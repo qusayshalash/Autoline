@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from fastapi import File as FastAPIFile
 
 from app.auth import get_current_user, require_permission
+from app.services import clocks
 from app.config import settings
 from app.db import admin as admin_db
 from app.db import catalog
@@ -52,8 +53,8 @@ def _dataset_out(row: dict) -> DatasetOut:
         row_count_cleaned=row.get("row_count_cleaned"),
         raw_file_bytes=row.get("raw_file_bytes"),
         cleaned_file_bytes=row.get("cleaned_file_bytes"),
-        created_at=str(row["created_at"]) if row.get("created_at") else None,
-        updated_at=str(row["updated_at"]) if row.get("updated_at") else None,
+        created_at=clocks.iso(row.get("created_at")),
+        updated_at=clocks.iso(row.get("updated_at")),
     )
 
 

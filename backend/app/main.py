@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.db import admin as admin_db
+from app.db import timestamp_migration
 from app.routers import (
     admin,
     auth,
@@ -44,6 +45,18 @@ def on_startup() -> None:
     # roles and permissions must exist before the first account is created, since the
     # bootstrap admin is given a role by slug
     admin_db.seed()
+
+    # Corrects timestamps written before the UTC rule was settled. Records that it has
+    # run, so it cannot shift the same rows twice.
+    try:
+        result = timestamp_migration.run(
+            admin_db.get_connection(), admin_db.get_setting, admin_db.set_setting
+        )
+        if result.get("applied"):
+            print(f"[startup] corrected {result['shifted_rows']:,} stored timestamps to UTC")
+    except Exception as exc:  # noqa: BLE001 - never block startup over a migration
+        print(f"[startup] timestamp migration failed: {exc}")
+
     bootstrap_admin()
 
     # Export retention, applied on every boot. Without this the exports folder only ever

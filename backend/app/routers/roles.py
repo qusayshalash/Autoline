@@ -3,6 +3,7 @@ import re
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.auth import require_permission
+from app.services import clocks
 from app.db import admin as admin_db
 from app.models.schemas import (
     CreateRoleRequest,
@@ -28,8 +29,8 @@ def _summary(row: dict) -> RoleSummary:
         is_system=bool(row.get("is_system")),
         user_count=int(row.get("user_count") or 0),
         permission_count=int(row.get("permission_count") or 0),
-        created_at=str(row["created_at"]) if row.get("created_at") else None,
-        updated_at=str(row["updated_at"]) if row.get("updated_at") else None,
+        created_at=clocks.iso(row.get("created_at")),
+        updated_at=clocks.iso(row.get("updated_at")),
     )
 
 

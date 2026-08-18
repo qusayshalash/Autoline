@@ -2,6 +2,7 @@ import duckdb
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.auth import require_permission
+from app.services import clocks
 from app.db import admin as admin_db
 from app.db import catalog
 from app.models.schemas import CreateUserRequest, UpdateUserRequest, UserOut
@@ -21,9 +22,9 @@ def _user_out(row: dict) -> UserOut:
         role=row["role"],
         status=row.get("status") or ("active" if row.get("is_active") else "inactive"),
         is_active=bool(row.get("is_active")),
-        last_login_at=str(row["last_login_at"]) if row.get("last_login_at") else None,
-        created_at=str(row["created_at"]) if row.get("created_at") else None,
-        updated_at=str(row["updated_at"]) if row.get("updated_at") else None,
+        last_login_at=clocks.iso(row.get("last_login_at")),
+        created_at=clocks.iso(row.get("created_at")),
+        updated_at=clocks.iso(row.get("updated_at")),
     )
 
 

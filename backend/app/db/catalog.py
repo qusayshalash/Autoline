@@ -12,6 +12,7 @@ from typing import Any, Optional
 import duckdb
 
 from app.config import settings
+from app.services import clocks
 
 _lock = threading.Lock()
 _conn: Optional[duckdb.DuckDBPyConnection] = None
@@ -199,7 +200,8 @@ def _migrate_users(conn: duckdb.DuckDBPyConnection) -> None:
 
 
 def _now() -> datetime:
-    return datetime.now(timezone.utc)
+    # naive UTC: see app/services/clocks.py for why an aware value cannot be stored here
+    return clocks.now()
 
 
 def cursor() -> duckdb.DuckDBPyConnection:

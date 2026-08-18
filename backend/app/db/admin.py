@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 from typing import Any, Optional
 
 from app.db.catalog import db_lock, get_connection
+from app.services import clocks
 
 # ---------------------------------------------------------------------------
 # Permission catalogue
@@ -77,7 +78,8 @@ PROTECTED_ROLE = "super_admin"
 
 
 def _now() -> datetime:
-    return datetime.now(timezone.utc)
+    # naive UTC: see app/services/clocks.py for why an aware value cannot be stored here
+    return clocks.now()
 
 
 def new_id() -> str:

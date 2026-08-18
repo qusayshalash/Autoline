@@ -8,6 +8,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.auth import require_permission
+from app.services import clocks
 from app.config import settings
 from app.db import admin as admin_db
 from app.db import catalog
@@ -66,7 +67,7 @@ def _default_language() -> str:
 def _activity_item(row: dict) -> ActivityItem:
     return ActivityItem(
         id=row["id"],
-        at=str(row["occurred_at"]) if row.get("occurred_at") else None,
+        at=clocks.iso(row.get("occurred_at")),
         actor_id=row.get("actor_id") or "",
         actor_username=row.get("actor_username") or "",
         action=row.get("action") or "",
