@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Big CSV Analyzer</title>
+    <script>
+      /* Resolves the theme before the stylesheet paints, so someone on dark never sees a
+         flash of the light palette while React boots. Deliberately inline, dependency-free
+         and wrapped in try/catch: localStorage throws in some privacy modes, and a theme
+         is not worth failing the page load over.
+
+         Must stay in sync with ThemeContext, which owns the same key and the same rule:
+         an explicit "light"/"dark" choice wins, anything else follows the OS. */
+      (function () {
+        var mode = "light";
+        try {
+          var saved = localStorage.getItem("theme");
+          mode =
+            saved === "light" || saved === "dark"
+              ? saved
+              : window.matchMedia("(prefers-color-scheme: dark)").matches
+                ? "dark"
+                : "light";
+        } catch (e) {
+          /* keep the light default */
+        }
+        document.documentElement.setAttribute("data-theme", mode);
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

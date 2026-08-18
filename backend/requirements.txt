@@ -1,0 +1,14 @@
+fastapi==0.141.1
+uvicorn[standard]==0.52.3
+duckdb==1.5.5
+pydantic==2.13.4
+pydantic-settings==2.15.0
+python-multipart==0.0.32
+charset-normalizer==3.5.1
+xlsxwriter==3.2.9
+reportlab==5.0.0
+arabic-reshaper==3.0.1
+python-bidi==0.6.11
+pytest==9.1.1
+httpx==0.28.1
+PyJWT==2.13.0

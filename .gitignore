@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+*.egg-info/
+
+# Backend runtime data - lives outside the repo (see backend/.env), but ignored here
+# as a second layer of protection in case DATA_DIR ever points inside the project again
+backend/data/
+
+# Machine-specific config (DATA_DIR, secrets). Commit backend/.env.example instead.
+backend/.env
+
+# Node / frontend
+node_modules/
+frontend/dist/
+frontend/dist-ssr/
+*.local
+
+# Editors / OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Claude Code local session settings - machine/session specific, not shared config
+.claude/settings.local.json
