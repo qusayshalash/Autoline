@@ -285,8 +285,13 @@ function BackupRow({
   );
 }
 
+/** The translator, typed as react-i18next hands it out rather than approximated. A
+ *  hand-written `(k: string) => string` is close enough for the editor and not close
+ *  enough for `tsc -b`, which is what the build actually runs. */
+type Translate = ReturnType<typeof useTranslation>["t"];
+
 /** Job progress arrives as a machine string like "dataset:2/5"; this is what it means. */
-function describe(progress: string, t: (k: string, o?: object) => string): string {
+function describe(progress: string, t: Translate): string {
   if (!progress) return t("admin.backup.starting");
   if (progress.startsWith("dataset:")) {
     const [done, total] = progress.slice("dataset:".length).split("/");
