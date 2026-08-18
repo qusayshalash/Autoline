@@ -354,3 +354,34 @@ export async function fetchLockouts(): Promise<Lockout[]> {
 export async function clearLockout(key: string): Promise<void> {
   await api.delete(`/admin/lockouts/${encodeURIComponent(key)}`);
 }
+
+// ---- compaction ----
+
+export interface CompactionEstimate {
+  dataset_id: string;
+  file_bytes: number;
+  tables: Record<string, number>;
+}
+
+export interface CompactionResult {
+  dataset_id: string;
+  bytes_before: number;
+  bytes_after: number;
+  freed_bytes: number;
+  tables: Record<string, number>;
+  duration_s: number;
+  /** the file was already compact, and was left untouched */
+  skipped: boolean;
+  reason: string;
+}
+
+export async function fetchCompactionEstimate(datasetId: string): Promise<CompactionEstimate> {
+  const { data } = await api.get<CompactionEstimate>(`/admin/datasets/${datasetId}/compaction`);
+  return data;
+}
+
+/** Starts a compaction. It runs as a job - poll it with getJob. */
+export async function startCompaction(datasetId: string): Promise<JobOut> {
+  const { data } = await api.post<JobOut>(`/admin/datasets/${datasetId}/compaction`, {});
+  return data;
+}

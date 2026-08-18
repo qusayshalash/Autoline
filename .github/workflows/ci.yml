@@ -55,9 +55,12 @@ jobs:
         working-directory: frontend
         run: npm ci
 
+      # `tsc -b`, not `tsc --noEmit`. The root tsconfig.json is a solution file of
+      # project references, and --noEmit against it type-checks nothing at all - it
+      # passed twice on code that the build then rejected.
       - name: Type-check
         working-directory: frontend
-        run: npx tsc --noEmit
+        run: npx tsc -b --force
 
       - name: Lint
         working-directory: frontend

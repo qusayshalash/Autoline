@@ -54,6 +54,12 @@ class _DatasetConnections:
         path = self._path_for(dataset_id)
         return path.stat().st_size if path.exists() else 0
 
+    def path_for(self, dataset_id: str) -> Path:
+        """The file backing this dataset. Public so maintenance work - compaction, and
+        anything else that has to replace the file rather than write through it - can
+        reach it without reaching into a private helper."""
+        return self._path_for(dataset_id)
+
     def delete(self, dataset_id: str) -> None:
         self.close(dataset_id)
         path = self._path_for(dataset_id)

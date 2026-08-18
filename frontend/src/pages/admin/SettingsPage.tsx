@@ -6,6 +6,7 @@ import { IconSettings } from "../../components/admin/AdminIcons";
 import { AdminPanel } from "../../components/admin/AdminUI";
 import LoadingState from "../../components/LoadingState";
 import BackupPanel from "./BackupPanel";
+import CompactionPanel from "./CompactionPanel";
 import LockoutPanel from "./LockoutPanel";
 import StoragePanel from "./StoragePanel";
 
@@ -22,6 +23,7 @@ export default function SettingsPage() {
         <StoragePanel />
         <BackupPanel />
         <LockoutPanel />
+        <CompactionPanel />
 
         <AdminPanel icon={<IconSettings />} title={t("admin.settings.about")}>
           <dl className="detail-list">

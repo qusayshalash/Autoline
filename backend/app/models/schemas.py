@@ -236,6 +236,26 @@ class StorageCleanupResult(BaseModel):
     failed: list[str] = []
 
 
+class CompactionOut(BaseModel):
+    """What a compaction run reclaimed, or why it did not run."""
+
+    dataset_id: str
+    bytes_before: int
+    bytes_after: int
+    freed_bytes: int
+    tables: dict[str, int] = {}
+    duration_s: float = 0
+    # true when the file was already compact - the original is never touched in that case
+    skipped: bool = False
+    reason: str = ""
+
+
+class CompactionEstimate(BaseModel):
+    dataset_id: str
+    file_bytes: int
+    tables: dict[str, int] = {}
+
+
 class LockoutOut(BaseModel):
     """One login counter currently holding attempts off."""
 

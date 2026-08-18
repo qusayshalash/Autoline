@@ -18,6 +18,8 @@ from app.models.schemas import (
     BackupPruneResult,
     BackupRequest,
     BackupSummary,
+    CompactionEstimate,
+    CompactionOut,
     LanguageOut,
     LockoutOut,
     OverviewOut,
@@ -32,6 +34,7 @@ from app.models.schemas import (
 from app.jobs import submit
 from app.models.schemas import JobOut
 from app.services import backup as backup_service
+from app.services import compaction as compaction_service
 from app.services import login_guard
 from app.services import storage as storage_service
 
@@ -347,3 +350,49 @@ def clear_lockout(key: str, actor: dict = Depends(require_permission("users.upda
         raise HTTPException(404, "No such lockout")
     admin_db.log_activity(actor, "auth.lockout_cleared", "user", "", key, "")
     return {"cleared": key}
+
+
+# ---- compaction -------------------------------------------------------------
+#
+# Rewriting a dataset file is the only operation here that replaces data rather than
+# adding to it, so it runs as a job, verifies its own output before swapping, and is
+# gated behind the delete permission - not because it deletes anything, but because
+# getting it wrong would.
+
+
+@router.get("/datasets/{dataset_id}/compaction", response_model=CompactionEstimate,
+            dependencies=[Depends(require_permission("system.view"))])
+def compaction_estimate(dataset_id: str) -> CompactionEstimate:
+    if catalog.get_dataset(dataset_id) is None:
+        raise HTTPException(404, "Dataset not found")
+    return CompactionEstimate(**compaction_service.estimate(dataset_id))
+
+
+@router.post("/datasets/{dataset_id}/compaction", response_model=JobOut)
+def start_compaction(
+    dataset_id: str, actor: dict = Depends(require_permission("datasets.delete"))
+) -> JobOut:
+    row = catalog.get_dataset(dataset_id)
+    if row is None:
+        raise HTTPException(404, "Dataset not found")
+    if row.get("status") not in ("ready", "error"):
+        raise HTTPException(409, "The dataset is busy; try again when it is ready")
+
+    job_id = catalog.create_job(dataset_id, "compact")
+    admin_db.log_activity(
+        actor, "dataset.compaction_started", "dataset", dataset_id,
+        row.get("original_filename") or "", "",
+    )
+    submit(_run_compaction_job, dataset_id, job_id)
+    return JobOut(id=job_id, dataset_id=dataset_id, kind="compact", status="pending", progress="")
+
+
+def _run_compaction_job(dataset_id: str, job_id: str) -> None:
+    try:
+        catalog.update_job(job_id, status="running", progress="starting")
+        result = compaction_service.compact(
+            dataset_id, progress=lambda stage: catalog.update_job(job_id, progress=stage)
+        )
+        catalog.update_job(job_id, status="done", progress="ready", result_json=result.as_dict())
+    except Exception as exc:  # noqa: BLE001 - the job record is where failures surface
+        catalog.update_job(job_id, status="error", error_message=str(exc))

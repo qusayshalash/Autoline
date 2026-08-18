@@ -295,7 +295,8 @@
       "auth.lockout_cleared": "Lockout cleared",
       "backup.started": "Backup started",
       "backup.deleted": "Backup deleted",
-      "backup.pruned": "Backups pruned"
+      "backup.pruned": "Backups pruned",
+      "dataset.compaction_started": "Compaction started"
     },
     "time": {
       "just_now": "just now",
@@ -499,6 +500,19 @@
       "unlocks_in": "Unlocks in",
       "minutes": "{{minutes}} min",
       "unlock": "Unlock"
+    },
+    "compaction": {
+      "title": "Compact databases",
+      "hint": "A database file does not shrink on its own: imports and cleaning runs leave empty pages behind inside it. Compaction rewrites the file with only what it actually holds - verifying the new copy row by row before replacing the old one, and leaving the original untouched if that verification fails.",
+      "file_size": "File size",
+      "run": "Compact now",
+      "running": "Compacting…",
+      "progress_writing": "Writing a compact copy…",
+      "progress_verifying": "Verifying the copy…",
+      "progress_swapping": "Swapping it in…",
+      "freed": "Reclaimed {{size}} - from {{before}} to {{after}}",
+      "already_compact": "The file is already compact; it was left untouched.",
+      "failed": "Compaction failed"
     }
   },
   "statistics": {

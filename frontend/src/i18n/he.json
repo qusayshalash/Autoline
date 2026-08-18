@@ -293,7 +293,8 @@
       "auth.lockout_cleared": "הנעילה הוסרה",
       "backup.started": "גיבוי החל",
       "backup.deleted": "גיבוי נמחק",
-      "backup.pruned": "גיבויים גוזמו"
+      "backup.pruned": "גיבויים גוזמו",
+      "dataset.compaction_started": "כיווץ החל"
     },
     "time": {
       "just_now": "עכשיו",
@@ -497,6 +498,19 @@
       "unlocks_in": "נפתח בעוד",
       "minutes": "{{minutes}} דק׳",
       "unlock": "הסר נעילה"
+    },
+    "compaction": {
+      "title": "כיווץ מסדי נתונים",
+      "hint": "קובץ מסד נתונים אינו מתכווץ מעצמו: ייבוא והרצות ניקוי משאירים בתוכו עמודים ריקים. הכיווץ כותב מחדש את הקובץ עם מה שהוא באמת מכיל — מאמת את העותק החדש שורה אחר שורה לפני החלפת הישן, ואינו נוגע במקור אם האימות נכשל.",
+      "file_size": "גודל הקובץ",
+      "run": "כווץ עכשיו",
+      "running": "מכווץ…",
+      "progress_writing": "כותב עותק מכווץ…",
+      "progress_verifying": "מאמת את העותק…",
+      "progress_swapping": "מחליף…",
+      "freed": "שוחררו {{size}} — מ־{{before}} ל־{{after}}",
+      "already_compact": "הקובץ כבר מכווץ; הוא לא נגע.",
+      "failed": "הכיווץ נכשל"
     }
   },
   "statistics": {
