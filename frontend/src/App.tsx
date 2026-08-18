@@ -1,24 +1,39 @@
+import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 
-import AdminLayout from "./components/admin/AdminLayout";
+import LoadingState from "./components/LoadingState";
 import RequireAuth from "./components/RequireAuth";
 import RequirePermission from "./components/RequirePermission";
 import Sidebar from "./components/Sidebar";
-import StatsLayout from "./components/stats/StatsLayout";
-import ActivityPage from "./pages/admin/ActivityPage";
-import FilesPage from "./pages/admin/FilesPage";
-import LanguagesPage from "./pages/admin/LanguagesPage";
-import OverviewPage from "./pages/admin/OverviewPage";
-import RolesPage from "./pages/admin/RolesPage";
-import SettingsPage from "./pages/admin/SettingsPage";
-import AdminUsersPage from "./pages/admin/UsersPage";
-import CleaningPage from "./pages/CleaningPage";
 import DatasetsPage from "./pages/DatasetsPage";
-import ExplorerPage from "./pages/ExplorerPage";
-import ImportWizardPage from "./pages/ImportWizardPage";
 import LoginPage from "./pages/LoginPage";
-import StatisticsIndexPage from "./pages/StatisticsIndexPage";
-import StatisticsPage from "./pages/StatisticsPage";
+
+/*
+ * Everything past the first screen is loaded when it is first opened, not before.
+ *
+ * The whole application used to arrive as one 1.15 MB script, which every user paid for
+ * on every first visit regardless of where they were going. Most of that weight is the
+ * charting library and the admin panel - the first is needed by two routes out of a
+ * dozen, and the second by administrators only.
+ *
+ * The login page and the file list stay eagerly imported: they are the two screens that
+ * are always reached first, and lazy-loading them would only add a spinner in front of
+ * the very thing the user came for.
+ */
+const AdminLayout = lazy(() => import("./components/admin/AdminLayout"));
+const StatsLayout = lazy(() => import("./components/stats/StatsLayout"));
+const ActivityPage = lazy(() => import("./pages/admin/ActivityPage"));
+const FilesPage = lazy(() => import("./pages/admin/FilesPage"));
+const LanguagesPage = lazy(() => import("./pages/admin/LanguagesPage"));
+const OverviewPage = lazy(() => import("./pages/admin/OverviewPage"));
+const RolesPage = lazy(() => import("./pages/admin/RolesPage"));
+const SettingsPage = lazy(() => import("./pages/admin/SettingsPage"));
+const AdminUsersPage = lazy(() => import("./pages/admin/UsersPage"));
+const CleaningPage = lazy(() => import("./pages/CleaningPage"));
+const ExplorerPage = lazy(() => import("./pages/ExplorerPage"));
+const ImportWizardPage = lazy(() => import("./pages/ImportWizardPage"));
+const StatisticsIndexPage = lazy(() => import("./pages/StatisticsIndexPage"));
+const StatisticsPage = lazy(() => import("./pages/StatisticsPage"));
 
 /** The data workspace: its own sidebar and full-height content area. */
 function Workspace() {
@@ -56,6 +71,9 @@ function Workspace() {
 
 export default function App() {
   return (
+    // One boundary around the whole tree: each lazy route needs a fallback, and a
+    // single spinner in the content area reads better than one per route.
+    <Suspense fallback={<LoadingState />}>
     <Routes>
       <Route path="/login" element={<LoginPage />} />
 
@@ -167,5 +185,6 @@ export default function App() {
         }
       />
     </Routes>
+    </Suspense>
   );
 }
