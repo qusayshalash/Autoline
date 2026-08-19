@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../auth/AuthContext";
+import { columnLabel } from "../data/columnDictionary";
 import ThemeToggle from "../components/ThemeToggle";
 import "./LoginPage.css";
 
@@ -352,64 +353,177 @@ function retryMinutes(err: unknown): number {
   return Number.isFinite(seconds) && seconds > 0 ? Math.max(1, Math.ceil(seconds / 60)) : 1;
 }
 
+/* ---------------------------------------------------------------------------
+   The panel's moving parts
+   --------------------------------------------------------------------------- */
+
+/** One pass over the file, asking one question of it. */
+interface Scene {
+  /** Raw header names, exactly as they appear in the file. */
+  columns: [string, string, string];
+  /** Four rows, in the same order as the columns. */
+  rows: [string, string, string][];
+  /** What the breakdown of the middle column looks like. */
+  bars: { label: string; pct: number }[];
+}
+
+/**
+ * Four questions over the same registry export. Rotating through them is what makes the
+ * panel look alive; each one is internally consistent, so the raw text, the table and the
+ * chart are always three views of the same thing rather than three unrelated pictures.
+ *
+ * The values are invented. Real registry figures on a page anyone can reach without
+ * signing in would be a small disclosure, and an illustration does not need them.
+ */
+const SCENES: Scene[] = [
+  {
+    columns: ["mispar_rechev", "tozeret_nm", "shnat_yitzur"],
+    rows: [
+      ["10428831", "KIA", "2021"],
+      ["10428907", "TOYOTA", "2019"],
+      ["10429114", "HYUNDAI", "2022"],
+      ["10429260", "MAZDA", "2020"],
+    ],
+    bars: [
+      { label: "KIA", pct: 100 },
+      { label: "TOYOTA", pct: 78 },
+      { label: "HYUNDAI", pct: 61 },
+      { label: "MAZDA", pct: 44 },
+      { label: "SKODA", pct: 29 },
+    ],
+  },
+  {
+    columns: ["mispar_rechev", "degem_nm", "shnat_yitzur"],
+    rows: [
+      ["10431044", "SPORTAGE", "2022"],
+      ["10431190", "COROLLA", "2021"],
+      ["10431358", "TUCSON", "2023"],
+      ["10431476", "CX-5", "2020"],
+    ],
+    bars: [
+      { label: "SPORTAGE", pct: 100 },
+      { label: "COROLLA", pct: 91 },
+      { label: "TUCSON", pct: 67 },
+      { label: "CX-5", pct: 52 },
+      { label: "OCTAVIA", pct: 38 },
+    ],
+  },
+  {
+    columns: ["mispar_rechev", "sug_delek_nm", "shnat_yitzur"],
+    rows: [
+      ["10433612", "PETROL", "2018"],
+      ["10433784", "DIESEL", "2021"],
+      ["10433905", "HYBRID", "2023"],
+      ["10434027", "ELECTRIC", "2024"],
+    ],
+    bars: [
+      { label: "PETROL", pct: 100 },
+      { label: "HYBRID", pct: 46 },
+      { label: "DIESEL", pct: 33 },
+      { label: "ELECTRIC", pct: 21 },
+      { label: "LPG", pct: 8 },
+    ],
+  },
+  {
+    columns: ["mispar_rechev", "tzeva_rechev", "shnat_yitzur"],
+    rows: [
+      ["10436128", "WHITE", "2022"],
+      ["10436244", "SILVER", "2019"],
+      ["10436391", "BLACK", "2021"],
+      ["10436507", "GREY", "2023"],
+    ],
+    bars: [
+      { label: "WHITE", pct: 100 },
+      { label: "SILVER", pct: 74 },
+      { label: "BLACK", pct: 58 },
+      { label: "GREY", pct: 41 },
+      { label: "BLUE", pct: 26 },
+    ],
+  },
+];
+
+const SCENE_MS = 4600;
+
+/** Whether the reader has asked the system for less movement. Watched rather than read
+ *  once, because the setting can change while the page is open. */
+function usePrefersReducedMotion(): boolean {
+  const [reduced, setReduced] = useState(
+    () => window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  );
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReduced(media.matches);
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+  return reduced;
+}
+
 /**
  * What the product does, in one picture: a file arrives as text, becomes columns, becomes
  * an answer. Three cards cascading forward, the finished one in front.
  *
+ * The three cards cycle together through four questions, so the panel reads as something
+ * running rather than a screenshot. The cycling stops entirely when the system asks for
+ * reduced motion - a login form is a bad place to argue with that - and the first scene
+ * simply stays put.
+ *
+ * The middle card is where the point is made: the back card shows the file's own header
+ * names, and the same columns appear in the card in front of it under the names a person
+ * uses, taken from the dictionary the rest of the app reads. In Hebrew that dictionary
+ * deliberately returns the raw headers, because there they already are the readable ones.
+ *
  * Decoration, so the whole thing is aria-hidden - a screen reader gets the heading and the
- * form, not a table of invented rows. The figures are illustrative and fixed; nothing here
- * is queried, and nobody is signed in yet to query it.
+ * form, not a table of invented rows that changes under it every few seconds.
  */
 function DataCascade() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const reduced = usePrefersReducedMotion();
+  const [index, setIndex] = useState(0);
 
-  // Deliberately unremarkable sample rows. Real registry values would be a small
-  // disclosure on a page that anyone can reach without signing in.
-  const table = [
-    ["10428831", "KIA", "2021"],
-    ["10428907", "TOYOTA", "2019"],
-    ["10429114", "HYUNDAI", "2022"],
-    ["10429260", "MAZDA", "2020"],
-  ];
+  useEffect(() => {
+    if (reduced) return;
+    const id = window.setInterval(
+      () => setIndex((current) => (current + 1) % SCENES.length),
+      SCENE_MS
+    );
+    return () => window.clearInterval(id);
+  }, [reduced]);
 
-  const bars = [
-    { label: "KIA", pct: 100 },
-    { label: "TOYOTA", pct: 78 },
-    { label: "HYUNDAI", pct: 61 },
-    { label: "MAZDA", pct: 44 },
-    { label: "SKODA", pct: 29 },
-  ];
+  const scene = SCENES[index];
+  const analysed = columnLabel(scene.columns[1], i18n.language);
+  const csv = [scene.columns.join(","), ...scene.rows.map((row) => row.join(","))].join("\n");
 
   return (
     <div className="lv-cascade" aria-hidden="true">
-      {/* back - the file exactly as it lands on disk */}
+      {/* back - the file exactly as it landed, header names and all */}
       <figure className="lv-card lv-card-raw">
         <figcaption>{t("auth.visual_step_file")}</figcaption>
-        <pre dir="ltr">
-          mispar_rechev,tozeret_nm,shnat_yitzur{"\n"}
-          10428831,KIA,2021{"\n"}
-          10428907,TOYOTA,2019{"\n"}
-          10429114,HYUNDAI,2022{"\n"}
-          10429260,MAZDA,2020
+        <pre dir="ltr" key={index}>
+          {csv}
         </pre>
       </figure>
 
-      {/* middle - the same bytes, understood as columns */}
+      {/* middle - the same bytes, under names a person uses */}
       <figure className="lv-card lv-card-table">
         <figcaption>{t("auth.visual_step_table")}</figcaption>
-        <table dir="ltr">
+        <table dir={i18n.dir()}>
           <thead>
-            <tr>
-              <th>mispar_rechev</th>
-              <th>tozeret_nm</th>
-              <th>shnat</th>
+            <tr key={index}>
+              {scene.columns.map((column) => (
+                <th key={column}>{columnLabel(column, i18n.language)}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
-            {table.map((row) => (
-              <tr key={row[0]}>
-                {row.map((cell) => (
-                  <td key={cell}>{cell}</td>
+            {scene.rows.map((row, rowIndex) => (
+              <tr key={rowIndex}>
+                {row.map((cell, cellIndex) => (
+                  <td key={cellIndex}>
+                    <span key={`${index}-${cell}`} dir="ltr">
+                      {cell}
+                    </span>
+                  </td>
                 ))}
               </tr>
             ))}
@@ -419,13 +533,22 @@ function DataCascade() {
 
       {/* front - the reason anyone opened the file */}
       <figure className="lv-card lv-card-chart">
-        <figcaption>{t("auth.visual_step_chart")}</figcaption>
+        <figcaption>
+          <span>{t("auth.visual_step_chart")}</span>
+          <span className="lv-analysed" key={index}>
+            {analysed}
+          </span>
+        </figcaption>
         <ul className="lv-bars" dir="ltr">
-          {bars.map(({ label, pct }) => (
-            <li key={label}>
-              <span className="lv-bar-label">{label}</span>
+          {/* The list items are stable across scenes on purpose: remounting them would
+              make each bar appear at its final width instead of growing into it. */}
+          {scene.bars.map((bar, barIndex) => (
+            <li key={barIndex}>
+              <span className="lv-bar-label" key={`${index}-${bar.label}`}>
+                {bar.label}
+              </span>
               <span className="lv-bar-track">
-                <span className="lv-bar-fill" style={{ width: `${pct}%` }} />
+                <span className="lv-bar-fill" style={{ width: `${bar.pct}%` }} />
               </span>
             </li>
           ))}

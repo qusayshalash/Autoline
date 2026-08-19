@@ -1506,3 +1506,85 @@
   opacity: 0;
   cursor: pointer;
 }
+
+/* ---- the cascade, in motion -------------------------------------------------
+   Text that changes fades in; bars grow into their new width. The bars are
+   transitioned rather than re-animated because their elements survive the scene
+   change - only the width is new, so the browser can tween it.
+
+   Everything here is decoration and none of it is announced, so the whole
+   sequence stops under prefers-reduced-motion further down. */
+
+@keyframes lv-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.login-page .lv-card-raw pre,
+.login-page .lv-card-table thead tr,
+.login-page .lv-card-table td span,
+.login-page .lv-bar-label,
+.login-page .lv-analysed {
+  animation: lv-fade-in 0.45s ease-out both;
+}
+
+/* The rows stagger very slightly, so the table fills rather than blinks. */
+.login-page .lv-card-table tbody tr:nth-child(1) td span { animation-delay: 0.03s; }
+.login-page .lv-card-table tbody tr:nth-child(2) td span { animation-delay: 0.07s; }
+.login-page .lv-card-table tbody tr:nth-child(3) td span { animation-delay: 0.11s; }
+.login-page .lv-card-table tbody tr:nth-child(4) td span { animation-delay: 0.15s; }
+
+.login-page .lv-bars li:nth-child(1) .lv-bar-label { animation-delay: 0.02s; }
+.login-page .lv-bars li:nth-child(2) .lv-bar-label { animation-delay: 0.06s; }
+.login-page .lv-bars li:nth-child(3) .lv-bar-label { animation-delay: 0.10s; }
+.login-page .lv-bars li:nth-child(4) .lv-bar-label { animation-delay: 0.14s; }
+.login-page .lv-bars li:nth-child(5) .lv-bar-label { animation-delay: 0.18s; }
+
+.login-page .lv-bar-fill {
+  transition: width 0.75s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.login-page .lv-bars li:nth-child(2) .lv-bar-fill { transition-delay: 0.05s; }
+.login-page .lv-bars li:nth-child(3) .lv-bar-fill { transition-delay: 0.10s; }
+.login-page .lv-bars li:nth-child(4) .lv-bar-fill { transition-delay: 0.15s; }
+.login-page .lv-bars li:nth-child(5) .lv-bar-fill { transition-delay: 0.20s; }
+
+/* The header row of the middle card carries translated names, which in Arabic and
+   Hebrew are wider than the machine ones and must not wrap the layout. */
+.login-page .lv-card-table th {
+  font-size: 9.5px;
+  letter-spacing: 0;
+}
+
+/* Which column the breakdown is of, beside the caption. */
+.login-page .lv-card-chart figcaption {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.login-page .lv-analysed {
+  color: #6fb4ff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-page .lv-card-raw pre,
+  .login-page .lv-card-table thead tr,
+  .login-page .lv-card-table td span,
+  .login-page .lv-bar-label,
+  .login-page .lv-analysed {
+    animation: none;
+  }
+
+  .login-page .lv-bar-fill {
+    transition: none;
+  }
+}
