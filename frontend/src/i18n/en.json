@@ -661,5 +661,36 @@
     "measure_row": "% of row",
     "measure_column": "% of column",
     "measure_total": "% of total"
+  },
+  "profile": {
+    "title": "Column profile",
+    "subtitle": "What each column actually contains - across {{rows}} rows.",
+    "column": "Column",
+    "filled": "Filled",
+    "missing": "Missing",
+    "distinct": "Distinct values",
+    "distinct_approx": "Distinct ≈",
+    "pick_a_column": "Choose a column to look at closely.",
+    "length_range": "Value length",
+    "zero_padded": "Zero-padded",
+    "numeric": "Numeric summary",
+    "min": "Min",
+    "max": "Max",
+    "median": "Median",
+    "average": "Average",
+    "top_values": "Commonest values",
+    "lengths": "Length distribution",
+    "measured_in": "measured in {{ms}} ms",
+    "finding": {
+      "entirely_empty": "The column is entirely empty - not one value in it.",
+      "mostly_empty": "Almost empty: only {{pct}}% filled, {{missing}} values missing.",
+      "has_missing": "{{count}} values missing ({{pct}}%).",
+      "single_value": "One value repeated in every row - nothing to group by.",
+      "identifier_like": "Looks like an identifier: {{distinct}} distinct values, close to one per row.",
+      "zero_padded": "{{count}} values start with a zero - reading this as a number would lose them.",
+      "mixed_lengths": "Inconsistent lengths: {{pct}}% are {{length}} characters, the rest differ.",
+      "not_numeric_values": "{{count}} values are not numbers, in a column treated as numeric.",
+      "outliers": "{{count}} values sit outside the usual range (below {{low}} or above {{high}})."
+    }
   }
 }

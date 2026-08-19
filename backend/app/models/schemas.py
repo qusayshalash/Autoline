@@ -236,6 +236,85 @@ class StorageCleanupResult(BaseModel):
     failed: list[str] = []
 
 
+class ProfileValue(BaseModel):
+    value: str
+    count: int
+    pct: float
+    # blank/NULL, which is a finding rather than a value
+    blank: bool = False
+
+
+class ProfileLength(BaseModel):
+    length: int
+    count: int
+    pct: float
+
+
+class ProfileNumeric(BaseModel):
+    count: int
+    # present but not parseable as a number - the interesting case
+    not_numeric: int
+    min: float
+    max: float
+    avg: Optional[float] = None
+    q1: Optional[float] = None
+    median: Optional[float] = None
+    q3: Optional[float] = None
+    outlier_low: Optional[float] = None
+    outlier_high: Optional[float] = None
+    outliers: int = 0
+
+
+class ProfileFinding(BaseModel):
+    """A statement about the column, as a code the screen translates."""
+
+    level: str          # problem | note
+    code: str
+    count: Optional[int] = None
+    pct: Optional[float] = None
+    missing: Optional[int] = None
+    distinct: Optional[int] = None
+    length: Optional[int] = None
+    low: Optional[float] = None
+    high: Optional[float] = None
+
+
+class ColumnProfile(BaseModel):
+    column: str
+    kind: ColumnKind
+    source: str
+    total: int
+    filled: int
+    missing: int
+    fill_pct: float
+    distinct: int
+    distinct_pct: float
+    min_length: Optional[int] = None
+    max_length: Optional[int] = None
+    zero_padded: int = 0
+    top_values: list[ProfileValue] = []
+    lengths: list[ProfileLength] = []
+    numeric: Optional[ProfileNumeric] = None
+    findings: list[ProfileFinding] = []
+    execution_ms: float = 0.0
+
+
+class ProfileColumnSummary(BaseModel):
+    name: str
+    filled: int
+    missing: int
+    fill_pct: float
+    # approximate, and named so: the exact count is in the column's own profile
+    approx_distinct: int
+
+
+class ProfileOverview(BaseModel):
+    source: str
+    total: int
+    columns: list[ProfileColumnSummary] = []
+    execution_ms: float = 0.0
+
+
 class CompactionOut(BaseModel):
     """What a compaction run reclaimed, or why it did not run."""
 

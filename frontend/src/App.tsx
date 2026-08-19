@@ -32,6 +32,7 @@ const AdminUsersPage = lazy(() => import("./pages/admin/UsersPage"));
 const CleaningPage = lazy(() => import("./pages/CleaningPage"));
 const ExplorerPage = lazy(() => import("./pages/ExplorerPage"));
 const ImportWizardPage = lazy(() => import("./pages/ImportWizardPage"));
+const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const StatisticsIndexPage = lazy(() => import("./pages/StatisticsIndexPage"));
 const StatisticsPage = lazy(() => import("./pages/StatisticsPage"));
 
@@ -60,6 +61,7 @@ function Workspace() {
             }
           />
           <Route path="/datasets/:datasetId/explore" element={<ExplorerPage />} />
+          <Route path="/datasets/:datasetId/profile" element={<ProfilePage />} />
           {/* user management now lives in the admin panel */}
           <Route path="/users" element={<Navigate to="/admin/users" replace />} />
           <Route path="*" element={<Navigate to="/" replace />} />

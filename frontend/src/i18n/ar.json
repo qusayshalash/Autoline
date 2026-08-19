@@ -661,5 +661,36 @@
     "measure_row": "% من الصف",
     "measure_column": "% من العمود",
     "measure_total": "% من الإجمالي"
+  },
+  "profile": {
+    "title": "تشخيص الأعمدة",
+    "subtitle": "ما يحتويه كل عمود فعلًا — من {{rows}} صفًّا.",
+    "column": "العمود",
+    "filled": "الممتلئ",
+    "missing": "الناقص",
+    "distinct": "قيم مميّزة",
+    "distinct_approx": "قيم مميّزة ≈",
+    "pick_a_column": "اختر عمودًا لفحصه عن قرب.",
+    "length_range": "طول القيم",
+    "zero_padded": "بأصفار بادئة",
+    "numeric": "ملخّص رقمي",
+    "min": "الأدنى",
+    "max": "الأعلى",
+    "median": "الوسيط",
+    "average": "المتوسّط",
+    "top_values": "أكثر القيم تكرارًا",
+    "lengths": "توزيع الأطوال",
+    "measured_in": "قيس في {{ms}} ms",
+    "finding": {
+      "entirely_empty": "العمود فارغ تمامًا — لا قيمة واحدة فيه.",
+      "mostly_empty": "شبه فارغ: {{pct}}% فقط ممتلئ، و{{missing}} قيمة ناقصة.",
+      "has_missing": "{{count}} قيمة ناقصة ({{pct}}%).",
+      "single_value": "قيمة واحدة تتكرّر في كل الصفوف — لا يصلح للتجميع.",
+      "identifier_like": "يبدو معرّفًا: {{distinct}} قيمة مميّزة، أي صفّ لكل قيمة تقريبًا.",
+      "zero_padded": "{{count}} قيمة تبدأ بصفر — لو حُوّل إلى رقم لضاعت هذه الأصفار.",
+      "mixed_lengths": "أطوال غير متّسقة: {{pct}}% بطول {{length}} والباقي مختلف.",
+      "not_numeric_values": "{{count}} قيمة ليست رقمًا داخل عمود رقمي.",
+      "outliers": "{{count}} قيمة خارج المدى المعتاد (أقل من {{low}} أو أكثر من {{high}})."
+    }
   }
 }

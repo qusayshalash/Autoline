@@ -115,9 +115,17 @@ export default function DatasetsPage() {
                   {t(`datasets.status_${d.status}`, d.status)}
                 </span>
                 {d.status === "ready" ? (
-                  <button className="btn secondary" onClick={() => navigate(`/datasets/${d.id}/explore`)}>
-                    {t("datasets.open")}
-                  </button>
+                  <>
+                    <button
+                      className="btn secondary"
+                      onClick={() => navigate(`/datasets/${d.id}/profile`)}
+                    >
+                      {t("profile.title")}
+                    </button>
+                    <button className="btn secondary" onClick={() => navigate(`/datasets/${d.id}/explore`)}>
+                      {t("datasets.open")}
+                    </button>
+                  </>
                 ) : d.status === "preview" && canWrite ? (
                   <button className="btn secondary" onClick={() => navigate(`/datasets/${d.id}/import`)}>
                     {t("import_wizard.title")}

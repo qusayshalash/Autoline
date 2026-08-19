@@ -5,6 +5,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from app.auth import get_current_user
 from app.db import catalog
 from app.models.schemas import (
+    ColumnProfile,
+    ProfileOverview,
     ColumnsOut,
     DataPage,
     DataQuery,
@@ -13,7 +15,7 @@ from app.models.schemas import (
     GroupQuery,
     StatsOut,
 )
-from app.services import query as query_service
+from app.services import profiling, query as query_service
 from app.services import stats as stats_service
 
 router = APIRouter(prefix="/api/datasets", tags=["data"])
@@ -104,3 +106,34 @@ def get_columns(
 def get_stats(dataset_id: str, user: dict = Depends(get_current_user)) -> StatsOut:
     _require_ready(dataset_id)
     return stats_service.get_stats(dataset_id)
+
+
+# ---- column profiling -------------------------------------------------------
+#
+# Split in two on purpose. The overview is one aggregate query over every column, cheap
+# enough to open a page with; the per-column profile costs several passes over the whole
+# table and is fetched only for the column somebody actually opened.
+
+
+@router.get("/{dataset_id}/profile", response_model=ProfileOverview)
+def get_profile_overview(
+    dataset_id: str,
+    source: str = "cleaned",
+    user: dict = Depends(get_current_user),
+) -> ProfileOverview:
+    _require_ready(dataset_id)
+    return ProfileOverview(**profiling.profile_overview(dataset_id, source))
+
+
+@router.get("/{dataset_id}/profile/{column}", response_model=ColumnProfile)
+def get_column_profile(
+    dataset_id: str,
+    column: str,
+    source: str = "cleaned",
+    user: dict = Depends(get_current_user),
+) -> ColumnProfile:
+    _require_ready(dataset_id)
+    try:
+        return ColumnProfile(**profiling.profile_column(dataset_id, column, source))
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc

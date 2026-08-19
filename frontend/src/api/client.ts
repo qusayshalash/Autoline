@@ -453,3 +453,102 @@ export async function updateUser(
 export async function deleteUser(userId: string): Promise<void> {
   await api.delete(`/users/${userId}`);
 }
+
+// ---- column profiling ----
+
+export interface ProfileColumnSummary {
+  name: string;
+  filled: number;
+  missing: number;
+  fill_pct: number;
+  /** approximate - the exact count is in that column's own profile */
+  approx_distinct: number;
+}
+
+export interface ProfileOverview {
+  source: string;
+  total: number;
+  columns: ProfileColumnSummary[];
+  execution_ms: number;
+}
+
+export interface ProfileValue {
+  value: string;
+  count: number;
+  pct: number;
+  blank: boolean;
+}
+
+export interface ProfileLength {
+  length: number;
+  count: number;
+  pct: number;
+}
+
+export interface ProfileNumeric {
+  count: number;
+  not_numeric: number;
+  min: number;
+  max: number;
+  avg: number | null;
+  q1: number | null;
+  median: number | null;
+  q3: number | null;
+  outlier_low: number | null;
+  outlier_high: number | null;
+  outliers: number;
+}
+
+export interface ProfileFinding {
+  level: "problem" | "note";
+  code: string;
+  count?: number | null;
+  pct?: number | null;
+  missing?: number | null;
+  distinct?: number | null;
+  length?: number | null;
+  low?: number | null;
+  high?: number | null;
+}
+
+export interface ColumnProfile {
+  column: string;
+  kind: ColumnKind;
+  source: string;
+  total: number;
+  filled: number;
+  missing: number;
+  fill_pct: number;
+  distinct: number;
+  distinct_pct: number;
+  min_length: number | null;
+  max_length: number | null;
+  zero_padded: number;
+  top_values: ProfileValue[];
+  lengths: ProfileLength[];
+  numeric: ProfileNumeric | null;
+  findings: ProfileFinding[];
+  execution_ms: number;
+}
+
+export async function fetchProfileOverview(
+  datasetId: string,
+  source: "raw" | "cleaned" = "cleaned"
+): Promise<ProfileOverview> {
+  const { data } = await api.get<ProfileOverview>(`/datasets/${datasetId}/profile`, {
+    params: { source },
+  });
+  return data;
+}
+
+export async function fetchColumnProfile(
+  datasetId: string,
+  column: string,
+  source: "raw" | "cleaned" = "cleaned"
+): Promise<ColumnProfile> {
+  const { data } = await api.get<ColumnProfile>(
+    `/datasets/${datasetId}/profile/${encodeURIComponent(column)}`,
+    { params: { source } }
+  );
+  return data;
+}

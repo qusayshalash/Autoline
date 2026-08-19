@@ -659,5 +659,36 @@
     "measure_row": "% מהשורה",
     "measure_column": "% מהעמודה",
     "measure_total": "% מהסך"
+  },
+  "profile": {
+    "title": "פרופיל עמודות",
+    "subtitle": "מה כל עמודה באמת מכילה — מתוך {{rows}} שורות.",
+    "column": "עמודה",
+    "filled": "מלא",
+    "missing": "חסר",
+    "distinct": "ערכים ייחודיים",
+    "distinct_approx": "ייחודיים ≈",
+    "pick_a_column": "בחרו עמודה לבחינה מקרוב.",
+    "length_range": "אורך הערכים",
+    "zero_padded": "עם אפסים מובילים",
+    "numeric": "סיכום מספרי",
+    "min": "מינימום",
+    "max": "מקסימום",
+    "median": "חציון",
+    "average": "ממוצע",
+    "top_values": "הערכים הנפוצים ביותר",
+    "lengths": "התפלגות אורכים",
+    "measured_in": "נמדד ב־{{ms}} ms",
+    "finding": {
+      "entirely_empty": "העמודה ריקה לחלוטין — אין בה ולו ערך אחד.",
+      "mostly_empty": "כמעט ריקה: רק {{pct}}% מלאים, {{missing}} ערכים חסרים.",
+      "has_missing": "{{count}} ערכים חסרים ({{pct}}%).",
+      "single_value": "ערך אחד החוזר בכל השורות — אין לפי מה לקבץ.",
+      "identifier_like": "נראה כמזהה: {{distinct}} ערכים ייחודיים, כמעט אחד לכל שורה.",
+      "zero_padded": "{{count}} ערכים מתחילים באפס — קריאה כמספר תאבד אותם.",
+      "mixed_lengths": "אורכים לא עקביים: {{pct}}% באורך {{length}}, והשאר שונים.",
+      "not_numeric_values": "{{count}} ערכים אינם מספר, בעמודה שמטופלת כמספרית.",
+      "outliers": "{{count}} ערכים מחוץ לטווח הרגיל (מתחת ל־{{low}} או מעל {{high}})."
+    }
   }
 }
