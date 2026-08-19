@@ -767,6 +767,80 @@ tbody tr:hover {
   filter: brightness(1.06);
 }
 
+/* The region holds the toast's place in the accessibility tree whether or not there is
+   a toast in it, so it is fixed, empty and click-through by default.
+
+   Bottom inline-end rather than top centre: the top of this page is the title bar and
+   then a dense row of tools, and a card pinned over them with no auto-dismiss blocks
+   whatever it covers until somebody closes it. The only thing under this corner is the
+   status bar's row-range label, which is text. */
+.export-ready-region {
+  position: fixed;
+  z-index: 140;
+  inset-block-end: 1rem;
+  inset-inline-end: 1rem;
+  pointer-events: none;
+}
+
+.export-ready-toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  width: min(calc(100vw - 2rem), 19rem);
+  padding: 0.8rem;
+  border: 1px solid var(--border);
+  border-inline-start: 3px solid var(--success);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
+  color: var(--text);
+}
+
+.export-ready-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.export-ready-icon svg { width: 1.35rem; height: 1.35rem; }
+
+.export-ready-copy {
+  display: grid;
+  min-width: 0;
+  gap: 0.08rem;
+  color: inherit;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  text-decoration: none;
+}
+
+.export-ready-copy strong { font-size: 0.84rem; }
+.export-ready-copy span { color: var(--text-muted); }
+.export-ready-copy em { color: var(--primary); font-style: normal; font-weight: 700; }
+
+.export-ready-close {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-muted);
+}
+
+.export-ready-close:hover { background: var(--surface-muted); color: var(--text); }
+.export-ready-close:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.export-ready-close svg { width: 1rem; height: 1rem; }
+
 .sheet-badge {
   min-width: 1.05rem;
   padding: 0 0.25rem;

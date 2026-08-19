@@ -109,6 +109,15 @@ export function IconClose() {
   );
 }
 
+export function IconCheck() {
+  return (
+    <svg {...base}>
+      <circle cx="8" cy="8" r="5.8" />
+      <path d="m5.3 8.1 1.7 1.8 3.8-4" />
+    </svg>
+  );
+}
+
 export function IconChevronLeft() {
   return (
     <svg {...base}>

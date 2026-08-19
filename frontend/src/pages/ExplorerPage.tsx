@@ -34,6 +34,7 @@ import Pager from "../components/Pager";
 import SearchScope from "../components/SearchScope";
 import StatsPanel from "../components/StatsPanel";
 import {
+  IconCheck,
   IconClock,
   IconClose,
   IconColumns,
@@ -100,6 +101,7 @@ export default function ExplorerPage() {
   const [exportFormat, setExportFormat] = useState<ExportRequest["format"]>("csv");
   const [exportScope, setExportScope] = useState<ExportRequest["scope"]>("all");
   const [exportJobId, setExportJobId] = useState<string | null>(null);
+  const [showExportReady, setShowExportReady] = useState(false);
   const [hiddenColumns, setHiddenColumns] = useState<Set<string>>(new Set());
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
   const [columnOrder, setColumnOrder] = useState<string[] | null>(null);
@@ -199,6 +201,12 @@ export default function ExplorerPage() {
     refetchIntervalInBackground: true,
   });
 
+  // Large exports complete in the background. Make the ready file immediately obvious
+  // instead of relying on people to notice the toolbar button changed state.
+  useEffect(() => {
+    if (exportJob?.status === "done") setShowExportReady(true);
+  }, [exportJob?.status]);
+
   const [deleteColumnError, setDeleteColumnError] = useState<string | null>(null);
 
   /** Keeps exactly the given columns, dropping the rest. Used by "delete hidden". */
@@ -249,6 +257,7 @@ export default function ExplorerPage() {
   function resetExport() {
     setExportJobId(null);
     setExportError(null);
+    setShowExportReady(false);
   }
 
   function handleSort(col: string, dir: "asc" | "desc") {
@@ -413,6 +422,34 @@ export default function ExplorerPage() {
 
   return (
     <div className="sheet">
+      {/* The live region is always here and only its contents change. A region that
+          appears at the same moment as its text is not reliably announced - some screen
+          readers only watch regions that were already present. It is fixed, empty and
+          click-through until there is something to say. */}
+      <div className="export-ready-region" role="status" aria-live="polite">
+        {showExportReady && exportJob?.status === "done" && (
+        <div className="export-ready-toast">
+          <span className="export-ready-icon"><IconCheck /></span>
+          <a
+            className="export-ready-copy"
+            href={downloadExportUrl(datasetId, exportJob.id)}
+            onClick={() => setShowExportReady(false)}
+          >
+            <strong>{t("explorer.export_ready_title")}</strong>
+            <span>{t("explorer.export_ready_body")}</span>
+            <em>{t("explorer.export_ready_action")}</em>
+          </a>
+          <button
+            type="button"
+            className="export-ready-close"
+            onClick={() => setShowExportReady(false)}
+            aria-label={t("explorer.export_ready_close")}
+          >
+            <IconClose />
+          </button>
+        </div>
+        )}
+      </div>
       <div className="sheet-titlebar">
         <Link to="/" className="sheet-back">
           {t("common.back")}
