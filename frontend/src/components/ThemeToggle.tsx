@@ -56,32 +56,9 @@ const OPTIONS: { mode: ThemeMode; Icon: () => ReactElement }[] = [
  * component sits in all three shells, so the control is in the same place whichever part
  * of the app you are in.
  */
-export default function ThemeToggle({
-  collapsed = false,
-  compact = false,
-}: {
-  collapsed?: boolean;
-  compact?: boolean;
-}) {
+export default function ThemeToggle({ collapsed = false }: { collapsed?: boolean }) {
   const { t } = useTranslation();
-  const { mode, resolved, setMode } = useTheme();
-
-  if (compact) {
-    const nextMode: ThemeMode = resolved === "dark" ? "light" : "dark";
-    const isDark = resolved === "dark";
-
-    return (
-      <button
-        className="theme-toggle-compact"
-        type="button"
-        onClick={() => setMode(nextMode)}
-        aria-label={t(isDark ? "theme.light" : "theme.dark")}
-        title={t(isDark ? "theme.light" : "theme.dark")}
-      >
-        {isDark ? <IconSun /> : <IconMoon />}
-      </button>
-    );
-  }
+  const { mode, setMode } = useTheme();
 
   return (
     <div
