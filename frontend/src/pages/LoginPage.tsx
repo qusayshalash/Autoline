@@ -53,6 +53,7 @@ export default function LoginPage() {
   const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
   const languageMenuRef = useRef<HTMLDivElement>(null);
   const languageTriggerRef = useRef<HTMLButtonElement>(null);
+  const languageOptionRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const activeLanguage = LOGIN_LANGUAGES.some(({ code }) => code === i18n.language.split("-")[0])
     ? i18n.language.split("-")[0]
     : "ar";
@@ -75,13 +76,18 @@ export default function LoginPage() {
       }
     }
 
+    // A menu that opens without taking focus leaves the keyboard where it was, so the
+    // first arrow press would go to the page rather than to the list.
+    const current = LOGIN_LANGUAGES.findIndex(({ code }) => code === activeLanguage);
+    languageOptionRefs.current[current < 0 ? 0 : current]?.focus();
+
     document.addEventListener("pointerdown", closeOnOutsidePress);
     document.addEventListener("keydown", closeOnEscape);
     return () => {
       document.removeEventListener("pointerdown", closeOnOutsidePress);
       document.removeEventListener("keydown", closeOnEscape);
     };
-  }, [languageMenuOpen]);
+  }, [languageMenuOpen, activeLanguage]);
 
   if (user) {
     return <Navigate to="/" replace />;
@@ -160,10 +166,36 @@ export default function LoginPage() {
                     <span className="login-select-chevron" aria-hidden="true" />
                   </button>
                   {languageMenuOpen && (
-                    <div id="login-language-menu" className="login-language-menu" role="menu" aria-label={t("common.language")}>
-                      {LOGIN_LANGUAGES.map(({ code, label }) => (
+                    <div
+                      id="login-language-menu"
+                      className="login-language-menu"
+                      role="menu"
+                      aria-label={t("common.language")}
+                      // Arrow keys, Home and End, as a menu is expected to behave. Tab
+                      // alone reaches the options but steps out of the list at its edges,
+                      // which for a three-item picker means leaving the control to get
+                      // back to its first entry.
+                      onKeyDown={(event) => {
+                        const last = LOGIN_LANGUAGES.length - 1;
+                        const here = languageOptionRefs.current.indexOf(
+                          document.activeElement as HTMLButtonElement
+                        );
+                        const go = (index: number) => {
+                          event.preventDefault();
+                          languageOptionRefs.current[index]?.focus();
+                        };
+                        if (event.key === "ArrowDown") go(here >= last ? 0 : here + 1);
+                        else if (event.key === "ArrowUp") go(here <= 0 ? last : here - 1);
+                        else if (event.key === "Home") go(0);
+                        else if (event.key === "End") go(last);
+                      }}
+                    >
+                      {LOGIN_LANGUAGES.map(({ code, label }, index) => (
                         <button
                           key={code}
+                          ref={(node) => {
+                            languageOptionRefs.current[index] = node;
+                          }}
                           type="button"
                           className="login-language-option"
                           role="menuitemradio"
