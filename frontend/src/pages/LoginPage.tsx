@@ -315,8 +315,11 @@ export default function LoginPage() {
             <header className="lv-intro">
               <span className="lv-eyebrow">{t("auth.visual_eyebrow")}</span>
               <h2 id="login-visual-heading" dir="ltr">
-                AutoLine
-                <span>Data Studio</span>
+                <span className="lv-wordmark">
+                  AutoLine
+                  <BrandSprite />
+                </span>
+                <span className="lv-wordmark-sub">Data Studio</span>
               </h2>
               <p>{t("auth.visual_lead")}</p>
             </header>
@@ -620,5 +623,58 @@ function Figure({
       <dt>{label}</dt>
       <dd>{format(value)}</dd>
     </div>
+  );
+}
+
+/**
+ * The brand mark, a second time, with a face.
+ *
+ * It is the same shape as the mark in the header - a rounded square holding a two-by-two
+ * grid of dots - read differently: the top pair are eyes, the bottom pair a mouth that
+ * opens. So it stays recognisably the logo while it winks and laughs, rather than being
+ * a mascot that happens to sit next to one.
+ *
+ * The timing is one CSS animation on a shared nine-second loop rather than a chain of
+ * timers, so the eye, the mouth and the container cannot drift apart: appear, settle,
+ * wink, laugh, leave, and a pause before it comes round again.
+ *
+ * It sizes itself in em, so it tracks the wordmark it sits beside at every breakpoint.
+ * Under prefers-reduced-motion it is not rendered at all - it is a flourish with nothing
+ * to say, and a static copy of the logo next to the logo would only be confusing.
+ */
+function BrandSprite() {
+  return (
+    <svg className="lv-sprite" viewBox="0 0 44 44" aria-hidden="true" focusable="false">
+      <defs>
+        <linearGradient id="lvSpriteFace" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#2468ed" />
+          <stop offset="100%" stopColor="#299be9" />
+        </linearGradient>
+      </defs>
+
+      <rect width="44" height="44" rx="12" fill="url(#lvSpriteFace)" />
+
+      {/* top row of the mark, read as eyes */}
+      <rect className="lv-sprite-eye" x="9" y="9" width="12" height="12" rx="4" fill="#fff" />
+      <rect
+        className="lv-sprite-eye lv-sprite-eye-wink"
+        x="23"
+        y="9"
+        width="12"
+        height="12"
+        rx="4"
+        fill="#fff"
+        opacity="0.82"
+      />
+
+      {/* bottom row, at rest: still just the logo */}
+      <g className="lv-sprite-rest">
+        <rect x="9" y="23" width="12" height="12" rx="4" fill="#fff" opacity="0.68" />
+        <rect x="23" y="23" width="12" height="12" rx="4" fill="#fff" opacity="0.92" />
+      </g>
+
+      {/* bottom row, laughing */}
+      <path className="lv-sprite-laugh" d="M10 24h24a12 12 0 0 1-24 0Z" fill="#fff" />
+    </svg>
   );
 }

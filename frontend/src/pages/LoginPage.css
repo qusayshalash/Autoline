@@ -1080,12 +1080,20 @@
   text-align: left;
 }
 
-.login-page .lv-intro h2 span {
+/* Scoped to the second line on purpose: the first line now holds the sprite as well as
+   the word, and clipping a gradient to that span would take the SVG with it. */
+.login-page .lv-intro h2 .lv-wordmark-sub {
   display: block;
   background: linear-gradient(96deg, #4c9bff, #2ee2ff);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+
+.login-page .lv-wordmark {
+  display: flex;
+  align-items: center;
+  gap: 0.3em;
 }
 
 .login-page .lv-intro p {
@@ -1593,5 +1601,99 @@
 
   .login-page .lv-bar-fill {
     transition: none;
+  }
+}
+
+/* ---- the winking mark ------------------------------------------------------
+   A second copy of the logo beside the wordmark, animated as a face. Its parts
+   share one nine-second loop so the eye, the mouth and the box cannot drift out
+   of step with each other:
+
+     0-8%    away
+     8-16%   arrives, overshoots, settles
+     24-32%  winks
+     42-60%  laughs
+     72-80%  leaves
+     80-100% away again, before it comes round
+
+   Sized in em so it tracks the wordmark at every breakpoint. */
+
+.login-page .lv-sprite {
+  width: 0.82em;
+  height: 0.82em;
+  flex: none;
+  overflow: visible;
+  transform-origin: center;
+  animation: lv-sprite-visit 9s cubic-bezier(0.34, 1.3, 0.5, 1) infinite;
+  filter: drop-shadow(0 6px 16px rgba(37, 118, 235, 0.4));
+}
+
+@keyframes lv-sprite-visit {
+  0%, 7%    { opacity: 0; transform: scale(0.3) rotate(-16deg); }
+  12%       { opacity: 1; transform: scale(1.14) rotate(6deg); }
+  16%       { opacity: 1; transform: scale(1) rotate(0deg); }
+  44%       { opacity: 1; transform: scale(1) rotate(0deg); }
+  /* the shake that goes with the laugh */
+  48%       { transform: scale(1.07) rotate(-5deg); }
+  52%       { transform: scale(1.03) rotate(5deg); }
+  56%       { transform: scale(1.07) rotate(-4deg); }
+  60%       { opacity: 1; transform: scale(1) rotate(0deg); }
+  72%       { opacity: 1; transform: scale(1) rotate(0deg); }
+  80%, 100% { opacity: 0; transform: scale(0.3) rotate(14deg); }
+}
+
+/* SVG children need a box to rotate about; without transform-box they use the
+   viewport origin and fly off. */
+.login-page .lv-sprite-eye,
+.login-page .lv-sprite-rest,
+.login-page .lv-sprite-laugh {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.login-page .lv-sprite-eye-wink {
+  animation: lv-sprite-wink 9s ease-in-out infinite;
+}
+
+/* Shut fast, held for a moment, opened slower. A wink that closes and reopens at the
+   same speed reads as a flicker; the hold is what makes it look meant. */
+@keyframes lv-sprite-wink {
+  0%, 23%   { transform: scaleY(1); }
+  25.5%     { transform: scaleY(0.1); }
+  28.5%     { transform: scaleY(0.1); }
+  33%       { transform: scaleY(1); }
+  100%      { transform: scaleY(1); }
+}
+
+/* The lower half of the mark is the mouth: two squares at rest, an open one
+   while it laughs. Cross-faded rather than morphed - a path that has to stay
+   recognisable as the logo is better swapped than tweened. */
+.login-page .lv-sprite-rest {
+  animation: lv-sprite-rest 9s ease-in-out infinite;
+}
+
+.login-page .lv-sprite-laugh {
+  opacity: 0;
+  animation: lv-sprite-laugh 9s ease-in-out infinite;
+}
+
+@keyframes lv-sprite-rest {
+  0%, 42%   { opacity: 1; }
+  46%, 58%  { opacity: 0; }
+  62%, 100% { opacity: 1; }
+}
+
+@keyframes lv-sprite-laugh {
+  0%, 42%   { opacity: 0; transform: scaleY(0.6); }
+  46%       { opacity: 1; transform: scaleY(1); }
+  58%       { opacity: 1; transform: scaleY(1); }
+  62%, 100% { opacity: 0; transform: scaleY(0.6); }
+}
+
+/* A flourish with nothing to say. Asked for less movement, it does not appear at
+   all - a still second copy of the logo beside the logo would only puzzle. */
+@media (prefers-reduced-motion: reduce) {
+  .login-page .lv-sprite {
+    display: none;
   }
 }
