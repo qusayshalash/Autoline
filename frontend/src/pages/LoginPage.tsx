@@ -324,18 +324,9 @@ export default function LoginPage() {
             <DataCascade />
 
             <dl className="lv-stats" aria-hidden="true">
-              <div>
-                <dt>{t("auth.visual_stat_rows")}</dt>
-                <dd>4.1M</dd>
-              </div>
-              <div>
-                <dt>{t("auth.visual_stat_columns")}</dt>
-                <dd>22</dd>
-              </div>
-              <div>
-                <dt>{t("auth.visual_stat_formats")}</dt>
-                <dd>3</dd>
-              </div>
+              <Figure label={t("auth.visual_stat_rows")} to={4_114_487} format={millions} />
+              <Figure label={t("auth.visual_stat_columns")} to={22} />
+              <Figure label={t("auth.visual_stat_formats")} to={3} />
             </dl>
           </div>
         </section>
@@ -554,6 +545,76 @@ function DataCascade() {
           ))}
         </ul>
       </figure>
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------------------------
+   The three figures
+   --------------------------------------------------------------------------- */
+
+/** Whole millions to one place: 4_114_487 reads as "4.1M". */
+function millions(value: number): string {
+  return `${(value / 1_000_000).toFixed(1)}M`;
+}
+
+function whole(value: number): string {
+  return String(Math.round(value));
+}
+
+const COUNT_MS = 1600;
+
+/**
+ * Counts from zero to `target` once, on mount.
+ *
+ * Eased out rather than linear: a figure that decelerates into place reads as landing on
+ * a number, while a linear one reads as a clock that happened to stop. Driven by
+ * requestAnimationFrame rather than a timer, so it keeps step with the display's refresh
+ * and stops being scheduled at all while the tab is in the background.
+ *
+ * Returns the target immediately when the system asks for reduced motion - the figure is
+ * the information, the counting is only decoration on top of it.
+ */
+function useCountUp(target: number): number {
+  const reduced = usePrefersReducedMotion();
+  const [value, setValue] = useState(reduced ? target : 0);
+
+  useEffect(() => {
+    if (reduced) {
+      setValue(target);
+      return;
+    }
+    let frame = 0;
+    let start: number | null = null;
+    const step = (now: number) => {
+      start ??= now;
+      const progress = Math.min(1, (now - start) / COUNT_MS);
+      // ease-out cubic
+      setValue(target * (1 - Math.pow(1 - progress, 3)));
+      if (progress < 1) frame = requestAnimationFrame(step);
+    };
+    frame = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(frame);
+  }, [target, reduced]);
+
+  return value;
+}
+
+/** One figure in the row beneath the cascade. */
+function Figure({
+  label,
+  to,
+  format = whole,
+}: {
+  label: string;
+  to: number;
+  format?: (value: number) => string;
+}) {
+  const value = useCountUp(to);
+  return (
+    <div>
+      <dt>{label}</dt>
+      <dd>{format(value)}</dd>
     </div>
   );
 }
