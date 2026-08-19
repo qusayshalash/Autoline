@@ -1,7 +1,7 @@
 import time
 
 from app.config import settings
-from app.db.connection import datasets
+from app.db.connection import datasets, read_locked
 from app.models.schemas import (
     ColumnInfo,
     ColumnsOut,
@@ -57,6 +57,7 @@ def _build_where(
     return " AND ".join(f"({c})" for c in clauses), params
 
 
+@read_locked
 def fetch_page(dataset_id: str, q: DataQuery) -> DataPage:
     table = sql_utils.resolve_source_table(dataset_id, q.source)
     columns = sql_utils.table_columns(dataset_id, table)
@@ -100,6 +101,7 @@ def fetch_page(dataset_id: str, q: DataQuery) -> DataPage:
     )
 
 
+@read_locked
 def fetch_groups(dataset_id: str, q: GroupQuery) -> GroupPage:
     """Group by a single column and return each distinct value with its row count.
 
@@ -197,6 +199,7 @@ def _infer_kinds(dataset_id: str, table: str, columns: list[str]) -> dict[str, s
     return kinds
 
 
+@read_locked
 def column_types(dataset_id: str, source: str) -> ColumnsOut:
     """Infer a display type per column by sampling values.
 
@@ -218,6 +221,7 @@ def column_kind(dataset_id: str, source: str, column: str) -> str:
     return _infer_kinds(dataset_id, table, [column])[column]
 
 
+@read_locked
 def distinct_values(
     dataset_id: str, source: str, column: str, search: str | None, limit: int | None
 ) -> DistinctValuesOut:

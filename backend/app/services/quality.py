@@ -26,7 +26,7 @@ from typing import Callable, Optional
 
 from app.config import settings
 from app.db import catalog
-from app.db.connection import datasets
+from app.db.connection import datasets, read_locked
 from app.services import sql_utils
 
 csv.field_size_limit(10_000_000)
@@ -266,6 +266,7 @@ def _warnings(scan: Optional[_Scan], loaded: int, profiles: list[dict], duplicat
     return out
 
 
+@read_locked
 def analyze(dataset_id: str, on_progress: Optional[Progress] = None) -> dict:
     """Builds the report and returns it. Also stored on the dataset by the caller."""
     progress: Progress = on_progress or (lambda _s: None)

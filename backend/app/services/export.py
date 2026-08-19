@@ -56,15 +56,21 @@ def build_export_query(dataset_id: str, req: ExportRequest) -> tuple[str, list, 
 
 
 def export_csv(dataset_id: str, req: ExportRequest, out_path: Path) -> None:
-    sql, params, _columns = build_export_query(dataset_id, req)
-    cur = datasets.cursor(dataset_id)
-    escaped = str(out_path).replace("'", "''")
-    cur.execute(f"COPY ({sql}) TO '{escaped}' (FORMAT CSV, HEADER)", params)
+    # held for the whole write: exporting four million rows takes minutes, and the file
+    # must not be replaced or closed underneath it
+    with datasets.reading(dataset_id) as cur:
+        sql, params, _columns = build_export_query(dataset_id, req)
+        escaped = str(out_path).replace("'", "''")
+        cur.execute(f"COPY ({sql}) TO '{escaped}' (FORMAT CSV, HEADER)", params)
 
 
 def export_xlsx(dataset_id: str, req: ExportRequest, out_path: Path) -> None:
+    with datasets.reading(dataset_id) as cur:
+        _export_xlsx(cur, dataset_id, req, out_path)
+
+
+def _export_xlsx(cur, dataset_id: str, req: ExportRequest, out_path: Path) -> None:
     sql, params, columns = build_export_query(dataset_id, req)
-    cur = datasets.cursor(dataset_id)
     cur.execute(sql, params)
 
     workbook = xlsxwriter.Workbook(str(out_path), {"constant_memory": True})
@@ -107,8 +113,8 @@ def _fix_rtl(value) -> str:
 def export_pdf(dataset_id: str, req: ExportRequest, out_path: Path) -> None:
     sql, params, columns = build_export_query(dataset_id, req)
     bounded_sql = sql + " LIMIT ?"
-    cur = datasets.cursor(dataset_id)
-    rows = cur.execute(bounded_sql, [*params, settings.pdf_row_limit]).fetchall()
+    with datasets.reading(dataset_id) as cur:
+        rows = cur.execute(bounded_sql, [*params, settings.pdf_row_limit]).fetchall()
 
     header = [_fix_rtl(c) for c in columns]
     body = [[_fix_rtl(v) for v in row] for row in rows]

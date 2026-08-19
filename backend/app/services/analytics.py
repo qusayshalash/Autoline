@@ -19,7 +19,7 @@ being checked against the table's own column list.
 import time
 from typing import Any
 
-from app.db.connection import datasets
+from app.db.connection import datasets, read_locked
 from app.models.schemas import (
     BreakdownItem,
     ColumnSuggestion,
@@ -126,6 +126,7 @@ def _build_where(q: StatisticsQuery | PivotQuery, columns: list[str]) -> tuple[s
     return " AND ".join(f"({c})" for c in clauses), params
 
 
+@read_locked
 def compute(dataset_id: str, q: StatisticsQuery) -> StatisticsOut:
     # Timed from the very first query: the reported figure is what the request actually
     # cost, including the type sampling, not just the aggregate at the end of it.
@@ -376,6 +377,7 @@ def _fmt_range(start: float, end: float) -> str:
     return one(start) if start == end else f"{one(start)} - {one(end)}"
 
 
+@read_locked
 def compute_pivot(dataset_id: str, q: PivotQuery) -> PivotOut:
     """A cross-tab: how the matching rows split across two columns at once.
 
@@ -585,6 +587,7 @@ def _assemble(
     )
 
 
+@read_locked
 def suggest_columns(dataset_id: str, source: str) -> list[ColumnSuggestion]:
     """Columns worth offering as a breakdown, with an estimate of their cardinality.
 
