@@ -1707,3 +1707,32 @@
 :root[data-theme="dark"] .login-page .login-forgot-password {
   color: #6cb2ff;
 }
+
+/* Caps Lock, while typing a password.
+   A warning rather than an error: nothing is wrong yet, and saying so in red beside a
+   field the reader has not submitted would be shouting at them for no reason. It matters
+   here more than on most forms because the backend locks an account after a few failures
+   - without it, the shift-locked password is simply "wrong" three times in a row. */
+.login-page .login-caps-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 6px 0 0;
+  color: #96631b;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.login-page .login-caps-hint::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  flex: none;
+  border-radius: 50%;
+  background: #d99423;
+  box-shadow: 0 0 0 3px rgba(217, 148, 35, 0.16);
+}
+
+:root[data-theme="dark"] .login-page .login-caps-hint {
+  color: #f0bf6b;
+}

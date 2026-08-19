@@ -41,7 +41,8 @@
     "visual_step_chart": "The answer",
     "visual_stat_rows": "Records",
     "visual_stat_columns": "Columns",
-    "visual_stat_volume": "Processed"
+    "visual_stat_volume": "Processed",
+    "caps_lock_on": "Caps Lock is on"
   },
   "users": {
     "title": "User Management",

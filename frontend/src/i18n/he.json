@@ -41,7 +41,8 @@
     "visual_step_chart": "התשובה",
     "visual_stat_rows": "רשומות",
     "visual_stat_columns": "עמודות",
-    "visual_stat_volume": "נפח מעובד"
+    "visual_stat_volume": "נפח מעובד",
+    "caps_lock_on": "מקש Caps Lock פעיל"
   },
   "users": {
     "title": "ניהול משתמשים",

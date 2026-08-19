@@ -41,7 +41,8 @@
     "visual_step_chart": "الإجابة",
     "visual_stat_rows": "سجل",
     "visual_stat_columns": "عمود",
-    "visual_stat_volume": "حجم مُعالَج"
+    "visual_stat_volume": "حجم مُعالَج",
+    "caps_lock_on": "مفتاح Caps Lock مُفعَّل"
   },
   "users": {
     "title": "إدارة المستخدمين",

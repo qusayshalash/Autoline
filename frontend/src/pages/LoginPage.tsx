@@ -49,6 +49,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberIdentifier, setRememberIdentifier] = useState(() => Boolean(getRememberedIdentifier()));
   const [attemptedSubmit, setAttemptedSubmit] = useState(false);
+  const [capsLock, setCapsLock] = useState(false);
   const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
   const languageMenuRef = useRef<HTMLDivElement>(null);
   const languageTriggerRef = useRef<HTMLButtonElement>(null);
@@ -250,7 +251,23 @@ export default function LoginPage() {
                           setNotice(null);
                         }}
                         aria-invalid={attemptedSubmit && !password}
-                        aria-describedby={attemptedSubmit && !password ? "login-password-error" : undefined}
+                        aria-describedby={
+                          [
+                            attemptedSubmit && !password ? "login-password-error" : null,
+                            capsLock ? "login-caps-lock" : null,
+                          ]
+                            .filter(Boolean)
+                            .join(" ") || undefined
+                        }
+                        // Asked of the event rather than inferred by watching for the
+                        // Caps Lock key: the lock is often already on before the field is
+                        // touched, and getModifierState reports the true state on any
+                        // key. Focus cannot answer - FocusEvent carries no modifiers - so
+                        // the warning appears on the first keystroke, which is also the
+                        // first moment it could be wrong.
+                        onKeyDown={(e) => setCapsLock(e.getModifierState("CapsLock"))}
+                        onKeyUp={(e) => setCapsLock(e.getModifierState("CapsLock"))}
+                        onBlur={() => setCapsLock(false)}
                       />
                       <button
                         className={`login-password-toggle${showPassword ? " is-visible" : ""}`}
@@ -266,6 +283,11 @@ export default function LoginPage() {
                     {attemptedSubmit && !password && (
                       <p id="login-password-error" className="login-field-error">
                         {t("auth.password_required")}
+                      </p>
+                    )}
+                    {capsLock && (
+                      <p id="login-caps-lock" className="login-caps-hint" role="status">
+                        {t("auth.caps_lock_on")}
                       </p>
                     )}
                   </div>
