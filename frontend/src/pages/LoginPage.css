@@ -1267,15 +1267,22 @@
   font-weight: 600;
 }
 
+/* The figure sits directly under its own label, so both take the paragraph's direction
+   and both align to the same edge. Setting direction:ltr here instead - which is what
+   this rule used to do - made `start` mean "left" for the number while it still meant
+   "right" for the label above it, and the two ended up on opposite sides of the cell.
+   The digits need no help: a run of numerals is left-to-right under the bidi algorithm
+   wherever it appears, and the isolation below keeps "24.8M" from interacting with the
+   Arabic around it. */
 .login-page .lv-stats dd {
-  margin: 5px 0 0;
+  margin: 6px 0 0;
   color: #f2f8ff;
-  font-size: 27px;
+  font-size: clamp(30px, 2.6vw, 38px);
   font-weight: 800;
-  letter-spacing: -0.8px;
+  line-height: 1.05;
+  letter-spacing: -1.2px;
   font-variant-numeric: tabular-nums;
-  /* Latin numerals read left-to-right in every language this app speaks. */
-  direction: ltr;
+  unicode-bidi: isolate;
   text-align: start;
 }
 

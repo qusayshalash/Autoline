@@ -41,7 +41,7 @@
     "visual_step_chart": "The answer",
     "visual_stat_rows": "Records",
     "visual_stat_columns": "Columns",
-    "visual_stat_formats": "Export formats"
+    "visual_stat_volume": "Processed"
   },
   "users": {
     "title": "User Management",

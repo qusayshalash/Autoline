@@ -324,9 +324,9 @@ export default function LoginPage() {
             <DataCascade />
 
             <dl className="lv-stats" aria-hidden="true">
-              <Figure label={t("auth.visual_stat_rows")} to={4_114_487} format={millions} />
-              <Figure label={t("auth.visual_stat_columns")} to={22} />
-              <Figure label={t("auth.visual_stat_formats")} to={3} />
+              <Figure label={t("auth.visual_stat_rows")} to={24_800_000} format={millions} />
+              <Figure label={t("auth.visual_stat_columns")} to={148} />
+              <Figure label={t("auth.visual_stat_volume")} to={826} format={gigabytes} />
             </dl>
           </div>
         </section>
@@ -556,6 +556,10 @@ function DataCascade() {
 /** Whole millions to one place: 4_114_487 reads as "4.1M". */
 function millions(value: number): string {
   return `${(value / 1_000_000).toFixed(1)}M`;
+}
+
+function gigabytes(value: number): string {
+  return `${Math.round(value)}GB`;
 }
 
 function whole(value: number): string {
