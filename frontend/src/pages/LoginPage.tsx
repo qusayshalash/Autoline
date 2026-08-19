@@ -257,127 +257,35 @@ export default function LoginPage() {
         </section>
 
         <section className="login-visual" dir={i18n.dir()} aria-labelledby="login-visual-heading">
-          <div className="login-grid-pattern" aria-hidden="true" />
-          <div className="login-visual-glow" aria-hidden="true" />
+          <div className="lv-grid" aria-hidden="true" />
+          <div className="lv-glow" aria-hidden="true" />
 
-          <div className="login-visual-content">
-            <div className="login-visual-intro">
+          <div className="lv-content">
+            <header className="lv-intro">
+              <span className="lv-eyebrow">{t("auth.visual_eyebrow")}</span>
               <h2 id="login-visual-heading" dir="ltr">
-                AutoLine<br />
+                AutoLine
                 <span>Data Studio</span>
               </h2>
-              <p>{t("auth.visual_eyebrow")}</p>
-              <span className="login-visual-accent" aria-hidden="true" />
-            </div>
+              <p>{t("auth.visual_lead")}</p>
+            </header>
 
-            <div className="login-visual-stage" aria-hidden="true">
-              <span className="login-connector login-connector-one" />
-              <span className="login-connector login-connector-two" />
-              <span className="login-connector login-connector-three" />
-              <span className="login-connector login-connector-four" />
-              <span className="login-connector login-connector-five" />
-              <span className="login-connector login-connector-six" />
-              <span className="login-connector login-connector-seven" />
-              <span className="login-connector login-connector-eight" />
+            <DataCascade />
 
-              <div className="login-visual-node login-visual-node-engine">
-                <span className="login-node-icon"><span className="data-glyph glyph-engine" /></span>
-                <span>{t("auth.visual_node_engine")}</span>
+            <dl className="lv-stats" aria-hidden="true">
+              <div>
+                <dt>{t("auth.visual_stat_rows")}</dt>
+                <dd>4.1M</dd>
               </div>
-              <div className="login-visual-node login-visual-node-analytics">
-                <span className="login-node-icon"><span className="data-glyph glyph-dashboard" /></span>
-                <span>{t("auth.visual_node_analytics")}</span>
+              <div>
+                <dt>{t("auth.visual_stat_columns")}</dt>
+                <dd>22</dd>
               </div>
-
-              <div className="login-visual-node login-visual-node-database">
-                <span className="login-node-icon"><span className="data-glyph glyph-database" /></span>
-                <span>{t("auth.visual_node_database")}</span>
+              <div>
+                <dt>{t("auth.visual_stat_formats")}</dt>
+                <dd>3</dd>
               </div>
-              <div className="login-visual-node login-visual-node-brakes">
-                <span className="login-node-icon"><span className="data-glyph glyph-wheel" /></span>
-                <span>{t("auth.visual_node_brakes")}</span>
-              </div>
-              <div className="login-visual-node login-visual-node-transmission">
-                <span className="login-node-icon"><span className="data-glyph glyph-pipeline" /></span>
-                <span>{t("auth.visual_node_transmission")}</span>
-              </div>
-              <div className="login-visual-node login-visual-node-battery">
-                <span className="login-node-icon"><span className="data-glyph glyph-api" /></span>
-                <span>{t("auth.visual_node_battery")}</span>
-              </div>
-              <div className="login-visual-node login-visual-node-inventory">
-                <span className="login-node-icon"><span className="data-glyph glyph-file" /></span>
-                <span>{t("auth.visual_node_inventory")}</span>
-              </div>
-              <div className="login-visual-node login-visual-node-wheels">
-                <span className="login-node-icon"><span className="data-glyph glyph-wheel" /></span>
-                <span>{t("auth.visual_node_wheels")}</span>
-              </div>
-              <div className="login-visual-node login-visual-node-kpis">
-                <span className="login-node-icon"><span className="data-glyph glyph-dashboard" /></span>
-                <span>{t("auth.visual_node_kpis")}</span>
-              </div>
-              <div className="login-visual-node login-visual-node-reports">
-                <span className="login-node-icon"><span className="data-glyph glyph-table" /></span>
-                <span>{t("auth.visual_node_reports")}</span>
-              </div>
-
-              <div className="login-car-art">
-                <svg viewBox="0 0 520 190" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M60 131C92 127 110 116 135 91C163 61 199 42 244 37L317 34C356 35 384 54 411 81L459 97C475 104 485 119 485 135V144H452C448 119 429 102 405 102C380 102 361 119 357 144H173C169 119 150 102 126 102C101 102 82 119 78 144H54C42 144 36 137 39 130Z" />
-                  <path d="M157 86C182 58 204 49 240 45L312 44C338 46 360 57 380 78L157 86Z" />
-                  <circle cx="126" cy="144" r="30" />
-                  <circle cx="405" cy="144" r="30" />
-                  <circle cx="126" cy="144" r="17" />
-                  <circle cx="405" cy="144" r="17" />
-                  <path d="M240 45L242 85M355 52L325 84" />
-                </svg>
-              </div>
-
-              <div className="login-dashboard">
-                <div className="login-dashboard-topline">
-                  <div className="login-dashboard-title">
-                    <span className="data-glyph glyph-vehicle" />
-                    <strong>{t("auth.visual_dashboard_title")}</strong>
-                  </div>
-                  <span className="login-dashboard-menu"><i /><i /><i /></span>
-                </div>
-
-                <div className="login-dashboard-metrics">
-                  <div className="login-metric-card">
-                    <span>{t("auth.visual_processed")}</span>
-                    <strong>2.84M</strong>
-                  </div>
-                  <div className="login-metric-card">
-                    <span>{t("auth.visual_quality")}</span>
-                    <strong>98.7%</strong>
-                  </div>
-                  <div className="login-metric-card">
-                    <span>{t("auth.visual_sources")}</span>
-                    <strong>12</strong>
-                  </div>
-                </div>
-
-                <div className="login-data-chart">
-                  <div className="login-chart-heading">
-                    <span>{t("auth.visual_volume")}</span>
-                    {/* dir="ltr" so the sign stays in front of the number. Written the
-                        other way round it only reads correctly in Arabic and Hebrew,
-                        where bidi moves a trailing "+" to the left; in English it comes
-                        out as "24.8%+". */}
-                    <strong dir="ltr">+24.8%</strong>
-                  </div>
-                  <div className="login-chart-bars">
-                    <span />
-                    <span />
-                    <span />
-                    <span />
-                    <span />
-                    <span />
-                  </div>
-                </div>
-              </div>
-            </div>
+            </dl>
           </div>
         </section>
       </div>
@@ -392,4 +300,87 @@ function retryMinutes(err: unknown): number {
   ];
   const seconds = Number(header);
   return Number.isFinite(seconds) && seconds > 0 ? Math.max(1, Math.ceil(seconds / 60)) : 1;
+}
+
+/**
+ * What the product does, in one picture: a file arrives as text, becomes columns, becomes
+ * an answer. Three cards cascading forward, the finished one in front.
+ *
+ * Decoration, so the whole thing is aria-hidden - a screen reader gets the heading and the
+ * form, not a table of invented rows. The figures are illustrative and fixed; nothing here
+ * is queried, and nobody is signed in yet to query it.
+ */
+function DataCascade() {
+  const { t } = useTranslation();
+
+  // Deliberately unremarkable sample rows. Real registry values would be a small
+  // disclosure on a page that anyone can reach without signing in.
+  const table = [
+    ["10428831", "KIA", "2021"],
+    ["10428907", "TOYOTA", "2019"],
+    ["10429114", "HYUNDAI", "2022"],
+    ["10429260", "MAZDA", "2020"],
+  ];
+
+  const bars = [
+    { label: "KIA", pct: 100 },
+    { label: "TOYOTA", pct: 78 },
+    { label: "HYUNDAI", pct: 61 },
+    { label: "MAZDA", pct: 44 },
+    { label: "SKODA", pct: 29 },
+  ];
+
+  return (
+    <div className="lv-cascade" aria-hidden="true">
+      {/* back - the file exactly as it lands on disk */}
+      <figure className="lv-card lv-card-raw">
+        <figcaption>{t("auth.visual_step_file")}</figcaption>
+        <pre dir="ltr">
+          mispar_rechev,tozeret_nm,shnat_yitzur{"\n"}
+          10428831,KIA,2021{"\n"}
+          10428907,TOYOTA,2019{"\n"}
+          10429114,HYUNDAI,2022{"\n"}
+          10429260,MAZDA,2020
+        </pre>
+      </figure>
+
+      {/* middle - the same bytes, understood as columns */}
+      <figure className="lv-card lv-card-table">
+        <figcaption>{t("auth.visual_step_table")}</figcaption>
+        <table dir="ltr">
+          <thead>
+            <tr>
+              <th>mispar_rechev</th>
+              <th>tozeret_nm</th>
+              <th>shnat</th>
+            </tr>
+          </thead>
+          <tbody>
+            {table.map((row) => (
+              <tr key={row[0]}>
+                {row.map((cell) => (
+                  <td key={cell}>{cell}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </figure>
+
+      {/* front - the reason anyone opened the file */}
+      <figure className="lv-card lv-card-chart">
+        <figcaption>{t("auth.visual_step_chart")}</figcaption>
+        <ul className="lv-bars" dir="ltr">
+          {bars.map(({ label, pct }) => (
+            <li key={label}>
+              <span className="lv-bar-label">{label}</span>
+              <span className="lv-bar-track">
+                <span className="lv-bar-fill" style={{ width: `${pct}%` }} />
+              </span>
+            </li>
+          ))}
+        </ul>
+      </figure>
+    </div>
+  );
 }

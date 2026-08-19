@@ -687,578 +687,6 @@
   outline-offset: 2px;
 }
 
-/* ──── automotive data visual ──── */
-
-.login-page .login-visual {
-  position: relative;
-  min-width: 0;
-  min-height: 100svh;
-  overflow: hidden;
-  isolation: isolate;
-  background:
-    radial-gradient(circle at 55% 44%, rgba(13, 75, 172, 0.22), transparent 39%),
-    linear-gradient(135deg, #04142c 0%, #061b3a 48%, #03152e 100%);
-  color: #fff;
-}
-
-.login-page .login-grid-pattern {
-  position: absolute;
-  z-index: -3;
-  inset: 0;
-  background-image:
-    radial-gradient(circle, rgba(74, 144, 255, 0.3) 0 1px, transparent 1.6px),
-    radial-gradient(circle, rgba(41, 116, 220, 0.16) 0 1px, transparent 1.45px);
-  background-position: 21px 31px, 3px 5px;
-  background-size: 94px 94px, 51px 51px;
-  opacity: 0.4;
-}
-
-.login-page .login-visual-glow {
-  position: absolute;
-  z-index: -2;
-  top: 49%;
-  left: 50%;
-  width: 740px;
-  height: 640px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(8, 85, 211, 0.19), transparent 68%);
-  transform: translate(-50%, -50%);
-}
-
-.login-page .login-visual-content {
-  position: relative;
-  width: 100%;
-  min-height: 100svh;
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  display: block;
-}
-
-.login-page .login-visual-intro {
-  position: absolute;
-  z-index: 4;
-  top: 147px;
-  left: 72px;
-  width: auto;
-  margin: 0;
-  direction: ltr;
-  text-align: left;
-}
-
-.login-page .login-visual-intro h2 {
-  margin: 0;
-  color: #f7fbff;
-  font-size: 42px;
-  font-weight: 800;
-  line-height: 1.19;
-  letter-spacing: -1.5px;
-}
-
-.login-page .login-visual-intro h2 span {
-  color: #1e6bef;
-}
-
-.login-page .login-visual-intro p {
-  width: max-content;
-  max-width: 100%;
-  margin: 18px 0 0;
-  color: #b1bfd7;
-  direction: rtl;
-  font-size: 15px;
-  font-weight: 500;
-  line-height: 1.7;
-}
-
-.login-page .login-visual-accent {
-  display: block;
-  width: 48px;
-  height: 4px;
-  margin-top: 18px;
-  border-radius: 50px;
-  background: #2479f4;
-}
-
-.login-page .login-visual-stage {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  margin: 0;
-}
-
-.login-page .login-visual-stage::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image:
-    radial-gradient(circle, rgba(48, 132, 255, 0.56) 0 1px, transparent 1.7px),
-    radial-gradient(circle, rgba(37, 118, 237, 0.24) 0 1px, transparent 1.55px);
-  background-position: 13px 9px, 51px 37px;
-  background-size: 67px 67px, 37px 37px;
-  opacity: 0.24;
-  pointer-events: none;
-}
-
-.login-page .login-car-art {
-  position: absolute;
-  z-index: 0;
-  top: 216px;
-  left: 60%;
-  width: 450px;
-  height: 190px;
-  opacity: 0.72;
-  transform: translateX(-50%);
-}
-
-.login-page .login-car-art svg {
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-}
-
-.login-page .login-car-art :is(path, circle) {
-  stroke: #3388ff;
-  stroke-width: 1.7;
-}
-
-.login-page .login-dashboard {
-  position: absolute;
-  z-index: 3;
-  top: 378px;
-  left: 50%;
-  width: 542px;
-  height: 365px;
-  padding: 18px;
-  border: 1px solid rgba(70, 149, 250, 0.46);
-  border-radius: 20px;
-  background: linear-gradient(150deg, rgba(8, 45, 96, 0.96), rgba(4, 29, 68, 0.96));
-  box-shadow: 0 30px 78px rgba(0, 9, 29, 0.34);
-  backdrop-filter: blur(16px);
-  transform: translateX(-50%);
-}
-
-.login-page .login-dashboard-topline {
-  min-height: 22px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.login-page .login-dashboard-title {
-  min-width: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.login-page .login-dashboard-title strong {
-  color: #f4f8ff;
-  font-size: 14px;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
-.login-page .login-dashboard-menu {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  flex: none;
-  padding: 5px;
-}
-
-.login-page .login-dashboard-menu i {
-  width: 3px;
-  height: 3px;
-  display: block;
-  border-radius: 50%;
-  background: #94b8ee;
-}
-
-.login-page .login-dashboard-metrics {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-  margin-bottom: 14px;
-}
-
-.login-page .login-metric-card {
-  min-width: 0;
-  padding: 16px 13px;
-  border: 1px solid rgba(82, 139, 220, 0.2);
-  border-radius: 12px;
-  background: rgba(13, 52, 108, 0.5);
-}
-
-.login-page .login-metric-card span {
-  display: block;
-  margin-bottom: 9px;
-  color: #a2b2ce;
-  font-size: 10px;
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.login-page .login-metric-card strong {
-  display: block;
-  color: #f6f9ff;
-  direction: ltr;
-  font-family: "Inter", "Cairo", sans-serif;
-  font-size: 24px;
-  font-weight: 700;
-  line-height: 1;
-  text-align: left;
-}
-
-.login-page .login-data-chart {
-  height: 172px;
-  padding: 15px;
-  border: 1px solid rgba(82, 139, 220, 0.17);
-  border-radius: 12px;
-  background: rgba(2, 24, 59, 0.52);
-}
-
-.login-page .login-chart-heading {
-  height: 15px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 10px;
-  color: #a8b9d4;
-  font-size: 10px;
-  font-weight: 500;
-  line-height: 1.5;
-}
-
-.login-page .login-chart-heading strong {
-  color: #70e1b5;
-  direction: ltr;
-  font-family: "Inter", "Cairo", sans-serif;
-  font-size: 11px;
-  font-weight: 700;
-}
-
-.login-page .login-chart-bars {
-  height: 112px;
-  display: flex;
-  align-items: flex-end;
-  gap: 9px;
-  direction: ltr;
-  border-bottom: 1px solid rgba(110, 149, 211, 0.15);
-}
-
-.login-page .login-chart-bars span {
-  max-width: 55px;
-  flex: 1;
-  min-width: 0;
-  border-radius: 4px 4px 1px 1px;
-  background: linear-gradient(180deg, #75d5f6, #1963ec);
-  box-shadow: 0 -4px 18px rgba(40, 125, 244, 0.08);
-  opacity: 0.96;
-}
-
-.login-page .login-chart-bars span:nth-child(1) { height: 76%; }
-.login-page .login-chart-bars span:nth-child(2) { height: 64%; }
-.login-page .login-chart-bars span:nth-child(3) { height: 43%; }
-.login-page .login-chart-bars span:nth-child(4) { height: 55%; }
-.login-page .login-chart-bars span:nth-child(5) { height: 30%; }
-.login-page .login-chart-bars span:nth-child(6) { height: 47%; }
-
-.login-page .login-visual-node {
-  position: absolute;
-  z-index: 2;
-  width: 100px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  color: #b8c9e5;
-  font-size: 11px;
-  font-weight: 500;
-  line-height: 1.45;
-  text-align: center;
-}
-
-.login-page .login-node-icon {
-  width: 92px;
-  height: 92px;
-  display: inline-grid;
-  place-items: center;
-  border: 1px solid rgba(32, 120, 246, 0.52);
-  border-radius: 25px;
-  background: linear-gradient(145deg, rgba(8, 41, 91, 0.78), rgba(5, 30, 68, 0.6));
-  box-shadow:
-    inset 0 0 30px rgba(20, 103, 218, 0.08),
-    0 10px 24px rgba(0, 5, 24, 0.12);
-  backdrop-filter: blur(9px);
-}
-
-.login-page .login-node-icon .data-glyph {
-  color: #74a7ff;
-  transform: scale(1.45);
-}
-
-.login-page .login-visual-node-engine { top: 65px; left: 36.8%; }
-.login-page .login-visual-node-analytics { top: 65px; left: 61.7%; }
-.login-page .login-visual-node-brakes { top: 108px; left: 79.3%; right: auto; }
-.login-page .login-visual-node-database { top: 394px; left: 8.4%; }
-.login-page .login-visual-node-transmission { top: 577px; left: 4.7%; }
-.login-page .login-visual-node-battery { top: 397px; left: 82.7%; right: auto; }
-.login-page .login-visual-node-wheels { top: 578px; left: 81.8%; right: auto; }
-.login-page .login-visual-node-inventory { top: 756px; left: 9.8%; }
-.login-page .login-visual-node-kpis { top: 789px; bottom: auto; left: 33.4%; }
-.login-page .login-visual-node-reports { top: 779px; right: auto; bottom: auto; left: 76.9%; }
-
-.login-page .login-connector {
-  position: absolute;
-  z-index: 1;
-  height: 1px;
-  opacity: 0.62;
-}
-
-.login-page .login-connector::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(90deg, transparent 0 5%, rgba(19, 112, 248, 0.8) 5% 9%, transparent 9% 13%) 0 0 / 13px 1px repeat-x;
-}
-
-.login-page .login-connector-one { top: 112px; left: 46%; width: 15%; }
-.login-page .login-connector-two { top: 147px; left: 66.7%; width: 12.5%; transform: rotate(-24deg); transform-origin: left center; }
-.login-page .login-connector-three { top: 298px; left: 21%; width: 23%; transform: rotate(-26deg); transform-origin: left center; }
-.login-page .login-connector-four { top: 315px; left: 63%; width: 21%; transform: rotate(17deg); transform-origin: left center; }
-.login-page .login-connector-five { top: 564px; left: 16%; width: 15%; transform: rotate(30deg); transform-origin: left center; }
-.login-page .login-connector-six { top: 566px; left: 71%; width: 12%; transform: rotate(-29deg); transform-origin: left center; }
-.login-page .login-connector-seven { top: 848px; left: 19%; width: 15%; }
-.login-page .login-connector-eight { top: 867px; left: 53%; width: 23%; }
-
-/* CSS-native automotive and data symbols */
-.login-page .login-visual .data-glyph {
-  position: relative;
-  display: inline-block;
-  width: 23px;
-  height: 23px;
-  flex: none;
-}
-
-.login-page .login-visual .glyph-dashboard {
-  border: 1.5px solid currentColor;
-  border-radius: 7px;
-  background:
-    linear-gradient(to top, currentColor 0 45%, transparent 45%) 5px 13px / 3px 5px no-repeat,
-    linear-gradient(to top, currentColor 0 72%, transparent 72%) 10px 10px / 3px 8px no-repeat,
-    linear-gradient(to top, currentColor 0 100%, transparent 100%) 15px 7px / 3px 11px no-repeat;
-}
-
-.login-page .login-visual .glyph-vehicle {
-  width: 28px;
-  height: 22px;
-  background:
-    radial-gradient(circle at 6px 17px, #0b2858 0 2px, currentColor 2.4px 4px, transparent 4.35px),
-    radial-gradient(circle at 22px 17px, #0b2858 0 2px, currentColor 2.4px 4px, transparent 4.35px);
-}
-
-.login-page .login-visual .glyph-vehicle::before {
-  content: "";
-  position: absolute;
-  z-index: 1;
-  bottom: 5px;
-  left: 1px;
-  width: 26px;
-  height: 9px;
-  border: 1.5px solid currentColor;
-  border-radius: 4px 7px 3px 3px;
-  background: linear-gradient(100deg, rgba(155, 239, 255, 0.16), rgba(155, 239, 255, 0.04));
-}
-
-.login-page .login-visual .glyph-vehicle::after {
-  content: "";
-  position: absolute;
-  z-index: 2;
-  top: 3px;
-  left: 7px;
-  width: 13px;
-  height: 8px;
-  border: 1.5px solid currentColor;
-  border-bottom: 0;
-  border-radius: 8px 9px 0 0;
-  background: linear-gradient(90deg, transparent 45%, rgba(155, 239, 255, 0.72) 46% 54%, transparent 55%);
-}
-
-.login-page .login-visual .glyph-wheel {
-  width: 23px;
-  height: 23px;
-  border: 2px solid currentColor;
-  border-radius: 50%;
-  background:
-    linear-gradient(90deg, transparent 43%, currentColor 44% 56%, transparent 57%),
-    linear-gradient(transparent 43%, currentColor 44% 56%, transparent 57%);
-  box-shadow: inset 0 0 0 3px rgba(9, 37, 82, 0.7);
-}
-
-.login-page .login-visual .glyph-wheel::before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  z-index: 1;
-  width: 6px;
-  height: 6px;
-  border: 1.5px solid currentColor;
-  border-radius: 50%;
-  background: #0b2858;
-  transform: translate(-50%, -50%);
-}
-
-.login-page .login-visual .glyph-wheel::after {
-  content: "";
-  position: absolute;
-  inset: 3px;
-  border: 1px solid rgba(155, 239, 255, 0.5);
-  border-radius: 50%;
-}
-
-.login-page .login-visual .glyph-database {
-  width: 20px;
-  height: 20px;
-  border: 1.5px solid currentColor;
-  border-top: 0;
-  border-radius: 0 0 8px 8px / 0 0 4px 4px;
-}
-
-.login-page .login-visual .glyph-database::before,
-.login-page .login-visual .glyph-database::after {
-  content: "";
-  position: absolute;
-  left: -1.5px;
-  width: 19px;
-  height: 6px;
-  border: 1.5px solid currentColor;
-  border-radius: 50%;
-}
-
-.login-page .login-visual .glyph-database::before {
-  top: -2px;
-  background: rgba(155, 239, 255, 0.16);
-}
-
-.login-page .login-visual .glyph-database::after {
-  top: 7px;
-  border-top-color: rgba(155, 239, 255, 0.65);
-  border-bottom: 0;
-}
-
-.login-page .login-visual .glyph-table {
-  border: 1.5px solid currentColor;
-  border-radius: 4px;
-  background:
-    linear-gradient(90deg, transparent 31%, currentColor 32% 37%, transparent 38% 63%, currentColor 64% 69%, transparent 70%),
-    linear-gradient(transparent 30%, currentColor 31% 36%, transparent 37% 63%, currentColor 64% 69%, transparent 70%);
-}
-
-.login-page .login-visual .glyph-api::before {
-  content: "<>";
-  position: absolute;
-  top: 2px;
-  left: 0;
-  color: currentColor;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: -3px;
-}
-
-.login-page .login-visual .glyph-pipeline::before {
-  content: "";
-  position: absolute;
-  top: 10px;
-  left: 2px;
-  width: 18px;
-  height: 2px;
-  background: currentColor;
-  box-shadow: 0 0 7px rgba(155, 239, 255, 0.5);
-}
-
-.login-page .login-visual .glyph-pipeline::after {
-  content: "";
-  position: absolute;
-  top: 5px;
-  left: 1px;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: currentColor;
-  box-shadow: 7px 8px 0 currentColor, 15px 0 0 currentColor;
-}
-
-.login-page .login-visual .glyph-file {
-  width: 18px;
-  height: 22px;
-  border: 1.5px solid currentColor;
-  border-radius: 4px;
-}
-
-.login-page .login-visual .glyph-file::before {
-  content: "";
-  position: absolute;
-  top: -1.5px;
-  right: -1.5px;
-  width: 7px;
-  height: 7px;
-  border-bottom: 1.5px solid currentColor;
-  border-left: 1.5px solid currentColor;
-  border-radius: 0 3px 0 3px;
-  background: #123570;
-}
-
-.login-page .login-visual .glyph-file::after {
-  content: "";
-  position: absolute;
-  top: 11px;
-  left: 3px;
-  width: 9px;
-  height: 1.5px;
-  border-radius: 999px;
-  background: currentColor;
-  box-shadow: 0 4px 0 currentColor;
-}
-
-.login-page .login-visual .glyph-engine {
-  width: 26px;
-  height: 20px;
-  border: 1.8px solid currentColor;
-  border-radius: 4px 6px 6px 4px;
-}
-
-.login-page .login-visual .glyph-engine::before {
-  content: "";
-  position: absolute;
-  top: 4px;
-  left: 5px;
-  width: 12px;
-  height: 8px;
-  border: 1.5px solid currentColor;
-  border-radius: 3px;
-  background:
-    radial-gradient(circle at 28% 50%, currentColor 0 1px, transparent 1.4px),
-    radial-gradient(circle at 72% 50%, currentColor 0 1px, transparent 1.4px);
-}
-
-.login-page .login-visual .glyph-engine::after {
-  content: "";
-  position: absolute;
-  top: 2px;
-  left: -5px;
-  width: 5px;
-  height: 15px;
-  border-top: 1.8px solid currentColor;
-  border-bottom: 1.8px solid currentColor;
-  box-shadow: 30px 0 0 -0.2px currentColor;
-}
-
 /* ──── dark mode / responsive ──── */
 
 :root[data-theme="dark"] .login-page {
@@ -1336,21 +764,6 @@
   color: #d7efff;
 }
 
-@media (max-width: 1180px) and (min-width: 951px) {
-  .login-page .login-visual-intro {
-    left: 42px;
-  }
-
-  .login-page .login-dashboard {
-    width: 490px;
-  }
-
-  .login-page .login-visual-stage {
-    transform: scale(0.9);
-    transform-origin: center top;
-  }
-}
-
 @media (max-width: 950px) {
   .login-page {
     overflow: auto;
@@ -1386,10 +799,6 @@
   .login-page .login-security-note {
     margin-top: 25px;
     padding-top: 0;
-  }
-
-  .login-page .login-visual {
-    display: none;
   }
 }
 
@@ -1477,110 +886,6 @@
   }
 }
 
-/* Proportional right-side canvas: keeps the automotive scene aligned at every
-   desktop size rather than relying on a single fixed pixel canvas. */
-@media (min-width: 951px) {
-  .login-page .login-visual {
-    container-type: size;
-  }
-
-  .login-page .login-visual-intro {
-    top: 15.2cqh;
-    left: 7.3cqw;
-  }
-
-  .login-page .login-visual-intro h2 {
-    font-size: clamp(36px, 4.18cqw, 42px);
-  }
-
-  .login-page .login-visual-stage {
-    transform: none;
-  }
-
-  .login-page .login-car-art {
-    top: 22.6cqh;
-    left: 60.5%;
-    width: min(44.7cqw, 450px);
-    height: auto;
-    aspect-ratio: 450 / 190;
-  }
-
-  .login-page .login-dashboard {
-    top: 37.85cqh;
-    left: 51.2%;
-    width: min(55.6cqw, 542px);
-    height: min(36.5cqh, 365px);
-    padding: min(1.8cqw, 18px);
-    border-radius: clamp(16px, 2.4cqw, 20px);
-  }
-
-  .login-page .login-dashboard-topline {
-    min-height: clamp(19px, 2.2cqw, 22px);
-    margin-bottom: min(1.6cqw, 16px);
-  }
-
-  .login-page .login-dashboard-title strong {
-    font-size: clamp(12px, 1.4cqw, 14px);
-  }
-
-  .login-page .login-dashboard-metrics {
-    gap: min(1.2cqw, 12px);
-    margin-bottom: min(1.4cqw, 14px);
-  }
-
-  .login-page .login-metric-card {
-    padding: min(1.6cqw, 16px) min(1.3cqw, 13px);
-  }
-
-  .login-page .login-metric-card span {
-    margin-bottom: min(0.9cqw, 9px);
-  }
-
-  .login-page .login-metric-card strong {
-    font-size: clamp(22px, 2.4cqw, 24px);
-  }
-
-  .login-page .login-data-chart {
-    height: min(17.2cqh, 172px);
-    padding: min(1.5cqw, 15px);
-  }
-
-  .login-page .login-chart-bars {
-    height: min(11.2cqh, 112px);
-    gap: min(0.9cqw, 9px);
-  }
-
-  .login-page .login-node-icon {
-    width: clamp(84px, 10.4cqw, 92px);
-    height: clamp(78px, 9.4cqw, 92px);
-    border-radius: clamp(21px, 2.5cqw, 25px);
-  }
-
-  .login-page .login-visual-node {
-    width: clamp(92px, 9.95cqw, 100px);
-  }
-
-  .login-page .login-visual-node-engine { top: 6.5%; left: 37.8%; }
-  .login-page .login-visual-node-analytics { top: 6.5%; left: 63.5%; }
-  .login-page .login-visual-node-brakes { top: 10.4%; left: 81.5%; }
-  .login-page .login-visual-node-database { top: 39.3%; left: 8.5%; }
-  .login-page .login-visual-node-transmission { top: 57.9%; left: 4.5%; }
-  .login-page .login-visual-node-battery { top: 39.8%; left: 85%; }
-  .login-page .login-visual-node-wheels { top: 57.9%; left: 84.2%; }
-  .login-page .login-visual-node-inventory { top: 75.4%; left: 9.9%; }
-  .login-page .login-visual-node-kpis { top: 79%; left: 34.1%; }
-  .login-page .login-visual-node-reports { top: 77.6%; left: 75.8%; }
-
-  .login-page .login-connector-one { top: 13.2%; left: 46%; width: 15%; }
-  .login-page .login-connector-two { top: 17.3%; left: 67.8%; width: 12.5%; }
-  .login-page .login-connector-three { top: 35.1%; left: 21%; width: 23%; }
-  .login-page .login-connector-four { top: 37.1%; left: 63%; width: 21%; }
-  .login-page .login-connector-five { top: 66.5%; left: 16%; width: 15%; }
-  .login-page .login-connector-six { top: 66.7%; left: 71%; width: 12%; }
-  .login-page .login-connector-seven { top: 84.8%; left: 19%; width: 15%; }
-  .login-page .login-connector-eight { top: 86.8%; left: 53%; width: 23%; }
-}
-
 /* Keep the language control's globe, label, and chevron in distinct columns. */
 .login-page .login-language-select {
   display: grid;
@@ -1664,4 +969,340 @@
   border: 0;
   opacity: 0;
   cursor: pointer;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   The right-hand panel
+   ═══════════════════════════════════════════════════════════════════════════
+
+   One idea rather than a scatter of ornaments: a file arrives as text, becomes
+   columns, becomes an answer. Three cards cascading forward with the finished
+   one in front, under the wordmark and over three figures.
+
+   The cascade offsets are physical, not logical. It is a single composed
+   picture, and mirroring it for Arabic would reverse the depth order rather
+   than translate it - only the surrounding text follows direction.
+
+   The panel is dark in both themes. It is the brand's own surface, not a
+   recolouring of the form beside it.
+*/
+
+.login-page .login-visual {
+  --lv-line: rgba(96, 165, 250, 0.16);
+  --lv-card: rgba(9, 32, 66, 0.86);
+  --lv-edge: rgba(78, 148, 245, 0.28);
+  --lv-ink: #e8f1ff;
+  --lv-dim: #8ea9cf;
+
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  min-height: 100svh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 40px;
+  color: var(--lv-ink);
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 8%, rgba(23, 92, 201, 0.28), transparent 70%),
+    radial-gradient(ellipse 60% 50% at 82% 96%, rgba(11, 118, 214, 0.16), transparent 70%),
+    linear-gradient(160deg, #041530 0%, #06213f 45%, #03122a 100%);
+}
+
+/* A ruled ground plane, faded out at both ends so it never meets an edge hard. */
+.login-page .lv-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--lv-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--lv-line) 1px, transparent 1px);
+  background-size: 52px 52px;
+  mask-image: radial-gradient(ellipse 78% 68% at 50% 45%, #000 35%, transparent 100%);
+  pointer-events: none;
+}
+
+.login-page .lv-glow {
+  position: absolute;
+  top: -14%;
+  left: 50%;
+  width: 620px;
+  height: 620px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(37, 132, 255, 0.22), transparent 62%);
+  filter: blur(38px);
+  pointer-events: none;
+}
+
+.login-page .lv-content {
+  position: relative;
+  z-index: 2;
+  width: min(560px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+/* ---- the wordmark and its line ---- */
+
+.login-page .lv-intro {
+  text-align: start;
+}
+
+.login-page .lv-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+  color: #7cc2ff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.login-page .lv-eyebrow::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #35d0ff;
+  box-shadow: 0 0 0 4px rgba(53, 208, 255, 0.16);
+}
+
+.login-page .lv-intro h2 {
+  margin: 0;
+  font-size: clamp(38px, 3.4vw, 50px);
+  font-weight: 800;
+  line-height: 1.06;
+  letter-spacing: -1.6px;
+  color: #f4f9ff;
+  text-align: left;
+}
+
+.login-page .lv-intro h2 span {
+  display: block;
+  background: linear-gradient(96deg, #4c9bff, #2ee2ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.login-page .lv-intro p {
+  position: relative;
+  max-width: 42ch;
+  margin: 20px 0 0;
+  padding-top: 20px;
+  color: var(--lv-dim);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.85;
+}
+
+.login-page .lv-intro p::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  inset-inline-start: 0;
+  width: 54px;
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #2f8bff, #23dcff);
+}
+
+/* ---- the cascade ---- */
+
+.login-page .lv-cascade {
+  position: relative;
+  /* tall enough to contain the front card, which sits 150px down and is the tallest */
+  height: 340px;
+  /* room for the two cards that sit up and to the left of the front one */
+  margin: 8px 0 0 auto;
+  width: 100%;
+}
+
+.login-page .lv-card {
+  position: absolute;
+  margin: 0;
+  padding: 14px 16px 16px;
+  border: 1px solid var(--lv-edge);
+  border-radius: 16px;
+  background: var(--lv-card);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 24px 54px rgba(0, 8, 26, 0.5);
+}
+
+.login-page .lv-card figcaption {
+  margin-bottom: 11px;
+  color: #9fc4ee;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Back: the raw file. Furthest away, dimmest, smallest. */
+.login-page .lv-card-raw {
+  top: 0;
+  left: 0;
+  width: 74%;
+  opacity: 0.5;
+  transform: scale(0.94);
+  transform-origin: top left;
+}
+
+.login-page .lv-card-raw pre {
+  margin: 0;
+  overflow: hidden;
+  color: #63d0ff;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10.5px;
+  line-height: 1.95;
+  white-space: pre;
+}
+
+/* Middle: the same bytes as columns. */
+.login-page .lv-card-table {
+  top: 66px;
+  left: 13%;
+  width: 76%;
+  opacity: 0.82;
+  transform: scale(0.97);
+  transform-origin: top left;
+}
+
+.login-page .lv-card-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.login-page .lv-card-table th {
+  padding: 0 8px 7px 0;
+  border-bottom: 1px solid rgba(120, 178, 255, 0.22);
+  color: #74a6e0;
+  font-weight: 700;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.login-page .lv-card-table td {
+  padding: 6px 8px 6px 0;
+  border-bottom: 1px solid rgba(120, 178, 255, 0.08);
+  color: #dbe9fb;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.login-page .lv-card-table tr:last-child td {
+  border-bottom: 0;
+}
+
+/* Front: the answer. Nearest, brightest, fully opaque. */
+.login-page .lv-card-chart {
+  top: 150px;
+  left: 26%;
+  width: 74%;
+  border-color: rgba(96, 170, 255, 0.44);
+  background: linear-gradient(150deg, rgba(13, 45, 92, 0.96), rgba(5, 25, 54, 0.94));
+  box-shadow: 0 30px 66px rgba(0, 8, 26, 0.62), 0 0 0 1px rgba(56, 140, 255, 0.1);
+}
+
+.login-page .lv-bars {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 9px;
+}
+
+.login-page .lv-bars li {
+  display: grid;
+  grid-template-columns: 62px 1fr;
+  align-items: center;
+  gap: 10px;
+}
+
+.login-page .lv-bar-label {
+  color: #9dbfe6;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-align: left;
+}
+
+.login-page .lv-bar-track {
+  height: 7px;
+  border-radius: 4px;
+  background: rgba(103, 163, 240, 0.13);
+  overflow: hidden;
+}
+
+.login-page .lv-bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #2a7dff, #2fdcff);
+}
+
+/* ---- the three figures ---- */
+
+.login-page .lv-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin: 0;
+  padding-top: 26px;
+  border-top: 1px solid rgba(101, 158, 226, 0.16);
+}
+
+.login-page .lv-stats div {
+  min-width: 0;
+}
+
+.login-page .lv-stats dt {
+  color: var(--lv-dim);
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.login-page .lv-stats dd {
+  margin: 5px 0 0;
+  color: #f2f8ff;
+  font-size: 27px;
+  font-weight: 800;
+  letter-spacing: -0.8px;
+  font-variant-numeric: tabular-nums;
+  /* Latin numerals read left-to-right in every language this app speaks. */
+  direction: ltr;
+  text-align: start;
+}
+
+/* ---- narrower ---- */
+
+@media (max-width: 1240px) {
+  .login-page .lv-cascade {
+    height: 316px;
+  }
+
+  .login-page .lv-card-chart {
+    top: 138px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-page .login-visual * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+/* Below the point where the two halves stop sitting side by side, the panel is dropped
+   rather than stacked under the form. It carries no information - everything it shows is
+   illustrative - so on a phone it is the part that goes, and the form gets the screen. */
+@media (max-width: 950px) {
+  .login-page .login-visual {
+    display: none;
+  }
 }
