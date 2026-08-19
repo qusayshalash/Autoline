@@ -337,8 +337,76 @@ def prune(keep: Optional[int] = None) -> dict:
     return {"removed": removed, "freed_bytes": freed}
 
 
-def summary() -> dict:
+# ---- schedule -----------------------------------------------------------------------
+#
+# A backup you have to remember is a backup you will forget. The schedule is a floor,
+# not a clock: rather than firing at a fixed hour - which a machine that was switched off
+# would simply miss - it asks whether the newest verified backup is older than the
+# interval, and runs one if it is. Starting the server after a week away therefore takes
+# a backup immediately, which is the behaviour somebody would want and the behaviour a
+# cron-shaped design would not give them.
+
+SCHEDULE_KEY = "backup.interval_hours"
+
+# Off until switched on, like export retention. Taking backups is safe, but doing
+# gigabytes of unrequested disk work the first time somebody starts the server is a
+# decision for whoever runs it.
+DEFAULT_INTERVAL_HOURS = 0
+
+# How stale the newest backup may get before the panel says so, when no schedule is set.
+STALE_AFTER_HOURS = 24 * 7
+
+
+def interval_hours(get_setting) -> int:
+    try:
+        return max(0, int(get_setting(SCHEDULE_KEY, DEFAULT_INTERVAL_HOURS)))
+    except (TypeError, ValueError):
+        return DEFAULT_INTERVAL_HOURS
+
+
+def set_interval_hours(set_setting, hours: int) -> int:
+    hours = max(0, int(hours))
+    set_setting(SCHEDULE_KEY, hours)
+    return hours
+
+
+def hours_since_last_verified() -> Optional[float]:
+    """Age of the newest verified backup, or None when there has never been one."""
+    good = [b for b in list_all() if b.get("verified") and b.get("created_at")]
+    if not good:
+        return None
+    newest = max(b["created_at"] for b in good)
+    try:
+        when = datetime.fromisoformat(newest.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if when.tzinfo is None:
+        when = when.replace(tzinfo=timezone.utc)
+    return (_now() - when).total_seconds() / 3600
+
+
+def is_due(get_setting) -> bool:
+    hours = interval_hours(get_setting)
+    if hours <= 0:
+        return False
+    age = hours_since_last_verified()
+    return age is None or age >= hours
+
+
+def run_if_due(get_setting, *, progress: Progress = None) -> Optional[dict]:
+    """Takes a backup only when one is overdue. Returns its manifest, or None."""
+    if not is_due(get_setting):
+        return None
+    manifest = run(progress=progress)
+    if manifest["verified"]:
+        prune()
+    return manifest
+
+
+def summary(get_setting=None) -> dict:
     """What the settings screen shows without listing every backup."""
+    hours = interval_hours(get_setting) if get_setting else 0
+    age = hours_since_last_verified()
     all_backups = list_all()
     good = [b for b in all_backups if b.get("verified")]
     latest = good[0] if good else None
@@ -352,6 +420,10 @@ def summary() -> dict:
         "latest_at": latest["created_at"] if latest else "",
         "latest_verified": bool(latest),
         "disk_free_bytes": _free_bytes(),
+        "interval_hours": hours,
+        "hours_since_last": round(age, 1) if age is not None else None,
+        # stale is answered here rather than on the screen so every caller agrees on it
+        "stale": age is None or age >= (hours or STALE_AFTER_HOURS),
     }
 
 

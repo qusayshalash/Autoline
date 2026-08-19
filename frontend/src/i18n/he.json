@@ -220,7 +220,8 @@
     "hide_password": "הסתר",
     "error_generic": "אירעה שגיאה בלתי צפויה, נסה שוב",
     "error_loading_data": "לא ניתן לטעון את הנתונים",
-    "delete": "מחיקה"
+    "delete": "מחיקה",
+    "retry": "נסו שוב"
   },
   "theme": {
     "label": "ערכת נושא",
@@ -294,7 +295,8 @@
       "backup.started": "גיבוי החל",
       "backup.deleted": "גיבוי נמחק",
       "backup.pruned": "גיבויים גוזמו",
-      "dataset.compaction_started": "כיווץ החל"
+      "dataset.compaction_started": "כיווץ החל",
+      "backup.schedule_changed": "לוח הגיבוי שונה"
     },
     "time": {
       "just_now": "עכשיו",
@@ -483,7 +485,16 @@
         "dataset": "מסד נתונים",
         "key": "מפתח הפעלות",
         "original": "קובץ מקור"
-      }
+      },
+      "schedule": "גיבוי אוטומטי",
+      "schedule_hint": "נבדק כל חצי שעה: אם הגיבוי המאומת האחרון ישן מהמרווח שנבחר, נלקח גיבוי. מכונה שהייתה כבויה אינה מפספסת את חלונה — היא מגבה מיד עם חזרתה.",
+      "schedule_off": "כבוי",
+      "schedule_daily": "יומי",
+      "schedule_2days": "כל יומיים",
+      "schedule_weekly": "שבועי",
+      "stale_never": "לא נלקח גיבוי מעולם",
+      "stale_since": "הגיבוי האחרון לפני {{hours}} שעות",
+      "fresh_since": "הגיבוי האחרון לפני {{hours}} שעות"
     },
     "lockouts": {
       "title": "נעולים זמנית",

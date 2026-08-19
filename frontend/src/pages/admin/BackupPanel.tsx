@@ -7,6 +7,7 @@ import {
   deleteBackup,
   fetchBackupSummary,
   fetchBackups,
+  setBackupSchedule,
   startBackup,
 } from "../../api/admin";
 import { apiErrorMessage, getJob } from "../../api/client";
@@ -14,9 +15,18 @@ import { useAuth } from "../../auth/AuthContext";
 import { IconDatabase, IconTrash } from "../../components/admin/AdminIcons";
 import { AdminPanel, formatBytes } from "../../components/admin/AdminUI";
 import ErrorBanner from "../../components/ErrorBanner";
-import LoadingState from "../../components/LoadingState";
+import QueryState from "../../components/QueryState";
 
 const POLL_MS = 700;
+
+/** Off, daily, every other day, weekly. Hours because that is what the API stores. */
+const SCHEDULE_CHOICES = [0, 24, 48, 168];
+const SCHEDULE_LABELS: Record<number, string> = {
+  0: "admin.backup.schedule_off",
+  24: "admin.backup.schedule_daily",
+  48: "admin.backup.schedule_2days",
+  168: "admin.backup.schedule_weekly",
+};
 
 /**
  * Backups.
@@ -40,7 +50,13 @@ export default function BackupPanel() {
   const [expanded, setExpanded] = useState<string | null>(null);
   const timer = useRef<number | null>(null);
 
-  const { data: summary, isLoading } = useQuery({
+  const {
+    data: summary,
+    isLoading,
+    isError: summaryFailed,
+    error: summaryError,
+    refetch: refetchSummary,
+  } = useQuery({
     queryKey: ["admin-backup-summary"],
     queryFn: fetchBackupSummary,
   });
@@ -92,13 +108,27 @@ export default function BackupPanel() {
     },
   });
 
+  const schedule = useMutation({
+    mutationFn: setBackupSchedule,
+    onSuccess: refresh,
+    onError: (e) => setError(apiErrorMessage(e, t("common.error_generic"))),
+  });
+
   const remove = useMutation({
     mutationFn: deleteBackup,
     onSuccess: refresh,
     onError: (e) => setError(apiErrorMessage(e, t("common.error_generic"))),
   });
 
-  if (isLoading || !summary) return <LoadingState />;
+  if (isLoading || summaryFailed || !summary) {
+    return (
+      <QueryState
+        loading={isLoading}
+        error={summaryFailed ? summaryError : null}
+        onRetry={refetchSummary}
+      />
+    );
+  }
 
   const busy = run.isPending || progress !== null;
   const canDelete = can("datasets.delete");
@@ -115,7 +145,16 @@ export default function BackupPanel() {
     >
       <ErrorBanner message={error} />
 
-      {summary.count === 0 && <p className="backup-warn">{t("admin.backup.no_backup_warning")}</p>}
+      {/* One line covers both "never" and "not for a long time". A panel that only warns
+          when there are zero backups goes quiet after the first one and stays quiet
+          however old it gets, which is the state this is meant to catch. */}
+      {summary.stale && (
+        <p className="backup-warn">
+          {summary.hours_since_last === null
+            ? t("admin.backup.stale_never")
+            : t("admin.backup.stale_since", { hours: Math.round(summary.hours_since_last) })}
+        </p>
+      )}
       {summary.same_disk_as_data && (
         <p className="backup-warn">{t("admin.backup.same_disk_warning")}</p>
       )}
@@ -162,6 +201,22 @@ export default function BackupPanel() {
             <small>{t("admin.backup.opt_originals_hint")}</small>
           </span>
         </label>
+      </div>
+
+      <p className="drawer-section">{t("admin.backup.schedule")}</p>
+      <p className="muted admin-note">{t("admin.backup.schedule_hint")}</p>
+      <div className="storage-retention">
+        {SCHEDULE_CHOICES.map((hours) => (
+          <button
+            key={hours}
+            type="button"
+            className={summary.interval_hours === hours ? "active" : ""}
+            disabled={schedule.isPending}
+            onClick={() => schedule.mutate(hours)}
+          >
+            {t(SCHEDULE_LABELS[hours])}
+          </button>
+        ))}
       </div>
 
       <div className="storage-actions">

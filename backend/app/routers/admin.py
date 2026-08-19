@@ -18,6 +18,7 @@ from app.models.schemas import (
     BackupOut,
     BackupPruneResult,
     BackupRequest,
+    BackupScheduleRequest,
     BackupSummary,
     CompactionEstimate,
     CompactionOut,
@@ -269,7 +270,7 @@ def list_backups() -> list[BackupOut]:
 @router.get("/backups/summary", response_model=BackupSummary,
             dependencies=[Depends(require_permission("system.view"))])
 def backup_summary() -> BackupSummary:
-    return BackupSummary(**backup_service.summary())
+    return BackupSummary(**backup_service.summary(admin_db.get_setting))
 
 
 @router.post("/backups", response_model=JobOut)
@@ -397,3 +398,17 @@ def _run_compaction_job(dataset_id: str, job_id: str) -> None:
         catalog.update_job(job_id, status="done", progress="ready", result_json=result.as_dict())
     except Exception as exc:  # noqa: BLE001 - the job record is where failures surface
         catalog.update_job(job_id, status="error", error_message=str(exc))
+
+
+@router.patch("/backups/schedule", response_model=BackupSummary)
+def set_backup_schedule(
+    body: BackupScheduleRequest,
+    actor: dict = Depends(require_permission("system.view")),
+) -> BackupSummary:
+    """Sets how often a backup should be taken, in hours. 0 turns the schedule off."""
+    hours = backup_service.set_interval_hours(admin_db.set_setting, body.hours)
+    admin_db.log_activity(
+        actor, "backup.schedule_changed", "system", "backup", "",
+        "off" if hours == 0 else f"every {hours}h",
+    )
+    return BackupSummary(**backup_service.summary(admin_db.get_setting))

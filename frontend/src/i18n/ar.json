@@ -222,7 +222,8 @@
     "hide_password": "إخفاء",
     "error_generic": "حدث خطأ غير متوقع، حاول مرة أخرى",
     "error_loading_data": "تعذّر تحميل البيانات",
-    "delete": "حذف"
+    "delete": "حذف",
+    "retry": "أعد المحاولة"
   },
   "theme": {
     "label": "المظهر",
@@ -296,7 +297,8 @@
       "backup.started": "بدء نسخة احتياطية",
       "backup.deleted": "حذف نسخة احتياطية",
       "backup.pruned": "تقليم النسخ الاحتياطية",
-      "dataset.compaction_started": "بدء ضغط قاعدة بيانات"
+      "dataset.compaction_started": "بدء ضغط قاعدة بيانات",
+      "backup.schedule_changed": "تغيير جدولة النسخ"
     },
     "time": {
       "just_now": "الآن",
@@ -485,7 +487,16 @@
         "dataset": "قاعدة بيانات",
         "key": "مفتاح الجلسات",
         "original": "الملف الأصلي"
-      }
+      },
+      "schedule": "النسخ التلقائي",
+      "schedule_hint": "يفحص النظام كل نصف ساعة: إن كانت أحدث نسخة موثّقة أقدم من المدة المختارة، يأخذ نسخة. الجهاز المطفأ لا يفوّت موعده — يأخذ نسخة فور عودته.",
+      "schedule_off": "معطّل",
+      "schedule_daily": "يوميًا",
+      "schedule_2days": "كل يومين",
+      "schedule_weekly": "أسبوعيًا",
+      "stale_never": "لم تُؤخذ أي نسخة بعد",
+      "stale_since": "آخر نسخة منذ {{hours}} ساعة",
+      "fresh_since": "آخر نسخة منذ {{hours}} ساعة"
     },
     "lockouts": {
       "title": "الحسابات المقفلة مؤقتًا",

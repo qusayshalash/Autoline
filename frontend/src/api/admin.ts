@@ -302,6 +302,11 @@ export interface BackupSummary {
   latest_at: string;
   latest_verified: boolean;
   disk_free_bytes: number;
+  /** 0 = no schedule; nothing is taken automatically */
+  interval_hours: number;
+  hours_since_last: number | null;
+  /** the server decides what overdue means, so every screen agrees */
+  stale: boolean;
 }
 
 export async function fetchBackups(): Promise<Backup[]> {
@@ -383,5 +388,10 @@ export async function fetchCompactionEstimate(datasetId: string): Promise<Compac
 /** Starts a compaction. It runs as a job - poll it with getJob. */
 export async function startCompaction(datasetId: string): Promise<JobOut> {
   const { data } = await api.post<JobOut>(`/admin/datasets/${datasetId}/compaction`, {});
+  return data;
+}
+
+export async function setBackupSchedule(hours: number): Promise<BackupSummary> {
+  const { data } = await api.patch<BackupSummary>("/admin/backups/schedule", { hours });
   return data;
 }

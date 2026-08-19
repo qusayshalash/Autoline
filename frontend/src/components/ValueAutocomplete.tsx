@@ -41,7 +41,7 @@ export default function ValueAutocomplete({
     return () => clearTimeout(id);
   }, [value]);
 
-  const { data, isFetching } = useQuery({
+  const { data, isFetching, isError } = useQuery({
     queryKey: ["distinct-values", datasetId, source, column, debounced, "suggest"],
     queryFn: () =>
       fetchDistinctValues(datasetId, {
@@ -155,6 +155,11 @@ export default function ValueAutocomplete({
           >
             {isFetching ? (
               <div className="muted autocomplete-note">{t("common.loading")}</div>
+            ) : isError ? (
+              /* "no values found" would be a claim about the data; the lookup simply
+                 failed, and the difference matters when the user is deciding whether
+                 the value they typed exists */
+              <div className="muted autocomplete-note">{t("common.error_loading_data")}</div>
             ) : items.length === 0 ? (
               <div className="muted autocomplete-note">{t("column_menu.no_values_found")}</div>
             ) : (

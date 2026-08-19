@@ -116,14 +116,32 @@ def decode_access_token(token: str) -> Optional[dict]:
 
 
 def bootstrap_admin() -> None:
+    """Creates the first administrator, once, on an empty installation.
+
+    The password is generated rather than defaulted. A literal default is the same
+    password on every installation of this software, and the moment the source is
+    readable - which for anything on a public repository is immediately - it is a
+    published credential rather than a placeholder. Rate limiting slows down guessing a
+    password; it does nothing about one an attacker already knows.
+
+    Generated once, printed once, and never recoverable from the database afterwards,
+    since only its hash is stored. Set ADMIN_PASSWORD to choose your own instead.
+    """
     if catalog.count_users() > 0:
         return
     username = os.environ.get("ADMIN_USERNAME", "admin")
-    password = os.environ.get("ADMIN_PASSWORD", "admin123")
+    chosen = os.environ.get("ADMIN_PASSWORD")
+    password = chosen or secrets.token_urlsafe(15)
+
     catalog.create_user(
         catalog.new_id(), username, hash_password(password), BOOTSTRAP_ROLE, full_name="System Administrator"
     )
-    print("=" * 60)
-    print(f"[bootstrap] created initial admin account: username={username!r} password={password!r}")
-    print("[bootstrap] change this password immediately after first login.")
-    print("=" * 60)
+    print("=" * 68)
+    print(f"[bootstrap] created the first administrator: {username!r}")
+    if chosen:
+        print("[bootstrap] password taken from ADMIN_PASSWORD.")
+    else:
+        print(f"[bootstrap] generated password: {password}")
+        print("[bootstrap] This is the only time it is shown - it is stored hashed.")
+    print("[bootstrap] Change it after signing in.")
+    print("=" * 68)

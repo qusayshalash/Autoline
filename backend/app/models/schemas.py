@@ -308,6 +308,16 @@ class BackupSummary(BaseModel):
     latest_at: str
     latest_verified: bool
     disk_free_bytes: int
+    # 0 means no schedule - nothing is taken automatically
+    interval_hours: int = 0
+    hours_since_last: Optional[float] = None
+    # answered by the server so every caller agrees on what "overdue" means
+    stale: bool = True
+
+
+class BackupScheduleRequest(BaseModel):
+    # 0 disables the schedule entirely
+    hours: int = Field(ge=0, le=24 * 90)
 
 
 class BackupRequest(BaseModel):

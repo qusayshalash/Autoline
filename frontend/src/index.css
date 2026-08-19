@@ -2496,3 +2496,28 @@ body.is-resizing-column {
   margin: 0 0 0.5rem;
   font-size: 0.8rem;
 }
+
+/* A failed request needs to look like a failure, not like a slow one. The retry sits
+   inside the block because the useful next action is right there - a message with no
+   way to act on it is only marginally better than the spinner it replaced. */
+.query-error {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 1rem 1.15rem;
+  margin: 0.5rem 0;
+  border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent);
+  background: color-mix(in srgb, var(--danger) 8%, transparent);
+  border-radius: var(--radius-sm, 8px);
+}
+
+.query-error-message {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* a group that failed to expand, stated inline in its own row */
+.group-failed { color: var(--danger); font-size: 0.85rem; }

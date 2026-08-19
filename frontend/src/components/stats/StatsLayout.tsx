@@ -35,7 +35,9 @@ export default function StatsLayout() {
     localStorage.setItem(COLLAPSED_KEY, collapsed ? "1" : "0");
   }, [collapsed]);
 
-  const { data: datasets = [] } = useQuery({
+  // `= []` on failure would render the sidebar as "no files imported", which is a
+  // different and much more alarming statement than "the list could not be loaded"
+  const { data: datasets = [], isError: listFailed } = useQuery({
     queryKey: ["datasets"],
     queryFn: listDatasets,
   });
@@ -84,7 +86,9 @@ export default function StatsLayout() {
             </NavLink>
           ))}
           {ready.length === 0 && !collapsed && (
-            <p className="stats-nav-empty">{t("statistics.no_files")}</p>
+            <p className="stats-nav-empty">
+              {listFailed ? t("common.error_loading_data") : t("statistics.no_files")}
+            </p>
           )}
         </nav>
 

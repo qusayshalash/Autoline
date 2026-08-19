@@ -8,7 +8,7 @@ import { useAuth } from "../../auth/AuthContext";
 import { IconGlobe } from "../../components/admin/AdminIcons";
 import { AdminPanel } from "../../components/admin/AdminUI";
 import ErrorBanner from "../../components/ErrorBanner";
-import LoadingState from "../../components/LoadingState";
+import QueryState from "../../components/QueryState";
 
 export default function LanguagesPage() {
   const { t } = useTranslation();
@@ -16,7 +16,13 @@ export default function LanguagesPage() {
   const qc = useQueryClient();
   const [error, setError] = useState<string | null>(null);
 
-  const { data: languages, isLoading } = useQuery({
+  const {
+    data: languages,
+    isLoading,
+    isError: loadFailed,
+    error: loadError,
+    refetch,
+  } = useQuery({
     queryKey: ["admin-languages"],
     queryFn: fetchLanguages,
   });
@@ -32,7 +38,11 @@ export default function LanguagesPage() {
     onError: (e) => setError(apiErrorMessage(e, t("common.error_generic"))),
   });
 
-  if (isLoading || !languages) return <LoadingState />;
+  if (isLoading || loadFailed || !languages) {
+    return (
+      <QueryState loading={isLoading} error={loadFailed ? loadError : null} onRetry={refetch} />
+    );
+  }
 
   const editable = can("languages.manage");
   const enabledCodes = languages.filter((l) => l.enabled).map((l) => l.code);

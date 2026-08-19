@@ -9,7 +9,7 @@ import { useAuth } from "../../auth/AuthContext";
 import { IconDatabase, IconTrash } from "../../components/admin/AdminIcons";
 import { AdminPanel, formatBytes } from "../../components/admin/AdminUI";
 import ErrorBanner from "../../components/ErrorBanner";
-import LoadingState from "../../components/LoadingState";
+import QueryState from "../../components/QueryState";
 
 const RETENTION_CHOICES = [0, 24, 72, 168, 720];
 
@@ -35,7 +35,13 @@ export default function StoragePanel() {
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
 
-  const { data: storage, isLoading } = useQuery({
+  const {
+    data: storage,
+    isLoading,
+    isError: loadFailed,
+    error: loadError,
+    refetch,
+  } = useQuery({
     queryKey: ["admin-storage"],
     queryFn: fetchStorage,
   });
@@ -79,7 +85,11 @@ export default function StoragePanel() {
     }
   }
 
-  if (isLoading || !storage) return <LoadingState />;
+  if (isLoading || loadFailed || !storage) {
+    return (
+      <QueryState loading={isLoading} error={loadFailed ? loadError : null} onRetry={refetch} />
+    );
+  }
 
   const canClean = can("datasets.delete");
   const previewBytes = preview?.reduce((a, p) => a + p.bytes, 0) ?? 0;

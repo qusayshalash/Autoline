@@ -19,13 +19,14 @@ import {
   formatDateTime,
   formatRelative,
 } from "../../components/admin/AdminUI";
+import QueryState from "../../components/QueryState";
 import LoadingState from "../../components/LoadingState";
 import ActivityRow from "./ActivityRow";
 
 export default function OverviewPage() {
   const { t } = useTranslation();
 
-  const { data: overview, isLoading } = useQuery({
+  const { data: overview, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["admin-overview"],
     queryFn: fetchOverview,
     refetchInterval: 30_000,
@@ -41,7 +42,11 @@ export default function OverviewPage() {
     refetchInterval: 30_000,
   });
 
-  if (isLoading || !overview) return <LoadingState />;
+  // isError has to be checked explicitly: on failure isLoading goes false while
+  // overview stays undefined, and a "!overview" guard alone shows the spinner forever
+  if (isLoading || isError || !overview) {
+    return <QueryState loading={isLoading} error={isError ? error : null} onRetry={refetch} />;
+  }
 
   const inactive = overview.users_total - overview.users_active;
   const activeShare =

@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { fetchActivity, fetchUsers } from "../../api/admin";
 import { IconActivity } from "../../components/admin/AdminIcons";
 import { AdminPanel } from "../../components/admin/AdminUI";
-import LoadingState from "../../components/LoadingState";
+import QueryState from "../../components/QueryState";
 import ActivityRow from "./ActivityRow";
 
 const PAGE_SIZE = 50;
@@ -35,7 +35,7 @@ export default function ActivityPage() {
   const [page, setPage] = useState(0);
 
   const { data: users } = useQuery({ queryKey: ["admin-users"], queryFn: fetchUsers });
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["admin-activity", "page", action, actor, page],
     queryFn: () =>
       fetchActivity({ limit: PAGE_SIZE, offset: page * PAGE_SIZE, action: action || null, actor_id: actor || null }),
@@ -81,8 +81,8 @@ export default function ActivityPage() {
           </div>
         }
       >
-        {isLoading ? (
-          <LoadingState />
+        {isLoading || isError ? (
+          <QueryState loading={isLoading} error={isError ? error : null} onRetry={refetch} />
         ) : data && data.items.length > 0 ? (
           <>
             <ul className="activity-list">

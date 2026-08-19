@@ -266,3 +266,118 @@ def test_deleting_a_backup_removes_it(admin, dataset):
 
     assert admin.delete(f"/api/admin/backups/{name}").status_code == 200
     assert admin.get("/api/admin/backups").json() == []
+
+
+# ---- the schedule ------------------------------------------------------------------
+
+
+class _Settings(dict):
+    def get(self, key, default=None):
+        return dict.get(self, key, default)
+
+    def set(self, key, value):
+        self[key] = value
+
+
+def test_no_schedule_means_nothing_runs_by_itself(dataset):
+    """Off until switched on. Gigabytes of unrequested disk work is not a decision a
+    piece of housekeeping should make the first time it runs."""
+    s = _Settings()
+    assert backup.interval_hours(s.get) == 0
+    assert backup.is_due(s.get) is False
+    assert backup.run_if_due(s.get) is None
+    assert backup.list_all() == []
+
+
+def test_the_first_scheduled_run_happens_immediately(dataset):
+    """With a schedule set and no backup yet, one is overdue by definition."""
+    s = _Settings()
+    backup.set_interval_hours(s.set, 24)
+    assert backup.is_due(s.get) is True
+
+    manifest = backup.run_if_due(s.get)
+    assert manifest is not None
+    assert manifest["verified"]
+
+
+def test_a_recent_backup_is_not_repeated(dataset):
+    s = _Settings()
+    backup.set_interval_hours(s.set, 24)
+    backup.run_if_due(s.get)
+
+    assert backup.is_due(s.get) is False
+    assert backup.run_if_due(s.get) is None, "a backup taken seconds ago is not overdue"
+    assert len(backup.list_all()) == 1
+
+
+def test_an_overdue_backup_runs_again(dataset, monkeypatch):
+    """The schedule is a floor, not a clock: what matters is the age of the newest
+    verified backup, so a machine that was switched off catches up rather than
+    silently missing its window."""
+    s = _Settings()
+    backup.set_interval_hours(s.set, 24)
+    backup.run_if_due(s.get)
+
+    monkeypatch.setattr(backup, "hours_since_last_verified", lambda: 25.0)
+    assert backup.is_due(s.get) is True
+    assert backup.run_if_due(s.get) is not None
+
+
+def test_an_unverified_backup_does_not_count_as_recent(dataset, monkeypatch):
+    """Otherwise a run that failed verification would satisfy the schedule, and the
+    system would sit for a day believing it was protected."""
+    import json
+
+    s = _Settings()
+    backup.set_interval_hours(s.set, 24)
+    manifest = backup.run_if_due(s.get)
+
+    path = backup.backups_root() / manifest["name"] / "manifest.json"
+    data = json.loads(path.read_text(encoding="utf-8"))
+    data["verified"] = False
+    path.write_text(json.dumps(data), encoding="utf-8")
+
+    assert backup.hours_since_last_verified() is None
+    assert backup.is_due(s.get) is True
+
+
+def test_the_summary_reports_staleness(dataset):
+    s = _Settings()
+    before = backup.summary(s.get)
+    assert before["stale"] is True, "never backed up is the stalest state there is"
+    assert before["hours_since_last"] is None
+
+    backup.set_interval_hours(s.set, 24)
+    backup.run_if_due(s.get)
+
+    after = backup.summary(s.get)
+    assert after["stale"] is False
+    assert after["interval_hours"] == 24
+    assert after["hours_since_last"] < 1
+
+
+def test_staleness_has_a_default_even_with_no_schedule(dataset, monkeypatch):
+    """Without a schedule there is still a point at which "last backed up months ago"
+    should be said out loud."""
+    s = _Settings()
+    backup.run()
+    monkeypatch.setattr(backup, "hours_since_last_verified", lambda: backup.STALE_AFTER_HOURS + 1)
+    assert backup.summary(s.get)["stale"] is True
+
+
+def test_an_admin_can_set_and_clear_the_schedule(admin, dataset):
+    r = admin.patch("/api/admin/backups/schedule", json={"hours": 24})
+    assert r.status_code == 200, r.text
+    assert r.json()["interval_hours"] == 24
+
+    r = admin.patch("/api/admin/backups/schedule", json={"hours": 0})
+    assert r.json()["interval_hours"] == 0
+
+
+def test_a_viewer_cannot_change_the_schedule(viewer):
+    assert viewer.patch("/api/admin/backups/schedule", json={"hours": 24}).status_code == 403
+
+
+def test_an_absurd_interval_is_refused(admin):
+    assert admin.patch("/api/admin/backups/schedule", json={"hours": -1}).status_code == 422
+    assert admin.patch("/api/admin/backups/schedule", json={"hours": 99999}).status_code == 422

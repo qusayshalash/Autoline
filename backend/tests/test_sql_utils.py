@@ -152,10 +152,33 @@ def test_multiple_filters_are_conjoined_in_order():
     assert params == ["kia", "2020"]
 
 
-def test_search_spans_every_column_as_one_string():
+def test_search_asks_each_column_separately():
+    """One comparison per column, not one against all of them concatenated.
+
+    Concatenating first means building a string for every row before anything can be
+    ruled out - a full second per search on four million rows, whatever was typed. An OR
+    chain stops at the first column that matches.
+    """
     sql, params = sql_utils.build_search_sql("kia", ["tozeret_nm", "sug_delek_nm"])
-    assert sql == 'concat_ws(\' \', "tozeret_nm", "sug_delek_nm") ILIKE ?'
-    assert params == ["%kia%"]
+    assert sql.count("ILIKE") == 2
+    assert "concat_ws" not in sql
+    assert sql.startswith("(") and sql.endswith(")")
+    assert params == ["%kia%", "%kia%"]
+
+
+def test_search_escapes_wildcards_in_the_term():
+    """Searching for a literal percent sign must not return the whole file - which is
+    what the concatenated version did, because it never escaped the term."""
+    _, params = sql_utils.build_search_sql("50%", ["a"])
+    assert params == ["%50" + BS + "%%"]
+
+
+def test_search_over_no_columns_matches_nothing():
+    """An empty OR chain is a syntax error; the honest answer is that a row with no
+    columns cannot contain the text."""
+    sql, params = sql_utils.build_search_sql("kia", [])
+    assert sql == "FALSE"
+    assert params == []
 
 
 def test_order_by_rejects_an_unknown_column():

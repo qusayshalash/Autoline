@@ -222,7 +222,8 @@
     "hide_password": "Hide",
     "error_generic": "An unexpected error occurred, please try again",
     "error_loading_data": "Could not load data",
-    "delete": "Delete"
+    "delete": "Delete",
+    "retry": "Try again"
   },
   "theme": {
     "label": "Theme",
@@ -296,7 +297,8 @@
       "backup.started": "Backup started",
       "backup.deleted": "Backup deleted",
       "backup.pruned": "Backups pruned",
-      "dataset.compaction_started": "Compaction started"
+      "dataset.compaction_started": "Compaction started",
+      "backup.schedule_changed": "Backup schedule changed"
     },
     "time": {
       "just_now": "just now",
@@ -485,7 +487,16 @@
         "dataset": "Database",
         "key": "Session key",
         "original": "Original file"
-      }
+      },
+      "schedule": "Automatic backups",
+      "schedule_hint": "Checked every half hour: if the newest verified backup is older than the chosen interval, one is taken. A machine that was switched off does not miss its window - it backs up as soon as it returns.",
+      "schedule_off": "Off",
+      "schedule_daily": "Daily",
+      "schedule_2days": "Every 2 days",
+      "schedule_weekly": "Weekly",
+      "stale_never": "No backup has ever been taken",
+      "stale_since": "Last backup {{hours}}h ago",
+      "fresh_since": "Last backup {{hours}}h ago"
     },
     "lockouts": {
       "title": "Temporarily locked",

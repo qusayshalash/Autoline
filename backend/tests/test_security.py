@@ -135,3 +135,63 @@ def test_the_secret_is_stable_across_calls():
     token = security.create_access_token("user-1", "amal", "admin")
     time.sleep(0.01)
     assert security.decode_access_token(token) is not None
+
+
+# ---- bootstrap ---------------------------------------------------------------------
+
+
+def test_the_bootstrap_password_is_generated_not_defaulted(monkeypatch, capsys):
+    """A literal default is the same password on every installation of this software,
+    and once the source is public it is a published credential. Two runs must not be
+    able to produce the same one.
+    """
+    import app.services.security as sec
+
+    monkeypatch.delenv("ADMIN_PASSWORD", raising=False)
+    seen = []
+
+    def fake_create_user(user_id, username, password_hash, role, **kwargs):
+        seen.append(password_hash)
+
+    monkeypatch.setattr(sec.catalog, "count_users", lambda: 0)
+    monkeypatch.setattr(sec.catalog, "create_user", fake_create_user)
+
+    sec.bootstrap_admin()
+    first = capsys.readouterr().out
+    sec.bootstrap_admin()
+    second = capsys.readouterr().out
+
+    assert "admin123" not in first
+    assert len(seen) == 2
+    assert seen[0] != seen[1], "two installations must not share a password"
+    assert first != second
+
+
+def test_an_explicit_password_is_honoured(monkeypatch, capsys):
+    """Set ADMIN_PASSWORD and it is used - and not echoed back to the log, which would
+    put it in whatever collects that output."""
+    import app.services.security as sec
+
+    monkeypatch.setenv("ADMIN_PASSWORD", "chosen-by-the-operator")
+    stored = []
+    monkeypatch.setattr(sec.catalog, "count_users", lambda: 0)
+    monkeypatch.setattr(
+        sec.catalog, "create_user",
+        lambda user_id, username, password_hash, role, **kw: stored.append(password_hash),
+    )
+
+    sec.bootstrap_admin()
+    out = capsys.readouterr().out
+
+    assert sec.verify_password("chosen-by-the-operator", stored[0])
+    assert "chosen-by-the-operator" not in out
+
+
+def test_bootstrap_does_nothing_when_an_account_exists(monkeypatch):
+    import app.services.security as sec
+
+    called = []
+    monkeypatch.setattr(sec.catalog, "count_users", lambda: 3)
+    monkeypatch.setattr(sec.catalog, "create_user", lambda *a, **k: called.append(1))
+    sec.bootstrap_admin()
+    assert called == []

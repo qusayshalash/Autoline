@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { createUser, deleteUser, listUsers, updateUser, type Role, type User } from "../api/client";
-import LoadingState from "../components/LoadingState";
+import QueryState from "../components/QueryState";
 import PasswordField from "../components/PasswordField";
 
 const ROLES: Role[] = ["admin", "editor", "viewer"];
@@ -86,7 +86,13 @@ export default function UsersPage() {
   const { t } = useTranslation();
   const qc = useQueryClient();
 
-  const { data: users, isLoading } = useQuery({ queryKey: ["users"], queryFn: listUsers });
+  const {
+    data: users,
+    isLoading,
+    isError: loadFailed,
+    error: loadError,
+    refetch,
+  } = useQuery({ queryKey: ["users"], queryFn: listUsers });
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -152,8 +158,12 @@ export default function UsersPage() {
         {formError && <p style={{ color: "var(--danger)" }}>{formError}</p>}
       </div>
 
-      {isLoading ? (
-        <LoadingState />
+      {isLoading || loadFailed ? (
+        <QueryState
+          loading={isLoading}
+          error={loadFailed ? loadError : null}
+          onRetry={refetch}
+        />
       ) : (
         <div className="table-scroll">
           <table>

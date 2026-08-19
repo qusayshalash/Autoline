@@ -1,3 +1,6 @@
+import threading
+import time
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -16,6 +19,7 @@ from app.routers import (
     statistics,
     users,
 )
+from app.services import backup as backup_service
 from app.services import storage
 from app.services.security import bootstrap_admin
 
@@ -71,6 +75,12 @@ def on_startup() -> None:
     except Exception as exc:  # noqa: BLE001 - never block startup over housekeeping
         print(f"[startup] export sweep failed: {exc}")
 
+    # The backup schedule is a floor, not a clock: it asks whether the newest verified
+    # backup is older than the interval. A machine that was switched off does not miss
+    # its window - it takes one as soon as it comes back, which is what somebody
+    # returning after a week actually wants.
+    _start_backup_schedule()
+
 
 app.include_router(auth.router)
 app.include_router(users.router)
@@ -87,3 +97,34 @@ app.include_router(export.router)
 @app.get("/api/health")
 def health() -> dict:
     return {"status": "ok"}
+
+
+# ---- backup schedule --------------------------------------------------------
+
+# How often the schedule is re-examined. Not how often a backup is taken - that is the
+# configured interval. Checking is a directory listing, so it can be cheap and frequent
+# without the check itself being the thing that costs anything.
+_SCHEDULE_CHECK_SECONDS = 60 * 30
+
+
+def _backup_if_due() -> None:
+    try:
+        manifest = backup_service.run_if_due(admin_db.get_setting)
+        if manifest is None:
+            return
+        if manifest["verified"]:
+            print(f"[backup] scheduled backup {manifest['name']} verified")
+        else:
+            print(f"[backup] scheduled backup {manifest['name']} FAILED: {manifest['errors']}")
+    except Exception as exc:  # noqa: BLE001 - a failed backup must not stop the server
+        print(f"[backup] scheduled backup failed: {exc}")
+
+
+def _start_backup_schedule() -> None:
+    def loop() -> None:
+        while True:
+            _backup_if_due()
+            time.sleep(_SCHEDULE_CHECK_SECONDS)
+
+    # a daemon thread: the schedule must never be the reason the process refuses to exit
+    threading.Thread(target=loop, name="backup-schedule", daemon=True).start()

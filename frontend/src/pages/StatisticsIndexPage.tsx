@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Link, Navigate } from "react-router-dom";
 
 import { listDatasets } from "../api/client";
+import QueryState from "../components/QueryState";
 import { IconChart } from "../components/stats/StatsIcons";
 
 /**
@@ -13,12 +14,14 @@ import { IconChart } from "../components/stats/StatsIcons";
  */
 export default function StatisticsIndexPage() {
   const { t, i18n } = useTranslation();
-  const { data: datasets, isLoading } = useQuery({
+  const { data: datasets, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["datasets"],
     queryFn: listDatasets,
   });
 
-  if (isLoading) return <p className="muted">{t("common.loading")}</p>;
+  if (isLoading || isError) {
+    return <QueryState loading={isLoading} error={isError ? error : null} onRetry={refetch} />;
+  }
 
   const ready = (datasets ?? []).filter((d) => d.status === "ready");
   if (ready.length === 1) return <Navigate to={`/statistics/${ready[0].id}`} replace />;

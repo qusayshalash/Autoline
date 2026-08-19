@@ -129,6 +129,7 @@ function GroupNode(props: NodeProps) {
   });
 
   const busy = open && (subQuery.isFetching || rowQuery.isFetching);
+  const failed = open && (subQuery.isError || rowQuery.isError);
   const colSpan = visibleColumns.length;
 
   return (
@@ -164,6 +165,11 @@ function GroupNode(props: NodeProps) {
         </td>
         <td className="group-summary" colSpan={colSpan}>
           {busy && <span className="muted">{t("common.loading")}</span>}
+          {/* an expanded group whose request failed would otherwise sit open and empty,
+              which reads as "this group contains nothing" */}
+          {!busy && failed && (
+            <span className="group-failed">{t("common.error_loading_data")}</span>
+          )}
         </td>
       </tr>
 
