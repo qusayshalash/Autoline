@@ -115,7 +115,8 @@ def _build_where(q: StatisticsQuery | PivotQuery, columns: list[str]) -> tuple[s
     clauses: list[str] = []
     params: list[Any] = []
     if q.search:
-        s_sql, s_params = sql_utils.build_search_sql(q.search, columns)
+        looked_in = sql_utils.resolve_search_columns(q.search_columns, columns)
+        s_sql, s_params = sql_utils.build_search_sql(q.search, looked_in)
         clauses.append(s_sql)
         params.extend(s_params)
     if q.filters:

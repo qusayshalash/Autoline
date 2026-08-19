@@ -2634,3 +2634,63 @@ body.is-resizing-column {
   .profile-layout { grid-template-columns: 1fr; }
   .profile-detail { position: static; }
 }
+
+/* ---- search scope -----------------------------------------------------------
+ *
+ * The label states what the search is currently costing rather than hiding it. When it
+ * has been narrowed the control takes the accent colour, because "this search is not
+ * looking everywhere" is something you need to see without going looking for it -
+ * otherwise a search that finds nothing looks like data that is not there.
+ */
+.search-scope {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.search-scope:hover { border-color: var(--border); color: var(--text); }
+
+.search-scope.is-narrowed {
+  color: var(--primary);
+  border-color: color-mix(in srgb, var(--primary) 40%, transparent);
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+}
+
+.search-scope-popover {
+  z-index: 60;
+  width: 260px;
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius, 10px);
+  box-shadow: 0 12px 32px -12px rgba(0, 0, 0, 0.35);
+  padding: 0.6rem;
+}
+
+.search-scope-note {
+  margin: 0 0 0.5rem;
+  font-size: 0.76rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.search-scope-actions { margin-bottom: 0.4rem; }
+
+.search-scope-popover ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.1rem; }
+
+.search-scope-popover label {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.28rem 0.3rem;
+  border-radius: 5px;
+  font-size: 0.84rem;
+  cursor: pointer;
+}
+
+.search-scope-popover label:hover { background: color-mix(in srgb, var(--primary) 8%, transparent); }

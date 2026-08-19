@@ -101,6 +101,32 @@ def build_filter_sql(filters: list[FilterRule], valid_columns: set[str]) -> tupl
     return (" AND ".join(clauses), params)
 
 
+def resolve_search_columns(
+    requested: list[str] | None, columns: list[str]
+) -> list[str]:
+    """Which columns a free-text search should look in.
+
+    Nothing requested means every column, which is what the search did before it could
+    be narrowed and what somebody expects the first time they type into it. The cost of
+    that default is real - each column is another pass over every row - but the cost of
+    the alternative is worse: a search that quietly declines to look somewhere is a
+    search that returns nothing and gives no reason.
+
+    An empty list is treated the same as nothing requested, rather than as "look
+    nowhere". Unchecking every box in a picker is how somebody clears it, not how they
+    ask for no results.
+    """
+    if not requested:
+        return columns
+    unknown = [c for c in requested if c not in columns]
+    if unknown:
+        raise ValueError(f"Unknown column(s): {', '.join(unknown)}")
+    # kept in table order rather than the order they were requested in, so the generated
+    # SQL is stable and two identical searches produce the same query text
+    chosen = set(requested)
+    return [c for c in columns if c in chosen]
+
+
 def build_search_sql(search: str, columns: list[str]) -> tuple[str, list[Any]]:
     """Free-text search: does any column of this row contain the text?
 

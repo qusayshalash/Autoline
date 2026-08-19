@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom";
 
@@ -31,6 +31,7 @@ import GroupDialog from "../components/GroupDialog";
 import GroupedGrid from "../components/GroupedGrid";
 import LoadingState from "../components/LoadingState";
 import Pager from "../components/Pager";
+import SearchScope from "../components/SearchScope";
 import StatsPanel from "../components/StatsPanel";
 import {
   IconClock,
@@ -72,6 +73,25 @@ export default function ExplorerPage() {
 
   const [source, setSource] = useState<"raw" | "cleaned">("cleaned");
   const [search, setSearch] = useState("");
+  // Which columns the search looks in; empty means all of them. Remembered per dataset
+  // because it is a statement about this file's columns, and re-narrowing it on every
+  // visit would be the kind of chore that stops people using it at all.
+  const [searchColumns, setSearchColumns] = useState<string[]>(() => {
+    try {
+      const raw = localStorage.getItem(`search-columns:${datasetId}`);
+      return raw ? (JSON.parse(raw) as string[]) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(`search-columns:${datasetId}`, JSON.stringify(searchColumns));
+    } catch {
+      // a browser refusing storage is not a reason to stop working
+    }
+  }, [datasetId, searchColumns]);
   const [filters, setFilters] = useState<FilterRule[]>([]);
   const [sortBy, setSortBy] = useState<string | null>(null);
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
@@ -115,7 +135,7 @@ export default function ExplorerPage() {
 
   // top level of the group tree; the pager drives its paging just like rows
   const { data: groupPage, isFetching: groupsFetching } = useQuery({
-    queryKey: ["group", datasetId, source, groupBy[0], filters, search, page, pageSize],
+    queryKey: ["group", datasetId, source, groupBy[0], filters, search, searchColumns, page, pageSize],
     queryFn: () =>
       fetchGroups(datasetId, {
         column: groupBy[0],
@@ -123,6 +143,7 @@ export default function ExplorerPage() {
         page_size: pageSize,
         filters,
         search: search || null,
+        search_columns: searchColumns,
         source,
       }),
     enabled: isGrouped,
@@ -134,7 +155,7 @@ export default function ExplorerPage() {
     isFetching,
     error: dataError,
   } = useQuery({
-    queryKey: ["data", datasetId, source, search, filters, sortBy, sortDir, page, pageSize],
+    queryKey: ["data", datasetId, source, search, searchColumns, filters, sortBy, sortDir, page, pageSize],
     queryFn: () =>
       fetchData(datasetId, {
         page,
@@ -142,6 +163,7 @@ export default function ExplorerPage() {
         sort_by: sortBy,
         sort_dir: sortDir,
         search: search || null,
+        search_columns: searchColumns,
         filters,
         source,
       }),
@@ -157,6 +179,7 @@ export default function ExplorerPage() {
         scope: exportScope,
         source,
         search: exportScope === "current_view" ? search || null : null,
+        search_columns: exportScope === "current_view" ? searchColumns : undefined,
         filters: exportScope === "current_view" ? filters : [],
         sort_by: exportScope === "current_view" ? sortBy : null,
         sort_dir: sortDir,
@@ -471,6 +494,15 @@ export default function ExplorerPage() {
           value={search}
           onChange={(e) => {
             setSearch(e.target.value);
+            setPage(1);
+          }}
+        />
+
+        <SearchScope
+          columns={allColumns}
+          selected={searchColumns}
+          onChange={(next) => {
+            setSearchColumns(next);
             setPage(1);
           }}
         />

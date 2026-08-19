@@ -31,7 +31,8 @@ def build_export_query(dataset_id: str, req: ExportRequest) -> tuple[str, list, 
 
     if req.scope == "current_view":
         if req.search:
-            s_sql, s_params = sql_utils.build_search_sql(req.search, columns)
+            looked_in = sql_utils.resolve_search_columns(req.search_columns, columns)
+            s_sql, s_params = sql_utils.build_search_sql(req.search, looked_in)
             where_clauses.append(s_sql)
             params.extend(s_params)
         if req.filters:

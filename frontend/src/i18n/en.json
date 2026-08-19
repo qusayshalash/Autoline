@@ -200,7 +200,10 @@
     "export_scope_view": "Current view only",
     "exporting": "Exporting...",
     "download": "Download",
-    "no_data": "No data"
+    "no_data": "No data",
+    "search_scope": "searching {{count}} of {{total}} columns",
+    "search_scope_hint": "Every extra column is another pass over every row. Narrowing the search to the columns you actually search by makes it many times faster - and columns left unticked are not searched at all.",
+    "search_scope_all": "All columns"
   },
   "stats": {
     "title": "Statistics",

@@ -33,7 +33,10 @@ _MAX_CATEGORY_VALUES = 12
 
 
 def _build_where(
-    search: str | None, filters: list, columns: list[str]
+    search: str | None,
+    filters: list,
+    columns: list[str],
+    search_columns: list[str] | None = None,
 ) -> tuple[str, list]:
     """Shared WHERE builder for the row, group and count queries.
 
@@ -44,7 +47,8 @@ def _build_where(
     params: list = []
 
     if search:
-        s_sql, s_params = sql_utils.build_search_sql(search, columns)
+        looked_in = sql_utils.resolve_search_columns(search_columns, columns)
+        s_sql, s_params = sql_utils.build_search_sql(search, looked_in)
         clauses.append(s_sql)
         params.extend(s_params)
 
@@ -63,7 +67,7 @@ def fetch_page(dataset_id: str, q: DataQuery) -> DataPage:
     columns = sql_utils.table_columns(dataset_id, table)
     valid = set(columns)
 
-    where_sql, params = _build_where(q.search, q.filters, columns)
+    where_sql, params = _build_where(q.search, q.filters, columns, q.search_columns)
     table_sql = sql_utils.quote_ident(table)
 
     started = time.perf_counter()
@@ -115,7 +119,7 @@ def fetch_groups(dataset_id: str, q: GroupQuery) -> GroupPage:
     if q.column not in columns:
         raise ValueError(f"Unknown column: {q.column}")
 
-    where_sql, params = _build_where(q.search, q.filters, columns)
+    where_sql, params = _build_where(q.search, q.filters, columns, q.search_columns)
     table_sql = sql_utils.quote_ident(table)
     col_sql = sql_utils.quote_ident(q.column)
     where_clause = f" WHERE {where_sql}" if where_sql else ""

@@ -198,3 +198,20 @@ def test_a_column_whose_name_contains_a_quote_survives_every_builder():
     )
     assert sql == '"weird""name" = ?'
     assert sql_utils.build_order_sql('weird"name', "asc", VALID) == '"weird""name" ASC'
+
+
+def test_resolve_search_columns_defaults_to_all():
+    columns = ["a", "b", "c"]
+    assert sql_utils.resolve_search_columns(None, columns) == columns
+    assert sql_utils.resolve_search_columns([], columns) == columns
+
+
+def test_resolve_search_columns_keeps_table_order():
+    """Stable SQL text: two identical searches should produce the same query however the
+    picker happened to order its checkboxes."""
+    assert sql_utils.resolve_search_columns(["c", "a"], ["a", "b", "c"]) == ["a", "c"]
+
+
+def test_resolve_search_columns_rejects_an_unknown_name():
+    with pytest.raises(ValueError, match="Unknown column"):
+        sql_utils.resolve_search_columns(["nope"], ["a", "b"])

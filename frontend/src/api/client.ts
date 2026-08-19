@@ -274,6 +274,8 @@ export async function fetchData(
     sort_by?: string | null;
     sort_dir?: "asc" | "desc";
     search?: string | null;
+    /** which columns the search looks in; omitted or empty means all of them */
+    search_columns?: string[];
     filters?: FilterRule[];
     source?: "raw" | "cleaned";
   }
@@ -287,6 +289,7 @@ export async function fetchData(
     sort_by: params.sort_by ?? null,
     sort_dir: params.sort_dir ?? "asc",
     search: params.search ?? null,
+    search_columns: params.search_columns ?? [],
     filters: params.filters ?? [],
     source: params.source ?? "cleaned",
   });
@@ -316,6 +319,7 @@ export async function fetchGroups(
     page?: number;
     page_size?: number;
     search?: string | null;
+    search_columns?: string[];
     filters?: FilterRule[];
     source?: "raw" | "cleaned";
   }
@@ -325,6 +329,7 @@ export async function fetchGroups(
     page: params.page ?? 1,
     page_size: params.page_size ?? 100,
     search: params.search ?? null,
+    search_columns: params.search_columns ?? [],
     filters: params.filters ?? [],
     source: params.source ?? "cleaned",
   });
@@ -386,6 +391,7 @@ export interface ExportRequest {
   scope: "all" | "current_view";
   source: "raw" | "cleaned";
   search?: string | null;
+  search_columns?: string[];
   filters?: FilterRule[];
   sort_by?: string | null;
   sort_dir?: "asc" | "desc";

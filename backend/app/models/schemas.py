@@ -521,6 +521,10 @@ class DataQuery(BaseModel):
     sort_by: Optional[str] = None
     sort_dir: Literal["asc", "desc"] = "asc"
     search: Optional[str] = None
+    # Which columns the search looks in. None or empty means all of them, which is both
+    # the old behaviour and the one that surprises nobody; narrowing it is what makes a
+    # search over a wide table fast.
+    search_columns: Optional[list[str]] = None
     filters: list[FilterRule] = []
     source: Literal["raw", "cleaned"] = "cleaned"
 
@@ -543,6 +547,7 @@ class GroupQuery(BaseModel):
     page: int = 1
     page_size: int = 100
     search: Optional[str] = None
+    search_columns: Optional[list[str]] = None
     filters: list[FilterRule] = []
     source: Literal["raw", "cleaned"] = "cleaned"
 
@@ -590,6 +595,7 @@ class StatisticsQuery(BaseModel):
     group_by: str
     filters: list[FilterRule] = []
     search: Optional[str] = None
+    search_columns: Optional[list[str]] = None
     source: Literal["raw", "cleaned"] = "cleaned"
     limit: int = Field(default=50, ge=1, le=200)
     # how ties between buckets are ordered: by popularity, or by the value itself
@@ -653,6 +659,7 @@ class PivotQuery(BaseModel):
     column_column: str
     filters: list[FilterRule] = []
     search: Optional[str] = None
+    search_columns: Optional[list[str]] = None
     source: Literal["raw", "cleaned"] = "cleaned"
     # A matrix wider than a dozen columns stops being readable, and taller than ~50 rows
     # stops being scannable; whatever falls outside is aggregated rather than dropped.
@@ -721,6 +728,7 @@ class ExportRequest(BaseModel):
     scope: Literal["all", "current_view"] = "all"
     source: Literal["raw", "cleaned"] = "cleaned"
     search: Optional[str] = None
+    search_columns: Optional[list[str]] = None
     filters: list[FilterRule] = []
     sort_by: Optional[str] = None
     sort_dir: Literal["asc", "desc"] = "asc"

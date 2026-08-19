@@ -279,3 +279,88 @@ def test_a_page_size_of_zero_returns_a_row_rather_than_an_empty_page(admin, data
     assert r.status_code == 200, r.text
     assert r.json()["page_size"] >= 1
     assert len(r.json()["rows"]) >= 1
+
+
+# ---- narrowing the search ----------------------------------------------------------
+
+
+def test_searching_named_columns_only_looks_there(admin, dataset, oracle):
+    """The point of narrowing: a term that appears in two columns, searched in one."""
+    everywhere = total(admin, dataset, source="raw", search="בנזין")
+    one_column = total(
+        admin, dataset, source="raw", search="בנזין", search_columns=["sug_delek_nm"]
+    )
+    expected = sum(1 for r in oracle if "בנזין" in r["sug_delek_nm"])
+    assert one_column == expected
+    assert everywhere >= one_column
+
+
+def test_narrowing_can_exclude_a_match(admin, dataset, oracle):
+    """Searching a column the term is not in finds nothing, even though the file
+    contains it - which is the whole behaviour being bought."""
+    found = total(admin, dataset, source="raw", search="בנזין", search_columns=["baalut"])
+    assert found == 0
+    assert total(admin, dataset, source="raw", search="בנזין") > 0
+
+
+def test_no_columns_named_still_searches_everything(admin, dataset):
+    """The default has to stay what it was. A search that quietly stopped looking
+    somewhere would return nothing and give no reason."""
+    everywhere = total(admin, dataset, source="raw", search="ליסינג")
+    assert total(admin, dataset, source="raw", search="ליסינג", search_columns=None) == everywhere
+    assert total(admin, dataset, source="raw", search="ליסינג", search_columns=[]) == everywhere
+
+
+def test_several_columns_are_combined(admin, dataset, oracle):
+    got = total(
+        admin, dataset, source="raw", search="קיה",
+        search_columns=["tozeret_nm", "ramat_gimur"],
+    )
+    expected = sum(
+        1 for r in oracle if "קיה" in r["tozeret_nm"] or "קיה" in r["ramat_gimur"]
+    )
+    assert got == expected
+
+
+def test_an_unknown_search_column_is_a_400(admin, dataset):
+    r = admin.post(
+        f"/api/datasets/{dataset}/data",
+        json={"source": "raw", "search": "x", "search_columns": ["no_such_column"]},
+    )
+    assert r.status_code == 400, r.text
+
+
+def test_the_breakdown_searches_the_same_columns_as_the_grid(admin, dataset):
+    """The statistics screen promises it describes the rows the grid would show. That
+    promise breaks if the two search different columns."""
+    narrowed = {"search": "קיה", "search_columns": ["tozeret_nm"], "source": "raw"}
+    grid = total(admin, dataset, **narrowed)
+
+    r = admin.post(
+        f"/api/datasets/{dataset}/statistics", json={"group_by": "baalut", **narrowed}
+    )
+    assert r.status_code == 200, r.text
+    assert r.json()["total"] == grid
+
+
+def test_the_pivot_searches_the_same_columns_too(admin, dataset):
+    narrowed = {"search": "קיה", "search_columns": ["tozeret_nm"], "source": "raw"}
+    grid = total(admin, dataset, **narrowed)
+
+    r = admin.post(
+        f"/api/datasets/{dataset}/pivot",
+        json={"row_column": "baalut", "column_column": "sug_delek_nm", **narrowed},
+    )
+    assert r.status_code == 200, r.text
+    assert r.json()["total"] == grid
+
+
+def test_grouping_honours_the_narrowed_search(admin, dataset):
+    narrowed = {"search": "קיה", "search_columns": ["tozeret_nm"], "source": "raw"}
+    grid = total(admin, dataset, **narrowed)
+
+    r = admin.post(
+        f"/api/datasets/{dataset}/group", json={"column": "baalut", "page_size": 100, **narrowed}
+    )
+    assert r.status_code == 200, r.text
+    assert sum(g["count"] for g in r.json()["groups"]) == grid
