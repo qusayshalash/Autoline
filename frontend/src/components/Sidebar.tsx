@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../auth/AuthContext";
+import { ADMIN_ACCESS_PERMISSIONS } from "../auth/permissionRoutes";
 import ThemeToggle from "./ThemeToggle";
 
 const COLLAPSED_KEY = "sidebar-collapsed";
@@ -75,7 +76,7 @@ function IconPanel() {
 
 export default function Sidebar() {
   const { t, i18n } = useTranslation();
-  const { user, canAny, logout } = useAuth();
+  const { user, can, canAny, logout } = useAuth();
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const inDatasets = pathname === "/" || pathname.startsWith("/datasets");
@@ -95,10 +96,11 @@ export default function Sidebar() {
     <aside className={collapsed ? "sidebar collapsed" : "sidebar"}>
       <div className="sidebar-head">
         <svg className="sidebar-logo" width="30" height="30" viewBox="0 0 32 32" aria-hidden="true">
-          <rect x="2" y="2" width="28" height="28" rx="8" fill="var(--primary)" />
-          <rect x="9" y="10" width="14" height="3" rx="1.5" fill="#fff" />
-          <rect x="9" y="15.5" width="10" height="3" rx="1.5" fill="#fff" opacity="0.85" />
-          <rect x="9" y="21" width="6" height="3" rx="1.5" fill="#fff" opacity="0.6" />
+          <rect x="2" y="2" width="28" height="28" rx="8" fill="#2468ed" />
+          <rect x="8" y="8" width="6.5" height="6.5" rx="2" fill="#fff" />
+          <rect x="17.5" y="8" width="6.5" height="6.5" rx="2" fill="#fff" opacity="0.82" />
+          <rect x="8" y="17.5" width="6.5" height="6.5" rx="2" fill="#fff" opacity="0.68" />
+          <rect x="17.5" y="17.5" width="6.5" height="6.5" rx="2" fill="#fff" opacity="0.92" />
         </svg>
         {!collapsed && <span className="sidebar-title">{t("app_title")}</span>}
       </div>
@@ -116,25 +118,23 @@ export default function Sidebar() {
       <nav className="sidebar-nav">
         {/* every dataset screen (import, cleaning, explorer) lives under Datasets, so the
             entry stays highlighted while you work inside a file */}
-        <NavLink
-          to="/"
-          title={t("nav.datasets") ?? ""}
-          className={inDatasets ? "active" : undefined}
-        >
-          <IconData />
-          {!collapsed && <span>{t("nav.datasets")}</span>}
-        </NavLink>
-        <NavLink to="/statistics" title={t("statistics.title") ?? ""}>
-          <IconChart />
-          {!collapsed && <span>{t("statistics.title")}</span>}
-        </NavLink>
-        {canAny(
-          "system.view",
-          "users.view",
-          "roles.view",
-          "languages.manage",
-          "activity.view"
-        ) && (
+        {can("datasets.view") && (
+          <>
+            <NavLink
+              to="/"
+              title={t("nav.datasets") ?? ""}
+              className={inDatasets ? "active" : undefined}
+            >
+              <IconData />
+              {!collapsed && <span>{t("nav.datasets")}</span>}
+            </NavLink>
+            <NavLink to="/statistics" title={t("statistics.title") ?? ""}>
+              <IconChart />
+              {!collapsed && <span>{t("statistics.title")}</span>}
+            </NavLink>
+          </>
+        )}
+        {canAny(...ADMIN_ACCESS_PERMISSIONS) && (
           <NavLink to="/admin" title={t("admin.title") ?? ""}>
             <IconUsers />
             {!collapsed && <span>{t("admin.title")}</span>}

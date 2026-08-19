@@ -248,7 +248,10 @@
     "error_generic": "An unexpected error occurred, please try again",
     "error_loading_data": "Could not load data",
     "delete": "Delete",
-    "retry": "Try again"
+    "retry": "Try again",
+    "access_denied": "You do not have permission to access this page.",
+    "access_denied_help": "Contact your system administrator if you need this permission.",
+    "go_to_available_area": "Go to an available page"
   },
   "theme": {
     "label": "Theme",

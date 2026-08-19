@@ -138,14 +138,15 @@
   position: relative;
   width: 108px;
   height: 38px;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0 28px 0 13px;
+  display: block;
+  flex: none;
+  padding: 0;
   border: 1px solid var(--al-border);
   border-radius: 11px;
   background: rgba(255, 255, 255, 0.94);
   color: #536688;
+  overflow: visible;
+  z-index: 20;
   transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -161,13 +162,16 @@
 }
 
 .login-page .login-globe-icon {
-  position: relative;
+  position: absolute;
   z-index: 1;
+  left: 12px;
+  top: 50%;
   width: 17px;
   height: 17px;
-  flex: none;
   border: 1.5px solid currentColor;
   border-radius: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
 }
 
 .login-page .login-globe-icon::before,
@@ -189,34 +193,138 @@
   border-radius: 0;
 }
 
-.login-page .login-language-select select {
-  position: relative;
+.login-page .login-language-label {
+  position: absolute;
   z-index: 1;
-  width: 100%;
-  min-width: 0;
-  height: 100%;
-  padding: 0;
-  border: 0;
-  outline: 0;
-  appearance: none;
-  background: transparent;
+  left: 36px;
+  right: 24px;
+  top: 50%;
+  display: block;
+  overflow: hidden;
+  transform: translateY(-50%);
   color: #536688;
   font-size: 13px;
   font-weight: 600;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.login-page .login-language-trigger {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  color: inherit;
   cursor: pointer;
+}
+
+.login-page .login-language-trigger:focus-visible {
+  outline: 2px solid #5790ef;
+  outline-offset: 2px;
 }
 
 .login-page .login-select-chevron {
   position: absolute;
-  z-index: 0;
+  z-index: 1;
   top: 50%;
-  right: 12px;
+  right: 13px;
   width: 7px;
   height: 7px;
+  margin: 0;
   border-right: 1.5px solid currentColor;
   border-bottom: 1.5px solid currentColor;
   transform: translateY(-65%) rotate(45deg);
   pointer-events: none;
+}
+
+.login-page .login-language-select.is-open {
+  border-color: #5790ef;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.09);
+}
+
+.login-page .login-language-select.is-open .login-select-chevron {
+  transform: translateY(-35%) rotate(225deg);
+}
+
+.login-page .login-language-menu {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 148px;
+  display: grid;
+  gap: 3px;
+  padding: 6px;
+  border: 1px solid #dbe7f6;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 14px 30px rgba(31, 64, 118, 0.16), 0 3px 8px rgba(31, 64, 118, 0.08);
+  animation: login-language-menu-enter 0.16s ease-out both;
+}
+
+.login-page .login-language-option {
+  position: relative;
+  width: 100%;
+  min-height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 28px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #526482;
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1;
+  direction: ltr;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.16s ease, color 0.16s ease;
+}
+
+.login-page .login-language-option > span {
+  display: block;
+  width: 100%;
+  text-align: center;
+}
+
+.login-page .login-language-option::after {
+  content: "";
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  flex: 0 0 7px;
+  border: 1.5px solid #b7c8df;
+  border-radius: 50%;
+  transform: translateY(-50%);
+}
+
+.login-page .login-language-option:hover,
+.login-page .login-language-option:focus-visible {
+  outline: none;
+  background: #f1f6ff;
+  color: #155fdf;
+}
+
+.login-page .login-language-option[aria-checked="true"] {
+  background: #edf4ff;
+  color: #155fdf;
+}
+
+.login-page .login-language-option[aria-checked="true"]::after {
+  border-color: #2f7af5;
+  background: #2f7af5;
+  box-shadow: 0 0 0 3px rgba(47, 122, 245, 0.14);
 }
 
 .login-page .theme-toggle-compact {
@@ -728,10 +836,6 @@
   color: #b7c6df;
 }
 
-:root[data-theme="dark"] .login-page .login-language-select select {
-  color: #d8e5f8;
-}
-
 :root[data-theme="dark"] .login-page .login-text-control {
   border-color: #2b405f;
   background: #111f36;
@@ -834,9 +938,7 @@
   }
 
   .login-page .login-language-select {
-    width: 90px;
-    padding-left: 9px;
-    padding-right: 24px;
+    width: 104px;
   }
 
   .login-page .login-topbar-controls {
@@ -863,10 +965,10 @@
   }
 
   .login-page .login-language-select {
-    width: 82px;
+    width: 100px;
   }
 
-  .login-page .login-language-select select {
+  .login-page .login-language-label {
     font-size: 12px;
   }
 
@@ -884,91 +986,6 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
   }
-}
-
-/* Keep the language control's globe, label, and chevron in distinct columns. */
-.login-page .login-language-select {
-  display: grid;
-  grid-template-columns: 17px minmax(0, 1fr) 9px;
-  column-gap: 7px;
-  padding: 0 11px;
-}
-
-.login-page .login-globe-icon {
-  grid-column: 1;
-  justify-self: center;
-}
-
-.login-page .login-language-select select {
-  grid-column: 2;
-  width: 100%;
-  min-width: 0;
-  text-align: center;
-  text-align-last: center;
-}
-
-.login-page .login-select-chevron {
-  position: static;
-  grid-column: 3;
-  justify-self: center;
-  align-self: center;
-  margin-top: -3px;
-  transform: rotate(45deg);
-}
-
-/* The native select remains fully interactive but no longer paints its own
-   label; this guarantees the visible layout cannot overlap on any browser. */
-.login-page .login-language-select {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 0 12px;
-}
-
-.login-page .login-globe-icon {
-  position: relative;
-  grid-column: auto;
-  flex: 0 0 17px;
-}
-
-.login-page .login-language-label {
-  min-width: 0;
-  flex: 1;
-  overflow: hidden;
-  color: #536688;
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1;
-  text-align: center;
-  white-space: nowrap;
-}
-
-.login-page .login-select-chevron {
-  position: relative;
-  top: auto;
-  right: auto;
-  grid-column: auto;
-  flex: 0 0 7px;
-  justify-self: auto;
-  align-self: auto;
-  margin-top: -3px;
-  transform: rotate(45deg);
-}
-
-.login-page .login-language-select .login-language-native {
-  position: absolute;
-  z-index: 5;
-  inset: 0;
-  display: block;
-  width: 100%;
-  min-width: 0;
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  opacity: 0;
-  cursor: pointer;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -1189,9 +1206,15 @@
 .login-page .lv-card-table th {
   padding: 0 8px 7px 0;
   border-bottom: 1px solid rgba(120, 178, 255, 0.22);
+  background: transparent;
   color: #74a6e0;
+  position: static;
+  top: auto;
+  user-select: auto;
   font-weight: 700;
-  text-align: left;
+  /* Match the data cells: in Arabic/Hebrew both align at the right edge of
+     their shared column; in English both align at the left edge. */
+  text-align: start;
   white-space: nowrap;
 }
 
@@ -1205,6 +1228,13 @@
 
 .login-page .lv-card-table tr:last-child td {
   border-bottom: 0;
+}
+
+/* The data workspace styles ordinary tables with light header and zebra rows.
+   This miniature table is part of the dark illustration, so it must stay transparent. */
+.login-page .lv-card-table tbody tr:nth-child(even),
+.login-page .lv-card-table tbody tr:hover {
+  background: transparent;
 }
 
 /* Front: the answer. Nearest, brightest, fully opaque. */
@@ -1322,104 +1352,6 @@
   }
 }
 
-/* Custom language menu — keeps the list inside the same visual system as the
-   rest of the sign-in page instead of showing the browser's default menu. */
-.login-page .login-language-select {
-  overflow: visible;
-  z-index: 20;
-}
-
-.login-page .login-language-trigger {
-  position: relative;
-  display: block;
-  width: 100%;
-  height: 100%;
-  padding: 0;
-  border: 0;
-  border-radius: inherit;
-  background: transparent;
-  color: inherit;
-  cursor: pointer;
-}
-
-.login-page .login-language-trigger:focus-visible {
-  outline: 2px solid #5790ef;
-  outline-offset: 2px;
-}
-
-.login-page .login-language-select.is-open {
-  border-color: #5790ef;
-  background: #fff;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.09);
-}
-
-.login-page .login-language-select.is-open .login-select-chevron {
-  transform: translateY(-35%) rotate(225deg);
-}
-
-.login-page .login-language-menu {
-  position: absolute;
-  z-index: 30;
-  top: calc(100% + 8px);
-  right: 0;
-  width: 148px;
-  display: grid;
-  gap: 3px;
-  padding: 6px;
-  border: 1px solid #dbe7f6;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.98);
-  box-shadow: 0 14px 30px rgba(31, 64, 118, 0.16), 0 3px 8px rgba(31, 64, 118, 0.08);
-  animation: login-language-menu-enter 0.16s ease-out both;
-}
-
-.login-page .login-language-option {
-  width: 100%;
-  min-height: 35px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 0 10px;
-  border: 0;
-  border-radius: 9px;
-  background: transparent;
-  color: #526482;
-  font-size: 13px;
-  font-weight: 650;
-  line-height: 1;
-  text-align: start;
-  cursor: pointer;
-  transition: background 0.16s ease, color 0.16s ease;
-}
-
-.login-page .login-language-option::after {
-  content: "";
-  width: 7px;
-  height: 7px;
-  flex: 0 0 7px;
-  border: 1.5px solid #b7c8df;
-  border-radius: 50%;
-}
-
-.login-page .login-language-option:hover,
-.login-page .login-language-option:focus-visible {
-  outline: none;
-  background: #f1f6ff;
-  color: #155fdf;
-}
-
-.login-page .login-language-option[aria-checked="true"] {
-  background: #edf4ff;
-  color: #155fdf;
-}
-
-.login-page .login-language-option[aria-checked="true"]::after {
-  border-color: #2f7af5;
-  background: #2f7af5;
-  box-shadow: 0 0 0 3px rgba(47, 122, 245, 0.14);
-}
-
 :root[data-theme="dark"] .login-page .login-language-select.is-open {
   border-color: #4e87e6;
   background: #122039;
@@ -1453,73 +1385,6 @@
     opacity: 1;
     transform: translateY(0) scale(1);
   }
-}
-
-/* Keep the visible language label independent of the native select.  Older
-   login styles used flex/grid rules here, which allowed the Arabic text to
-   drift over the globe in some browsers. */
-.login-page .login-language-select {
-  position: relative;
-  display: block;
-  width: 108px;
-  height: 38px;
-  padding: 0;
-}
-
-.login-page .login-language-select .login-globe-icon {
-  position: absolute;
-  z-index: 1;
-  left: 12px;
-  top: 50%;
-  width: 17px;
-  height: 17px;
-  transform: translateY(-50%);
-  pointer-events: none;
-}
-
-.login-page .login-language-select .login-language-label {
-  position: absolute;
-  z-index: 1;
-  left: 37px;
-  right: 27px;
-  top: 50%;
-  display: block;
-  overflow: hidden;
-  transform: translateY(-50%);
-  color: #536688;
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1;
-  text-align: center;
-  white-space: nowrap;
-  pointer-events: none;
-}
-
-.login-page .login-language-select .login-select-chevron {
-  position: absolute;
-  z-index: 1;
-  top: 50%;
-  right: 13px;
-  width: 7px;
-  height: 7px;
-  margin: 0;
-  transform: translateY(-65%) rotate(45deg);
-  pointer-events: none;
-}
-
-.login-page .login-language-select .login-language-native {
-  position: absolute;
-  z-index: 2;
-  inset: 0;
-  display: block;
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  appearance: none;
-  opacity: 0;
-  cursor: pointer;
 }
 
 /* ---- the cascade, in motion -------------------------------------------------

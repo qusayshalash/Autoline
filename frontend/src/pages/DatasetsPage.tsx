@@ -26,9 +26,10 @@ export default function DatasetsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const { hasRole } = useAuth();
-  const canWrite = hasRole("admin", "editor");
-  const canDelete = hasRole("admin");
+  const { can } = useAuth();
+  const canUpload = can("datasets.upload");
+  const canDelete = can("datasets.delete");
+  const canRunQuality = can("datasets.view");
   const [progress, setProgress] = useState(0);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   // which dataset's import report is expanded, if any
@@ -66,7 +67,7 @@ export default function DatasetsPage() {
   return (
     <div>
       <h2>{t("datasets.title")}</h2>
-      {canWrite && (
+      {canUpload && (
         <div className="card">
           <UploadDropzone
             busy={uploadMutation.isPending}
@@ -126,7 +127,7 @@ export default function DatasetsPage() {
                       {t("datasets.open")}
                     </button>
                   </>
-                ) : d.status === "preview" && canWrite ? (
+                ) : d.status === "preview" && canUpload ? (
                   <button className="btn secondary" onClick={() => navigate(`/datasets/${d.id}/import`)}>
                     {t("import_wizard.title")}
                   </button>
@@ -155,7 +156,7 @@ export default function DatasetsPage() {
           ))}
           {quality && (
             <div className="dataset-quality">
-              <QualityReportView datasetId={quality} canRun={canWrite} />
+              <QualityReportView datasetId={quality} canRun={canRunQuality} />
             </div>
           )}
         </div>

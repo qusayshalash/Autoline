@@ -393,7 +393,8 @@ function UserDrawer({
           <h3 className="drawer-section">{t("admin.users.reset_password")}</h3>
           <div className="inline-form">
             <input
-              type="text"
+              type="password"
+              autoComplete="new-password"
               value={newPassword}
               placeholder={t("users.new_password") ?? ""}
               onChange={(e) => setNewPassword(e.target.value)}
@@ -486,7 +487,12 @@ function CreateUserDrawer({
         </label>
         <label>
           {t("auth.password")} *
-          <input value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
+          <input
+            type="password"
+            autoComplete="new-password"
+            value={form.password}
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
+          />
         </label>
         <label>
           {t("admin.users.role")}

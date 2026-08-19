@@ -1,6 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect x="2" y="2" width="28" height="28" rx="8" fill="#12967f"/>
-  <rect x="9" y="10" width="14" height="3" rx="1.5" fill="#ffffff"/>
-  <rect x="9" y="15.5" width="10" height="3" rx="1.5" fill="#ffffff" opacity="0.85"/>
-  <rect x="9" y="21" width="6" height="3" rx="1.5" fill="#f0985a"/>
+  <defs>
+    <linearGradient id="autoline-blue" x1="4" y1="3" x2="28" y2="29" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2468ed"/>
+      <stop offset="1" stop-color="#299be9"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="28" height="28" rx="8" fill="url(#autoline-blue)"/>
+  <rect x="8" y="8" width="6.5" height="6.5" rx="2" fill="white"/>
+  <rect x="17.5" y="8" width="6.5" height="6.5" rx="2" fill="white" fill-opacity=".82"/>
+  <rect x="8" y="17.5" width="6.5" height="6.5" rx="2" fill="white" fill-opacity=".68"/>
+  <rect x="17.5" y="17.5" width="6.5" height="6.5" rx="2" fill="white" fill-opacity=".92"/>
 </svg>

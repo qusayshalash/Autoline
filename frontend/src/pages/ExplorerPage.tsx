@@ -66,9 +66,9 @@ export default function ExplorerPage() {
   const { t, i18n } = useTranslation();
   const labelFor = (c: string) => columnLabel(c, i18n.language);
   const { datasetId = "" } = useParams();
-  const { hasRole } = useAuth();
-  const canExport = hasRole("admin", "editor");
-  const canDeleteColumn = hasRole("admin", "editor");
+  const { can } = useAuth();
+  const canExport = can("datasets.export");
+  const canDeleteColumn = can("datasets.clean");
   const qc = useQueryClient();
 
   const [source, setSource] = useState<"raw" | "cleaned">("cleaned");

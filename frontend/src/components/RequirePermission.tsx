@@ -11,7 +11,7 @@ export default function RequirePermission({
   children,
   all,
   any,
-  redirectTo = "/",
+  redirectTo = "/forbidden",
 }: {
   children: ReactNode;
   /** every permission listed is required */

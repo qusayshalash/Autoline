@@ -16,18 +16,18 @@
 
 /** Chosen for separation at small sizes and for staying distinguishable side by side. */
 export const PALETTE = [
-  "#4f46e5",
+  "#2563eb",
   "#0ea5e9",
   "#10b981",
   "#f59e0b",
   "#ef4444",
-  "#8b5cf6",
+  "#0ea5e9",
   "#14b8a6",
   "#ec4899",
   "#84cc16",
   "#f97316",
   "#06b6d4",
-  "#a855f7",
+  "#38bdf8",
   "#22c55e",
   "#eab308",
   "#f43f5e",
@@ -45,12 +45,12 @@ const SEMANTIC: Record<string, string> = {
   'חשמל': "#10b981", // electric
   'חשמל/בנזין': "#06b6d4", // hybrid
   'חשמל/דיזל': "#0284c7", // diesel hybrid
-  'גפמ"': "#a855f7", // LPG
+  'גפמ"': "#38bdf8", // LPG
 
   // ownership (baalut)
-  'פרטי': "#4f46e5",
+  'פרטי': "#2563eb",
   'ליסינג': "#0ea5e9",
-  'חברה': "#8b5cf6",
+  'חברה': "#0ea5e9",
   'סוחר': "#f59e0b",
   'השכרה': "#14b8a6",
 };

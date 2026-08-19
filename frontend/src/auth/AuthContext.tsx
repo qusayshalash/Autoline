@@ -5,7 +5,7 @@ import { getMe, login as apiLogin, logout as apiLogout, type Role, type User } f
 interface AuthState {
   user: User | null;
   loading: boolean;
-  login: (username: string, password: string) => Promise<void>;
+  login: (username: string, password: string) => Promise<User>;
   logout: () => Promise<void>;
   hasRole: (...roles: Role[]) => boolean;
   /** true when the signed-in user's role grants every listed permission. Presentation
@@ -31,6 +31,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function login(username: string, password: string) {
     const u = await apiLogin(username, password);
     setUser(u);
+    return u;
   }
 
   async function logout() {

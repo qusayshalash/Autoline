@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../auth/AuthContext";
+import { firstAllowedPath } from "../auth/permissionRoutes";
 import { columnLabel } from "../data/columnDictionary";
 import ThemeToggle from "../components/ThemeToggle";
 import "./LoginPage.css";
@@ -106,9 +107,9 @@ export default function LoginPage() {
 
     setBusy(true);
     try {
-      await login(identifier, password);
+      const signedInUser = await login(identifier, password);
       persistRememberedIdentifier(identifier, rememberIdentifier);
-      const from = (location.state as { from?: string })?.from ?? "/";
+      const from = (location.state as { from?: string })?.from ?? firstAllowedPath(signedInUser.permissions ?? []);
       navigate(from, { replace: true });
     } catch (err) {
       // 429 is the one refusal worth explaining. Every other failure stays deliberately
@@ -200,13 +201,12 @@ export default function LoginPage() {
                           className="login-language-option"
                           role="menuitemradio"
                           aria-checked={activeLanguage === code}
-                          dir={code === "en" ? "ltr" : "rtl"}
                           onClick={() => {
                             void i18n.changeLanguage(code);
                             setLanguageMenuOpen(false);
                           }}
                         >
-                          <span>{label}</span>
+                          <span dir={code === "en" ? "ltr" : "rtl"}>{label}</span>
                         </button>
                       ))}
                     </div>

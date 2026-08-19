@@ -5,7 +5,10 @@ import LoadingState from "./components/LoadingState";
 import RequireAuth from "./components/RequireAuth";
 import RequirePermission from "./components/RequirePermission";
 import Sidebar from "./components/Sidebar";
+import { useAuth } from "./auth/AuthContext";
+import { ADMIN_ACCESS_PERMISSIONS, firstAllowedAdminPath } from "./auth/permissionRoutes";
 import DatasetsPage from "./pages/DatasetsPage";
+import ForbiddenPage from "./pages/ForbiddenPage";
 import LoginPage from "./pages/LoginPage";
 
 /*
@@ -43,7 +46,14 @@ function Workspace() {
       <Sidebar />
       <main className="app-main">
         <Routes>
-          <Route path="/" element={<DatasetsPage />} />
+          <Route
+            path="/"
+            element={
+              <RequirePermission all={["datasets.view"]}>
+                <DatasetsPage />
+              </RequirePermission>
+            }
+          />
           <Route
             path="/datasets/:datasetId/import"
             element={
@@ -60,8 +70,22 @@ function Workspace() {
               </RequirePermission>
             }
           />
-          <Route path="/datasets/:datasetId/explore" element={<ExplorerPage />} />
-          <Route path="/datasets/:datasetId/profile" element={<ProfilePage />} />
+          <Route
+            path="/datasets/:datasetId/explore"
+            element={
+              <RequirePermission all={["datasets.view"]}>
+                <ExplorerPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/datasets/:datasetId/profile"
+            element={
+              <RequirePermission all={["datasets.view"]}>
+                <ProfilePage />
+              </RequirePermission>
+            }
+          />
           {/* user management now lives in the admin panel */}
           <Route path="/users" element={<Navigate to="/admin/users" replace />} />
           <Route path="*" element={<Navigate to="/" replace />} />
@@ -71,6 +95,14 @@ function Workspace() {
   );
 }
 
+function AdminIndexRoute() {
+  const { user, can } = useAuth();
+  if (can("system.view")) return <OverviewPage />;
+
+  const destination = firstAllowedAdminPath(user?.permissions ?? []);
+  return <Navigate to={destination ?? "/forbidden"} replace />;
+}
+
 export default function App() {
   return (
     // One boundary around the whole tree: each lazy route needs a fallback, and a
@@ -78,6 +110,14 @@ export default function App() {
     <Suspense fallback={<LoadingState />}>
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route
+        path="/forbidden"
+        element={
+          <RequireAuth>
+            <ForbiddenPage />
+          </RequireAuth>
+        }
+      />
 
       {/* Statistics is its own area too: a dashboard, not a view of the grid. It needs
           no more than read access, which every signed-in role has. */}
@@ -113,21 +153,14 @@ export default function App() {
         element={
           <RequireAuth>
             <RequirePermission
-              any={["system.view", "users.view", "roles.view", "languages.manage", "activity.view"]}
+              any={[...ADMIN_ACCESS_PERMISSIONS]}
             >
               <AdminLayout />
             </RequirePermission>
           </RequireAuth>
         }
       >
-        <Route
-          index
-          element={
-            <RequirePermission all={["system.view"]} redirectTo="/admin/users">
-              <OverviewPage />
-            </RequirePermission>
-          }
-        />
+        <Route index element={<AdminIndexRoute />} />
         <Route
           path="users"
           element={

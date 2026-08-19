@@ -141,6 +141,8 @@
   "column_menu": {
     "sort_asc": "מיון עולה - א עד ת",
     "sort_desc": "מיון יורד - ת עד א",
+    "translate_values": "תרגום ערכים",
+    "show_original": "הצג ערכים מקוריים",
     "hide": "הסתר עמודה",
     "unhide": "הצג עמודה",
     "delete": "מחק עמודה",
@@ -246,7 +248,10 @@
     "error_generic": "אירעה שגיאה בלתי צפויה, נסה שוב",
     "error_loading_data": "לא ניתן לטעון את הנתונים",
     "delete": "מחיקה",
-    "retry": "נסו שוב"
+    "retry": "נסו שוב",
+    "access_denied": "אין לך הרשאה לגשת לדף זה.",
+    "access_denied_help": "פנו למנהל המערכת אם אתם זקוקים להרשאה זו.",
+    "go_to_available_area": "מעבר לדף זמין"
   },
   "theme": {
     "label": "ערכת נושא",

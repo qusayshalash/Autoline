@@ -332,12 +332,10 @@
 }
 
 /* The headline figure of a grid, filled rather than tinted.
-   The fill is a fixed deep indigo rather than var(--primary): the dark theme lightens
-   that token to #6366f1, and white on it measures 4.5:1 - under the contrast a 12px
-   label needs. This shade clears it in both themes. */
+   The fill is a fixed deep blue so white labels remain readable in both themes. */
 .kpi-card.lead {
-  background: #4338ca;
-  border-color: #4338ca;
+  background: #1d4ed8;
+  border-color: #1d4ed8;
   color: #fff;
 }
 

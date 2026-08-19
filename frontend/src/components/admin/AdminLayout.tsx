@@ -43,6 +43,7 @@ export default function AdminLayout() {
 
   const visible = NAV.filter((n) => can(n.permission));
   const current = visible.find((n) => (n.end ? pathname === n.to : pathname.startsWith(n.to)));
+  const backTo = can("datasets.view") ? "/" : (visible[0]?.to ?? "/forbidden");
 
   return (
     <div className="admin-shell">
@@ -75,7 +76,7 @@ export default function AdminLayout() {
         <div className="admin-sidebar-foot">
           <ThemeToggle collapsed={collapsed} />
 
-          <button type="button" className="admin-exit" onClick={() => navigate("/")}>
+          <button type="button" className="admin-exit" onClick={() => navigate(backTo)}>
             <IconBack />
             {!collapsed && <span>{t("admin.back_to_app")}</span>}
           </button>

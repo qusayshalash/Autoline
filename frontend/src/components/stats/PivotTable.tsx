@@ -62,7 +62,7 @@ export default function PivotTable({ pivot, measure, translate }: Props) {
   /**
    * Tint strength for a cell, as a percentage of the accent colour.
    *
-   * Capped well below full: a mid-strength indigo is the one background that fails both
+   * Capped well below full: a mid-strength blue is the one background that fails both
    * themes at once - too dark for the light theme's near-black text, too light for the
    * dark theme's near-white text. Measured at full strength the text came out at 2.5:1.
    * Held under a third, both themes clear 4.5:1 comfortably.

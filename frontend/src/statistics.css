@@ -817,12 +817,12 @@ html[dir="rtl"] .stats-export {
   opacity: 0.45;
 }
 
-/* Fixed deep indigo rather than var(--primary): the dark theme lightens that token to
-   #6366f1, and white on it measures 4.5:1 - under what a 12px label needs. */
+/* Fixed deep blue rather than var(--primary): white on it remains readable for a
+   compact 12px label in both themes. */
 .stats-kpi.primary {
   cursor: default;
-  background: #4338ca;
-  border-color: #4338ca;
+  background: #1d4ed8;
+  border-color: #1d4ed8;
   color: #fff;
 }
 
