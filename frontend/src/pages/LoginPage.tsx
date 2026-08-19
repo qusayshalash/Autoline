@@ -326,7 +326,7 @@ export default function LoginPage() {
             <dl className="lv-stats" aria-hidden="true">
               <Figure label={t("auth.visual_stat_rows")} to={24_800_000} format={millions} />
               <Figure label={t("auth.visual_stat_columns")} to={148} />
-              <Figure label={t("auth.visual_stat_volume")} to={826} format={gigabytes} />
+              <Figure label={t("auth.visual_stat_volume")} to={20} format={gigabytes} />
             </dl>
           </div>
         </section>
