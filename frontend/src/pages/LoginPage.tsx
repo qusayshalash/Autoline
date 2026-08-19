@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 
@@ -48,11 +48,38 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberIdentifier, setRememberIdentifier] = useState(() => Boolean(getRememberedIdentifier()));
   const [attemptedSubmit, setAttemptedSubmit] = useState(false);
+  const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
+  const languageMenuRef = useRef<HTMLDivElement>(null);
+  const languageTriggerRef = useRef<HTMLButtonElement>(null);
   const activeLanguage = LOGIN_LANGUAGES.some(({ code }) => code === i18n.language.split("-")[0])
     ? i18n.language.split("-")[0]
     : "ar";
   const activeLanguageLabel = LOGIN_LANGUAGES.find(({ code }) => code === activeLanguage)?.label
     ?? LOGIN_LANGUAGES[0].label;
+
+  useEffect(() => {
+    if (!languageMenuOpen) return;
+
+    function closeOnOutsidePress(event: PointerEvent) {
+      if (!languageMenuRef.current?.contains(event.target as Node)) {
+        setLanguageMenuOpen(false);
+      }
+    }
+
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setLanguageMenuOpen(false);
+        languageTriggerRef.current?.focus();
+      }
+    }
+
+    document.addEventListener("pointerdown", closeOnOutsidePress);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeOnOutsidePress);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [languageMenuOpen]);
 
   if (user) {
     return <Navigate to="/" replace />;
@@ -110,24 +137,47 @@ export default function LoginPage() {
                 </span>
               </div>
               <div className="login-topbar-controls">
-                <label className="login-language-select">
-                  <span className="login-globe-icon" aria-hidden="true" />
-                  <span className="login-language-label" dir={i18n.dir()} aria-hidden="true">
-                    {activeLanguageLabel}
-                  </span>
-                  <span className="login-select-chevron" aria-hidden="true" />
-                  <select
-                    className="login-language-native"
+                <div
+                  ref={languageMenuRef}
+                  className={`login-language-select${languageMenuOpen ? " is-open" : ""}`}
+                >
+                  <button
+                    ref={languageTriggerRef}
+                    type="button"
+                    className="login-language-trigger"
                     aria-label={t("common.language")}
-                    value={activeLanguage}
-                    onChange={(event) => void i18n.changeLanguage(event.currentTarget.value)}
-                    dir={i18n.dir()}
+                    aria-haspopup="menu"
+                    aria-expanded={languageMenuOpen}
+                    aria-controls="login-language-menu"
+                    onClick={() => setLanguageMenuOpen((isOpen) => !isOpen)}
                   >
-                    {LOGIN_LANGUAGES.map(({ code, label }) => (
-                      <option key={code} value={code}>{label}</option>
-                    ))}
-                  </select>
-                </label>
+                    <span className="login-globe-icon" aria-hidden="true" />
+                    <span className="login-language-label" dir={i18n.dir()} aria-hidden="true">
+                      {activeLanguageLabel}
+                    </span>
+                    <span className="login-select-chevron" aria-hidden="true" />
+                  </button>
+                  {languageMenuOpen && (
+                    <div id="login-language-menu" className="login-language-menu" role="menu" aria-label={t("common.language")}>
+                      {LOGIN_LANGUAGES.map(({ code, label }) => (
+                        <button
+                          key={code}
+                          type="button"
+                          className="login-language-option"
+                          role="menuitemradio"
+                          aria-checked={activeLanguage === code}
+                          dir={code === "en" ? "ltr" : "rtl"}
+                          onClick={() => {
+                            void i18n.changeLanguage(code);
+                            setLanguageMenuOpen(false);
+                          }}
+                        >
+                          <span>{label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 <ThemeToggle compact />
               </div>
             </div>

@@ -25,7 +25,7 @@
 .login-page .login-shell {
   min-height: 100svh;
   display: grid;
-  grid-template-columns: minmax(420px, 37.125fr) minmax(520px, 62.875fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   direction: ltr;
   background: #fff;
 }
@@ -254,8 +254,8 @@
   min-height: 0;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  padding: clamp(72px, 9.3svh, 93px) 0 0;
+  justify-content: center;
+  padding: 0;
 }
 
 .login-page .login-auth-card {
@@ -1305,4 +1305,204 @@
   .login-page .login-visual {
     display: none;
   }
+}
+
+/* Custom language menu — keeps the list inside the same visual system as the
+   rest of the sign-in page instead of showing the browser's default menu. */
+.login-page .login-language-select {
+  overflow: visible;
+  z-index: 20;
+}
+
+.login-page .login-language-trigger {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.login-page .login-language-trigger:focus-visible {
+  outline: 2px solid #5790ef;
+  outline-offset: 2px;
+}
+
+.login-page .login-language-select.is-open {
+  border-color: #5790ef;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.09);
+}
+
+.login-page .login-language-select.is-open .login-select-chevron {
+  transform: translateY(-35%) rotate(225deg);
+}
+
+.login-page .login-language-menu {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 148px;
+  display: grid;
+  gap: 3px;
+  padding: 6px;
+  border: 1px solid #dbe7f6;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 14px 30px rgba(31, 64, 118, 0.16), 0 3px 8px rgba(31, 64, 118, 0.08);
+  animation: login-language-menu-enter 0.16s ease-out both;
+}
+
+.login-page .login-language-option {
+  width: 100%;
+  min-height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #526482;
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1;
+  text-align: start;
+  cursor: pointer;
+  transition: background 0.16s ease, color 0.16s ease;
+}
+
+.login-page .login-language-option::after {
+  content: "";
+  width: 7px;
+  height: 7px;
+  flex: 0 0 7px;
+  border: 1.5px solid #b7c8df;
+  border-radius: 50%;
+}
+
+.login-page .login-language-option:hover,
+.login-page .login-language-option:focus-visible {
+  outline: none;
+  background: #f1f6ff;
+  color: #155fdf;
+}
+
+.login-page .login-language-option[aria-checked="true"] {
+  background: #edf4ff;
+  color: #155fdf;
+}
+
+.login-page .login-language-option[aria-checked="true"]::after {
+  border-color: #2f7af5;
+  background: #2f7af5;
+  box-shadow: 0 0 0 3px rgba(47, 122, 245, 0.14);
+}
+
+:root[data-theme="dark"] .login-page .login-language-select.is-open {
+  border-color: #4e87e6;
+  background: #122039;
+  box-shadow: 0 0 0 3px rgba(78, 135, 230, 0.16);
+}
+
+:root[data-theme="dark"] .login-page .login-language-menu {
+  border-color: #2b405f;
+  background: rgba(18, 30, 52, 0.99);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.3);
+}
+
+:root[data-theme="dark"] .login-page .login-language-option {
+  color: #b7c6df;
+}
+
+:root[data-theme="dark"] .login-page .login-language-option:hover,
+:root[data-theme="dark"] .login-page .login-language-option:focus-visible,
+:root[data-theme="dark"] .login-page .login-language-option[aria-checked="true"] {
+  background: #1c3358;
+  color: #dceaff;
+}
+
+@keyframes login-language-menu-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Keep the visible language label independent of the native select.  Older
+   login styles used flex/grid rules here, which allowed the Arabic text to
+   drift over the globe in some browsers. */
+.login-page .login-language-select {
+  position: relative;
+  display: block;
+  width: 108px;
+  height: 38px;
+  padding: 0;
+}
+
+.login-page .login-language-select .login-globe-icon {
+  position: absolute;
+  z-index: 1;
+  left: 12px;
+  top: 50%;
+  width: 17px;
+  height: 17px;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.login-page .login-language-select .login-language-label {
+  position: absolute;
+  z-index: 1;
+  left: 37px;
+  right: 27px;
+  top: 50%;
+  display: block;
+  overflow: hidden;
+  transform: translateY(-50%);
+  color: #536688;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.login-page .login-language-select .login-select-chevron {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  right: 13px;
+  width: 7px;
+  height: 7px;
+  margin: 0;
+  transform: translateY(-65%) rotate(45deg);
+  pointer-events: none;
+}
+
+.login-page .login-language-select .login-language-native {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  appearance: none;
+  opacity: 0;
+  cursor: pointer;
 }
