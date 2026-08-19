@@ -1,0 +1,50 @@
+# Dependency updates, proposed as pull requests.
+#
+# Every version in this project is pinned exactly - requirements.txt has no ranges and
+# the frontend has a lockfile - which is what makes builds reproducible and also what
+# makes them quietly age. Pinning without a mechanism to move the pins is how a project
+# arrives, a year later, at a set of dependencies nobody dares touch.
+#
+# Nothing here merges anything. Each update comes as a pull request that has to pass the
+# CI in ci.yml first, so an update that breaks the suite announces itself as a red check
+# rather than as a broken clone.
+
+version: 2
+
+updates:
+  # Patch and minor releases are grouped into one pull request per ecosystem; major ones
+  # deliberately are not. Ungrouped, a week of routine releases is a dozen near-identical
+  # PRs and the one that changes an API gets lost among them. Grouped the other way, a
+  # major bump arrives wearing the same clothes as a patch.
+  #
+  # Nothing is ignored. An `ignore` rule for majors would also suppress the security
+  # updates GitHub raises off the advisory database, and a fix that only exists in the
+  # next major is exactly the one worth hearing about.
+
+  - package-ecosystem: pip
+    directory: /backend
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      routine:
+        update-types: [minor, patch]
+
+  - package-ecosystem: npm
+    directory: /frontend
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      routine:
+        update-types: [minor, patch]
+
+  # The actions themselves. These pin to major tags (actions/checkout@v4), so this
+  # updates them the day v5 is released rather than the day one of them stops working.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 3

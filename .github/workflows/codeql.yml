@@ -1,0 +1,55 @@
+name: CodeQL
+
+# Static analysis for the classes of defect a test suite is bad at finding.
+#
+# The suite in ci.yml checks that the code does what it is supposed to. This checks for
+# the things nobody wrote a test for because nobody thought of them: a query built by
+# concatenation on a path that was missed, a redirect taken from user input, a secret
+# read into a log line. The backend builds SQL text at runtime by design - sql_utils
+# exists to make that safe - so it is worth having a second opinion that is not the
+# author's own.
+#
+# Free on public repositories. Findings appear under the repository's Security tab.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Weekly, because the rule set keeps improving after the code stops changing: a
+    # query added next month can find something in code that was written last year.
+    - cron: "27 4 * * 1"
+
+jobs:
+  analyze:
+    name: Analyze ${{ matrix.language }}
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write # to file the results against the repository
+      contents: read
+
+    strategy:
+      fail-fast: false # one language's failure should not hide the other's findings
+      matrix:
+        language: [python, javascript-typescript]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          language: ${{ matrix.language }}
+          # The default suite plus the maintainability queries. The extra ones are
+          # noisier, which is affordable here: this is one project with one maintainer,
+          # not a monorepo where a hundred low-severity findings drown the real ones.
+          queries: security-and-quality
+
+      # Neither language needs compiling: Python is interpreted and the frontend is
+      # analysed from source rather than from the Vite bundle, which is minified and
+      # would tell CodeQL nothing useful.
+      - name: Analyze
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: /language:${{ matrix.language }}
