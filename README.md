@@ -62,7 +62,7 @@ immediately**.
 ```bash
 # the test suite
 cd backend
-pytest -m "not real"            # 227 tests, ~30s, no data needed
+pytest -m "not real"            # 359 tests, ~40s, no data needed
 ```
 
 ---
@@ -74,7 +74,7 @@ pytest -m "not real"            # 227 tests, ~30s, no data needed
 | Backend | FastAPI, DuckDB 1.5, Pydantic v2, PyJWT |
 | Frontend | React 19, TypeScript, Vite, TanStack Query, ECharts, react-i18next |
 | Storage | One DuckDB file per dataset, plus a small catalogue database |
-| Tests | 227 (+7 characterization tests against the real dataset) |
+| Tests | 359 (+7 characterization tests against the real dataset) |
 
 A dataset lives in its own DuckDB file, so listing files never opens a four-million-row
 database and deleting one is a file deletion. A separate catalogue tracks metadata, jobs,
@@ -159,7 +159,7 @@ permanent lock would let anyone who knows a username take that person's access a
 ## Tests
 
 ```
-227 passing, ~30 seconds, no external data required
+359 passing, ~40 seconds, no external data required
 ```
 
 The suite runs against a real stack — real DuckDB files, real HTTP routing, real auth
