@@ -35,6 +35,15 @@ class Settings(BaseSettings):
     pdf_row_limit: int = 10_000
     export_ttl_hours: int = 24
 
+    # A CSV upload is written to data_dir in chunks with no cap on the file's own size -
+    # the real registry export this is built against is 867 MB, and a hard byte ceiling
+    # would reject legitimate files right along with runaway ones. What is bounded
+    # instead is the free space behind it: the write is refused, mid-stream if need be,
+    # once continuing would leave less than this much room on the disk. 1 GB leaves
+    # headroom for the cleaned-table rewrite cleaning produces, which briefly holds two
+    # copies of the table on the same disk.
+    min_free_disk_bytes: int = 1_000_000_000
+
     # Where verified snapshots are written. Defaults next to the data, which protects
     # against the failures that actually happen most - a bad cleaning run, a deleted
     # dataset - but not against the disk itself dying. Point BACKUP_DIR at another drive

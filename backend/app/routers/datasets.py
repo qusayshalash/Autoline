@@ -66,7 +66,11 @@ async def upload_dataset(
     catalog.create_dataset(dataset_id, file.filename or "upload.csv")
 
     ext = "".join(ch for ch in (("." + file.filename.split(".")[-1]) if file.filename and "." in file.filename else ".csv") if ch.isalnum() or ch == ".") or ".csv"
-    saved_path = await ingestion.save_upload_stream(dataset_id, file, ext)
+    try:
+        saved_path = await ingestion.save_upload_stream(dataset_id, file, ext)
+    except ingestion.InsufficientDiskSpace as exc:
+        catalog.update_dataset(dataset_id, status="error", error_message=str(exc))
+        raise HTTPException(413, str(exc)) from exc
 
     encoding = ingestion.detect_encoding(saved_path)
     delimiter = ingestion.detect_delimiter(saved_path, encoding)

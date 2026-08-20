@@ -5,6 +5,7 @@ file at once, so a multi-hundred-MB / multi-million-row CSV never has to fit in 
 """
 
 import csv
+import shutil
 from pathlib import Path
 from typing import Callable, Optional
 
@@ -16,6 +17,13 @@ from app.db import catalog
 from app.db.connection import datasets
 
 ALLOWED_DELIMITERS = [",", ";", "|", "\t"]
+
+
+class InsufficientDiskSpace(Exception):
+    """Raised mid-upload rather than pre-checked against Content-Length: that header is
+    absent for a chunked request and untrustworthy even when present, so the only figure
+    worth acting on is how much room is actually left, checked as the file grows.
+    """
 
 
 def dataset_upload_dir(dataset_id: str) -> Path:
@@ -33,13 +41,33 @@ def normalized_path(dataset_id: str) -> Path:
 
 
 async def save_upload_stream(dataset_id: str, file: UploadFile, ext: str) -> Path:
+    """Writes the upload to disk a chunk at a time, refusing to fill the disk doing it.
+
+    Checked after every chunk rather than once at the start: the file's total size is
+    not known in advance - some clients never send Content-Length, and none of them can
+    be trusted to send an honest one - and this same disk is also where every other
+    dataset's tables live, so what is free can shrink for reasons that have nothing to
+    do with this particular upload.
+
+    A rejected upload leaves nothing behind: the partial file is removed before the
+    error is raised, rather than left for the next cleanup pass to find.
+    """
     dest = raw_path(dataset_id, ext)
-    with open(dest, "wb") as out:
-        while True:
-            chunk = await file.read(settings.upload_chunk_bytes)
-            if not chunk:
-                break
-            out.write(chunk)
+    try:
+        with open(dest, "wb") as out:
+            while True:
+                chunk = await file.read(settings.upload_chunk_bytes)
+                if not chunk:
+                    break
+                out.write(chunk)
+                if shutil.disk_usage(dest.parent).free < settings.min_free_disk_bytes:
+                    raise InsufficientDiskSpace(
+                        f"Not enough free disk space to continue this upload "
+                        f"(need at least {settings.min_free_disk_bytes:,} bytes free)."
+                    )
+    except InsufficientDiskSpace:
+        dest.unlink(missing_ok=True)
+        raise
     return dest
 
 
