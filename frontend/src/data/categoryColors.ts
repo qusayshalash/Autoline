@@ -15,7 +15,7 @@
  */
 
 /** Chosen for separation at small sizes and for staying distinguishable side by side.
- *  Measured, not judged by eye: no two entries are closer than 7 dE2000, and the
+ *  Measured, not judged by eye: no two entries are closer than 12 dE2000, and the
  *  categories that share a chart - see SEMANTIC below - are held far wider apart. */
 export const PALETTE = [
   "#2563eb",
@@ -29,10 +29,10 @@ export const PALETTE = [
   "#84cc16",
   "#f97316",
   "#06b6d4",
-  "#38bdf8",
-  "#22c55e",
-  "#eab308",
-  "#f43f5e",
+  "#a855f7",
+  "#e879f9",
+  "#78716c",
+  "#fb7185",
   "#3b82f6",
 ];
 
@@ -47,7 +47,7 @@ const SEMANTIC: Record<string, string> = {
   'חשמל': "#10b981", // electric
   'חשמל/בנזין': "#06b6d4", // hybrid
   'חשמל/דיזל': "#0284c7", // diesel hybrid
-  'גפמ"': "#38bdf8", // LPG
+  'גפמ"': "#a855f7", // LPG
 
   // ownership (baalut)
   'פרטי': "#2563eb",
