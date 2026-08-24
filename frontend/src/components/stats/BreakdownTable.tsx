@@ -42,6 +42,9 @@ export default function BreakdownTable({ rows, total, onToggle }: Props) {
               <th>{t("statistics.value")}</th>
               <th className="num">{t("statistics.count")}</th>
               <th className="num">{t("statistics.share")}</th>
+              <th className="num" title={t("statistics.cumulative_hint") ?? ""}>
+                {t("statistics.cumulative")}
+              </th>
               <th className="col-bar">{t("statistics.distribution")}</th>
             </tr>
           </thead>
@@ -61,6 +64,7 @@ export default function BreakdownTable({ rows, total, onToggle }: Props) {
                 </td>
                 <td className="num">{formatCount(r.count, lang)}</td>
                 <td className="num strong">{formatPercent(r.percentage, lang)}</td>
+                <td className="num stats-cumulative">{formatPercent(r.cumulative, lang)}</td>
                 <td className="col-bar">
                   <span className="stats-minibar">
                     <span style={{ width: `${(r.count / max) * 100}%`, background: r.color }} />
@@ -75,6 +79,9 @@ export default function BreakdownTable({ rows, total, onToggle }: Props) {
               <td>{t("statistics.total")}</td>
               <td className="num strong">{formatCount(total, lang)}</td>
               <td className="num strong">{formatPercent(sum(rows), lang)}</td>
+              {/* The cumulative column needs no total of its own: its last row is the
+                  total, by construction. */}
+              <td />
               <td />
             </tr>
           </tfoot>
