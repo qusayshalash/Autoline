@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 
@@ -16,7 +16,6 @@ import AnalysisSetup from "../components/stats/AnalysisSetup";
 import type { PivotMeasure } from "../components/stats/PivotTable";
 import PivotTable from "../components/stats/PivotTable";
 import BrandCard from "../components/stats/BrandCard";
-import BreakdownCharts from "../components/stats/BreakdownCharts";
 import BreakdownTable from "../components/stats/BreakdownTable";
 import InsightNotes from "../components/stats/InsightNotes";
 import KpiCards from "../components/stats/KpiCards";
@@ -26,6 +25,10 @@ import { buildRows } from "../components/stats/rows";
 import { brandFor } from "../data/brandRegistry";
 import { columnLabel } from "../data/columnDictionary";
 import { usesRawHeaders } from "../data/columnDictionary";
+
+// echarts is the bulk of this page's JS weight, so the component that pulls it in is
+// its own chunk, fetched alongside the stats request instead of blocking the page shell.
+const BreakdownCharts = lazy(() => import("../components/stats/BreakdownCharts"));
 
 /** Where the dashboard starts, in order of preference. Fuel type is the breakdown this
  *  screen was built around, so it leads when the file has it. */
@@ -365,13 +368,15 @@ export default function StatisticsPage() {
           ) : (
             <>
               <KpiCards stats={stats} rows={rows} onToggle={toggle} />
-              <BreakdownCharts
-                stats={stats}
-                rows={rows}
-                showPercent={showPercent}
-                onToggle={toggle}
-                onShowAll={() => setHidden(new Set())}
-              />
+              <Suspense fallback={<div className="stats-charts-loading" />}>
+                <BreakdownCharts
+                  stats={stats}
+                  rows={rows}
+                  showPercent={showPercent}
+                  onToggle={toggle}
+                  onShowAll={() => setHidden(new Set())}
+                />
+              </Suspense>
               <InsightNotes
                 stats={stats}
                 rows={rows}

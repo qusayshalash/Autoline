@@ -1178,6 +1178,12 @@ html[dir="rtl"] .stats-export {
   color: var(--text-muted);
 }
 
+/* Reserves roughly the charts' height so the KPI cards below it don't jump once the
+   lazy-loaded chart chunk finishes fetching. */
+.stats-charts-loading {
+  min-height: 320px;
+}
+
 .stats-spinner {
   width: 26px;
   height: 26px;
