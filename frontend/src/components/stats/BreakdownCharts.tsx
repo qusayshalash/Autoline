@@ -114,11 +114,20 @@ export default function BreakdownCharts({ stats, rows, showPercent, onToggle, on
         formatter: (params: { dataIndex: number }[]) => {
           const row = visible[params[0]?.dataIndex ?? 0];
           if (!row) return "";
-          return [
+          const lines = [
             `<strong>${escapeHtml(row.label)}</strong>`,
             `${t("statistics.count")}: ${formatCount(row.count, lang)}`,
             `${t("statistics.share")}: ${formatPercent(row.percentage, lang)}`,
-          ].join("<br/>");
+          ];
+          // The running total counts every bucket above this one, including any the
+          // user has hidden - so it keeps matching the table, and never implies the
+          // hidden rows stopped existing.
+          if (stats.mode === "value") {
+            lines.push(
+              `${t("statistics.cumulative")}: ${formatPercent(row.cumulative, lang)}`
+            );
+          }
+          return lines.join("<br/>");
         },
       },
       // a horizontal bar chart reads bottom-up, so the ranking is reversed to put the
@@ -142,7 +151,7 @@ export default function BreakdownCharts({ stats, rows, showPercent, onToggle, on
         },
       ],
     };
-  }, [visible, showPercent, horizontal, rtl, theme, tooltip, t, lang]);
+  }, [visible, showPercent, horizontal, rtl, theme, tooltip, t, lang, stats.mode]);
 
   function download(handle: ChartHandle | null, suffix: string) {
     const url = handle?.toPng(theme.surface);
