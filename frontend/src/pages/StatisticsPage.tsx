@@ -255,12 +255,13 @@ export default function StatisticsPage() {
             </div>
 
             <div className="stats-toggle" role="group" aria-label={t("pivot.measure") ?? ""}>
-              {(["count", "row", "column", "total"] as PivotMeasure[]).map((m) => (
+              {(["count", "row", "column", "total", "lift"] as PivotMeasure[]).map((m) => (
                 <button
                   key={m}
                   type="button"
                   className={measure === m ? "active" : ""}
                   onClick={() => setMeasure(m)}
+                  title={t(`pivot.measure_${m}_hint`) ?? ""}
                 >
                   {t(`pivot.measure_${m}`)}
                 </button>
