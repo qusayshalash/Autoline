@@ -626,7 +626,18 @@
     "no_results_hint": "Try removing a filter or changing its value.",
     "export": "Export",
     "export_title": "{{column}} breakdown",
-    "export_scope": "Matching records: {{total}}"
+    "export_scope": "Matching records: {{total}}",
+    "measure": "Measure",
+    "measure_rows": "Number of rows",
+    "measure_heading": "{{agg}} {{column}}",
+    "based_on": "Rows",
+    "agg": "Function",
+    "agg_avg": "Mean",
+    "agg_median": "Median",
+    "agg_sum": "Sum",
+    "agg_min": "Minimum",
+    "agg_max": "Maximum",
+    "agg_count": "Count"
   },
   "quality": {
     "check": "Check import",

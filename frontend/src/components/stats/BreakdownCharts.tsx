@@ -6,7 +6,7 @@ import { columnLabel } from "../../data/columnDictionary";
 import EChart from "./EChart";
 import type { ChartHandle } from "./EChart";
 import { IconChart, IconDonut, IconImage } from "./StatsIcons";
-import { formatCount, formatPercent } from "./labels";
+import { formatCount, formatMeasure, formatPercent } from "./labels";
 import type { ChartRow } from "./rows";
 import { useThemeTokens } from "./useThemeTokens";
 
@@ -16,9 +16,13 @@ interface Props {
   showPercent: boolean;
   onToggle: (key: string) => void;
   onShowAll: () => void;
+  /** set when the buckets carry an aggregate rather than a row count */
+  measureLabel?: string;
 }
 
-export default function BreakdownCharts({ stats, rows, showPercent, onToggle, onShowAll }: Props) {
+export default function BreakdownCharts({
+  stats, rows, showPercent, onToggle, onShowAll, measureLabel,
+}: Props) {
   const { t, i18n } = useTranslation();
   const lang = i18n.language;
   const theme = useThemeTokens();
@@ -27,6 +31,7 @@ export default function BreakdownCharts({ stats, rows, showPercent, onToggle, on
 
   const visible = rows.filter((r) => !r.hidden);
   const columnName = columnLabel(stats.group_by, lang);
+  const measured = !!measureLabel;
 
   // Long Hebrew colour names and trade names need room, so categories run down the side
   // and the bars run across. Years and histogram buckets are read as a sequence, so
@@ -86,14 +91,17 @@ export default function BreakdownCharts({ stats, rows, showPercent, onToggle, on
 
   const barOption = useMemo(() => {
     const labels = visible.map((r) => r.label);
-    const values = visible.map((r) => (showPercent ? r.percentage : r.count));
+    const values = visible.map((r) =>
+      measured ? (r.measure ?? 0) : showPercent ? r.percentage : r.count
+    );
     const valueAxis = {
       type: "value" as const,
       inverse: horizontal && rtl,
       axisLabel: {
         color: theme.muted,
         fontSize: 11,
-        formatter: (v: number) => (showPercent ? `${v}%` : compact(v, lang)),
+        formatter: (v: number) =>
+          measured ? compact(v, lang) : showPercent ? `${v}%` : compact(v, lang),
       },
       splitLine: { lineStyle: { color: theme.border, type: "dashed" as const } },
     };
@@ -114,15 +122,22 @@ export default function BreakdownCharts({ stats, rows, showPercent, onToggle, on
         formatter: (params: { dataIndex: number }[]) => {
           const row = visible[params[0]?.dataIndex ?? 0];
           if (!row) return "";
-          const lines = [
-            `<strong>${escapeHtml(row.label)}</strong>`,
-            `${t("statistics.count")}: ${formatCount(row.count, lang)}`,
-            `${t("statistics.share")}: ${formatPercent(row.percentage, lang)}`,
-          ];
+          const lines = [`<strong>${escapeHtml(row.label)}</strong>`];
+          if (measured) {
+            lines.push(
+              `${escapeHtml(measureLabel)}: ${row.measure === null ? "—" : formatMeasure(row.measure, lang)}`,
+              `${t("statistics.based_on")}: ${formatCount(row.count, lang)}`
+            );
+          } else {
+            lines.push(
+              `${t("statistics.count")}: ${formatCount(row.count, lang)}`,
+              `${t("statistics.share")}: ${formatPercent(row.percentage, lang)}`
+            );
+          }
           // The running total counts every bucket above this one, including any the
           // user has hidden - so it keeps matching the table, and never implies the
           // hidden rows stopped existing.
-          if (stats.mode === "value") {
+          if (stats.mode === "value" && !measured) {
             lines.push(
               `${t("statistics.cumulative")}: ${formatPercent(row.cumulative, lang)}`
             );
@@ -151,7 +166,7 @@ export default function BreakdownCharts({ stats, rows, showPercent, onToggle, on
         },
       ],
     };
-  }, [visible, showPercent, horizontal, rtl, theme, tooltip, t, lang, stats.mode]);
+  }, [visible, showPercent, horizontal, rtl, theme, tooltip, t, lang, stats.mode, measured, measureLabel]);
 
   function download(handle: ChartHandle | null, suffix: string) {
     const url = handle?.toPng(theme.surface);
@@ -176,7 +191,11 @@ export default function BreakdownCharts({ stats, rows, showPercent, onToggle, on
   }
 
   return (
-    <section className="stats-charts">
+    <section className={measured ? "stats-charts single" : "stats-charts"}>
+      {/* A ring divides a whole into its parts. An average is not a total and has no
+          parts, so under a measure there is nothing for the ring to divide and it is
+          left out rather than drawn over figures that do not add up. */}
+      {!measured && (
       <div className="stats-panel">
         <header className="stats-panel-head">
           <h3>
@@ -206,12 +225,13 @@ export default function BreakdownCharts({ stats, rows, showPercent, onToggle, on
           </div>
         </div>
       </div>
+      )}
 
       <div className="stats-panel">
         <header className="stats-panel-head">
           <h3>
             <IconChart />
-            {t("statistics.comparison")}
+            {measureLabel ?? t("statistics.comparison")}
           </h3>
           <button
             type="button"

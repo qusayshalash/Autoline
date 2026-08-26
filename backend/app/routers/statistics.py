@@ -65,6 +65,8 @@ def get_statistics(
     sort: Literal["count", "value"] = "count",
     granularity: Literal["year", "month", "day"] = "year",
     bins: int = 20,
+    measure_column: Optional[str] = None,
+    agg: Literal["count", "sum", "avg", "min", "max", "median"] = "count",
     user: dict = Depends(require_permission("datasets.view")),
 ) -> StatisticsOut:
     """`filters` is a JSON array of filter rules, e.g.
@@ -88,6 +90,8 @@ def get_statistics(
             sort=sort,
             granularity=granularity,
             bins=bins,
+            measure_column=measure_column,
+            agg=agg,
         )
     except ValidationError as exc:
         raise HTTPException(400, exc.errors(include_url=False)) from exc

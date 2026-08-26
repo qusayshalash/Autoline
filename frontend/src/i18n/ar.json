@@ -626,7 +626,18 @@
     "no_results_hint": "جرّب حذف أحد الفلاتر أو تعديل قيمته.",
     "export": "تصدير",
     "export_title": "إحصائية {{column}}",
-    "export_scope": "عدد السجلات المطابقة: {{total}}"
+    "export_scope": "عدد السجلات المطابقة: {{total}}",
+    "measure": "القياس",
+    "measure_rows": "عدد السجلات",
+    "measure_heading": "{{agg}} {{column}}",
+    "based_on": "عدد السجلات",
+    "agg": "الدالة",
+    "agg_avg": "متوسط",
+    "agg_median": "وسيط",
+    "agg_sum": "مجموع",
+    "agg_min": "أصغر",
+    "agg_max": "أكبر",
+    "agg_count": "عدد"
   },
   "quality": {
     "check": "فحص الاستيراد",

@@ -36,6 +36,24 @@ export function formatCount(value: number, language: string): string {
 }
 
 /**
+ * An aggregate over a measure column.
+ *
+ * The precision has to suit the figure rather than the column, because one column
+ * produces both kinds: a mean year of manufacture wants a decimal or two to be worth
+ * showing at all, while a sum of the same column runs to millions where decimals are
+ * noise. Whole numbers print whole - a minimum or a maximum is a value out of the file,
+ * and "2018.00" claims a precision the file never had.
+ */
+export function formatMeasure(value: number, language: string): string {
+  if (Number.isInteger(value)) return value.toLocaleString(language);
+  const decimals = Math.abs(value) >= 1000 ? 0 : 2;
+  return value.toLocaleString(language, {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  });
+}
+
+/**
  * A ratio against an expected value, written the way people say it out loud: 2.3x, or
  * 0.4x when the cell holds less than its share. One decimal, for the same reason
  * percentages take one.

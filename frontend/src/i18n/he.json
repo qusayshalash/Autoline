@@ -626,7 +626,18 @@
     "no_results_hint": "נסה להסיר מסנן או לשנות את ערכו.",
     "export": "ייצוא",
     "export_title": "פילוח {{column}}",
-    "export_scope": "רשומות תואמות: {{total}}"
+    "export_scope": "רשומות תואמות: {{total}}",
+    "measure": "מדד",
+    "measure_rows": "מספר רשומות",
+    "measure_heading": "{{agg}} {{column}}",
+    "based_on": "רשומות",
+    "agg": "פונקציה",
+    "agg_avg": "ממוצע",
+    "agg_median": "חציון",
+    "agg_sum": "סכום",
+    "agg_min": "מינימום",
+    "agg_max": "מקסימום",
+    "agg_count": "ספירה"
   },
   "quality": {
     "check": "בדיקת הייבוא",

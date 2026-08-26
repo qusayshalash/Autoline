@@ -39,6 +39,17 @@ def build(req: StatisticsExportRequest) -> bytes:
     return _pdf(req)
 
 
+def _num(value: float | None) -> str:
+    """A figure as people write it. The same field carries a row count and an aggregate,
+    so the decimals follow the value: a count of 40 is "40", never "40.0", and a mean of
+    2018.37 keeps the two places that make it a mean rather than a year."""
+    if value is None:
+        return ""
+    if float(value).is_integer():
+        return f"{int(value):,}"
+    return f"{value:,.2f}"
+
+
 def _csv(req: StatisticsExportRequest) -> bytes:
     buf = io.StringIO()
     writer = csv.writer(buf, lineterminator="\n")
@@ -50,8 +61,8 @@ def _csv(req: StatisticsExportRequest) -> bytes:
         writer.writerow([])
     writer.writerow(req.headers)
     for row in req.rows:
-        writer.writerow([row.label, row.count, f"{row.percentage:.2f}"])
-    writer.writerow([req.total_label, req.total, ""])
+        writer.writerow([row.label, _num(row.count), f"{row.percentage:.2f}"])
+    writer.writerow([req.total_label, _num(req.total), ""])
     # BOM so Excel opens the file as UTF-8 instead of mangling Hebrew and Arabic
     return b"\xef\xbb\xbf" + buf.getvalue().encode("utf-8")
 
@@ -67,7 +78,10 @@ def _xlsx(req: StatisticsExportRequest) -> bytes:
     head_fmt = book.add_format(
         {"bold": True, "bg_color": "#eef0ff", "border": 1, "border_color": "#d6d9e6"}
     )
-    num_fmt = book.add_format({"num_format": "#,##0"})
+    # Aggregates need their decimals; counts must not grow any. One glance at the rows
+    # decides which format the whole column gets.
+    fractional = any(not float(row.count).is_integer() for row in req.rows)
+    num_fmt = book.add_format({"num_format": "#,##0.00" if fractional else "#,##0"})
     pct_fmt = book.add_format({"num_format": "0.00%"})
     total_fmt = book.add_format({"bold": True, "top": 1})
     total_num_fmt = book.add_format({"bold": True, "top": 1, "num_format": "#,##0"})
@@ -95,7 +109,8 @@ def _xlsx(req: StatisticsExportRequest) -> bytes:
         r += 1
 
     sheet.write(r, 0, req.total_label, total_fmt)
-    sheet.write_number(r, 1, req.total, total_num_fmt)
+    if req.total is not None:
+        sheet.write_number(r, 1, req.total, total_num_fmt)
 
     sheet.set_column(0, 0, 34)
     sheet.set_column(1, 2, 16)
@@ -141,8 +156,8 @@ def _pdf(req: StatisticsExportRequest) -> bytes:
     story.append(Spacer(1, 14))
 
     data = [[_rtl(h) for h in req.headers]]
-    data += [[_rtl(r.label), f"{r.count:,}", f"{r.percentage:.2f}%"] for r in req.rows]
-    data.append([_rtl(req.total_label), f"{req.total:,}", ""])
+    data += [[_rtl(r.label), _num(r.count), f"{r.percentage:.2f}%"] for r in req.rows]
+    data.append([_rtl(req.total_label), _num(req.total), ""])
 
     table = Table(data, repeatRows=1, colWidths=[260, 110, 90])
     table.setStyle(
