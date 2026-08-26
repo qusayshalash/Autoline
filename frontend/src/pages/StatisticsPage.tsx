@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 
 import type { FilterRule } from "../api/client";
-import type { AggFunc, Granularity } from "../api/statistics";
+import type { Granularity } from "../api/statistics";
 import {
   exportStatistics,
   fetchColumnSuggestions,
@@ -51,8 +51,6 @@ export default function StatisticsPage() {
   const [mode, setMode] = useState<AnalysisMode>("breakdown");
   const [pivotColumn, setPivotColumn] = useState("");
   const [measure, setMeasure] = useState<PivotMeasure>("count");
-  const [measureColumn, setMeasureColumn] = useState("");
-  const [agg, setAgg] = useState<AggFunc>("count");
 
   // Hebrew is the language these files are written in, so their values are already
   // readable and translating them would be the odd choice; in Arabic and English the
@@ -86,8 +84,6 @@ export default function StatisticsPage() {
   useEffect(() => {
     setFilters([]);
     setHidden(new Set());
-    setMeasureColumn("");
-    setAgg("count");
   }, [datasetId]);
 
   // The second axis defaults to whatever the first is not: the pairing that answers a
@@ -115,7 +111,7 @@ export default function StatisticsPage() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["statistics", datasetId, groupBy, filters, granularity, measureColumn, agg],
+    queryKey: ["statistics", datasetId, groupBy, filters, granularity],
     queryFn: () =>
       fetchStatistics(datasetId, {
         group_by: groupBy,
@@ -123,8 +119,6 @@ export default function StatisticsPage() {
         granularity,
         sort: granularity && isDateColumn(columns, groupBy) ? "value" : "count",
         limit: 50,
-        measure_column: measureColumn || null,
-        agg,
       }),
     enabled: !!datasetId && !!groupBy && mode === "breakdown",
     placeholderData: (prev) => prev,
@@ -152,16 +146,6 @@ export default function StatisticsPage() {
     () => (stats ? buildRows(stats, t, lang, translate, hidden) : []),
     [stats, t, lang, translate, hidden]
   );
-
-  /** What the measure column is called on screen, e.g. "متوسط سنة الصنع". Read off the
-   *  response, so a heading never describes a request that is still in flight. */
-  const measureLabel = useMemo(() => {
-    if (!stats?.measure_column || stats.agg === "count") return undefined;
-    return t("statistics.measure_heading", {
-      agg: t(`statistics.agg_${stats.agg}`),
-      column: columnLabel(stats.measure_column, lang),
-    });
-  }, [stats?.measure_column, stats?.agg, t, lang]);
 
   /** The manufacturer the filters pin down, if they pin exactly one down. */
   const brandSubject = useMemo(() => {
@@ -201,20 +185,14 @@ export default function StatisticsPage() {
         ]
           .filter(Boolean)
           .join(" — "),
-        headers: [
-          t("statistics.value"),
-          measureLabel ?? t("statistics.count"),
-          t("statistics.share"),
-        ],
+        headers: [t("statistics.value"), t("statistics.count"), t("statistics.share")],
         rows: visible.map((r) => ({
           label: r.label,
-          count: measureLabel ? (r.measure ?? 0) : r.count,
+          count: r.count,
           percentage: r.percentage,
         })),
         total_label: t("statistics.total"),
-        // Aggregates have no total - a column of averages does not add up to anything -
-        // so the total row is left off rather than filled with a number that misleads.
-        total: measureLabel ? undefined : visible.reduce((a, r) => a + r.count, 0),
+        total: visible.reduce((a, r) => a + r.count, 0),
       });
     } finally {
       setExporting(false);
@@ -246,16 +224,10 @@ export default function StatisticsPage() {
         onFilters={setFilters}
         granularity={granularity}
         onGranularity={setGranularity}
-        measureColumn={measureColumn}
-        onMeasureColumn={setMeasureColumn}
-        agg={agg}
-        onAgg={setAgg}
         translate={translate}
         onReset={() => {
           setFilters([]);
           setHidden(new Set());
-          setMeasureColumn("");
-          setAgg("count");
         }}
         isFetching={mode === "pivot" ? pivotFetching : isFetching}
       />
@@ -283,13 +255,12 @@ export default function StatisticsPage() {
             </div>
 
             <div className="stats-toggle" role="group" aria-label={t("pivot.measure") ?? ""}>
-              {(["count", "row", "column", "total", "lift"] as PivotMeasure[]).map((m) => (
+              {(["count", "row", "column", "total"] as PivotMeasure[]).map((m) => (
                 <button
                   key={m}
                   type="button"
                   className={measure === m ? "active" : ""}
                   onClick={() => setMeasure(m)}
-                  title={t(`pivot.measure_${m}_hint`) ?? ""}
                 >
                   {t(`pivot.measure_${m}`)}
                 </button>
@@ -337,24 +308,22 @@ export default function StatisticsPage() {
               </span>
             </div>
 
-            {!measureLabel && (
-              <div className="stats-toggle" role="group" aria-label={t("statistics.display") ?? ""}>
-                <button
-                  type="button"
-                  className={showPercent ? "" : "active"}
-                  onClick={() => setShowPercent(false)}
-                >
-                  {t("statistics.counts")}
-                </button>
-                <button
-                  type="button"
-                  className={showPercent ? "active" : ""}
-                  onClick={() => setShowPercent(true)}
-                >
-                  {t("statistics.percentages")}
-                </button>
-              </div>
-            )}
+            <div className="stats-toggle" role="group" aria-label={t("statistics.display") ?? ""}>
+              <button
+                type="button"
+                className={showPercent ? "" : "active"}
+                onClick={() => setShowPercent(false)}
+              >
+                {t("statistics.counts")}
+              </button>
+              <button
+                type="button"
+                className={showPercent ? "active" : ""}
+                onClick={() => setShowPercent(true)}
+              >
+                {t("statistics.percentages")}
+              </button>
+            </div>
 
             <label className="stats-switch">
               <input
@@ -398,7 +367,7 @@ export default function StatisticsPage() {
             </div>
           ) : (
             <>
-              <KpiCards stats={stats} rows={rows} onToggle={toggle} measureLabel={measureLabel} />
+              <KpiCards stats={stats} rows={rows} onToggle={toggle} />
               <Suspense fallback={<div className="stats-charts-loading" />}>
                 <BreakdownCharts
                   stats={stats}
@@ -406,10 +375,8 @@ export default function StatisticsPage() {
                   showPercent={showPercent}
                   onToggle={toggle}
                   onShowAll={() => setHidden(new Set())}
-                  measureLabel={measureLabel}
                 />
               </Suspense>
-              {!measureLabel && (
               <InsightNotes
                 stats={stats}
                 rows={rows}
@@ -425,13 +392,7 @@ export default function StatisticsPage() {
                     : undefined
                 }
               />
-              )}
-              <BreakdownTable
-                rows={rows}
-                total={stats.total}
-                onToggle={toggle}
-                measureLabel={measureLabel}
-              />
+              <BreakdownTable rows={rows} total={stats.total} onToggle={toggle} />
             </>
           )}
         </>

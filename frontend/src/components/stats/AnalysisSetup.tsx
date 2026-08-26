@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import type { FilterOp, FilterRule } from "../../api/client";
-import type { AggFunc, ColumnSuggestion, Granularity } from "../../api/statistics";
+import type { ColumnSuggestion, Granularity } from "../../api/statistics";
 import { columnLabel } from "../../data/columnDictionary";
 import { translateValue } from "../../data/valueDictionary";
 import ValueAutocomplete from "../ValueAutocomplete";
@@ -47,12 +47,6 @@ interface Props {
   onFilters: (filters: FilterRule[]) => void;
   granularity: Granularity;
   onGranularity: (g: Granularity) => void;
-  /** the column whose values are aggregated, and how. Empty column means the buckets
-   *  report a row count, which is the default and what every older analysis expects. */
-  measureColumn: string;
-  onMeasureColumn: (column: string) => void;
-  agg: AggFunc;
-  onAgg: (agg: AggFunc) => void;
   translate: boolean;
   onReset: () => void;
   isFetching: boolean;
@@ -73,10 +67,6 @@ export default function AnalysisSetup({
   onFilters,
   granularity,
   onGranularity,
-  measureColumn,
-  onMeasureColumn,
-  agg,
-  onAgg,
   translate,
   onReset,
   isFetching,
@@ -89,18 +79,6 @@ export default function AnalysisSetup({
     [columns]
   );
   const groupColumn = columns.find((c) => c.name === groupBy);
-
-  // Only numbers can be averaged, so only numbers are offered. An identifier is a number
-  // the file happens to store as digits - averaging a plate number is a well-formed query
-  // and a meaningless one - so columns whose values are nearly all distinct are left out
-  // on the same grounds the group-by picker warns about them.
-  const numericColumns = useMemo(
-    () =>
-      columns
-        .filter((c) => c.kind === "number" && c.approx_distinct < UNSUITABLE_DISTINCT)
-        .sort((a, b) => a.name.localeCompare(b.name)),
-    [columns]
-  );
 
   const [draft, setDraft] = useState<FilterRule | null>(null);
 
@@ -218,44 +196,6 @@ export default function AnalysisSetup({
               <option value="year">{t("statistics.by_year")}</option>
               <option value="month">{t("statistics.by_month")}</option>
               <option value="day">{t("statistics.by_day")}</option>
-            </select>
-          </label>
-        )}
-
-        {mode === "breakdown" && (
-          <label className="stats-field">
-            <span>{t("statistics.measure")}</span>
-            <select
-              value={measureColumn}
-              onChange={(e) => {
-                const column = e.target.value;
-                onMeasureColumn(column);
-                // Clearing the column has to clear the aggregate with it: the server
-                // refuses a measure column paired with "count", and refuses an aggregate
-                // with no column, so the two only ever move together.
-                if (!column) onAgg("count");
-                else if (agg === "count") onAgg("avg");
-              }}
-            >
-              <option value="">{t("statistics.measure_rows")}</option>
-              {numericColumns.map((c) => (
-                <option key={c.name} value={c.name}>
-                  {columnLabel(c.name, lang)}
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
-
-        {mode === "breakdown" && measureColumn && (
-          <label className="stats-field">
-            <span>{t("statistics.agg")}</span>
-            <select value={agg} onChange={(e) => onAgg(e.target.value as AggFunc)}>
-              {(["avg", "median", "sum", "min", "max"] as AggFunc[]).map((a) => (
-                <option key={a} value={a}>
-                  {t(`statistics.agg_${a}`)}
-                </option>
-              ))}
             </select>
           </label>
         )}

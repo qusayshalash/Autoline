@@ -7,10 +7,6 @@ export type BreakdownMode = "value" | "date" | "histogram";
 
 export type Granularity = "year" | "month" | "day";
 
-/** What a bucket reports. `count` is how many rows fell into it; the rest are computed
- *  from a second column's values. */
-export type AggFunc = "count" | "sum" | "avg" | "min" | "max" | "median";
-
 export interface BreakdownItem {
   value: string;
   count: number;
@@ -19,8 +15,6 @@ export interface BreakdownItem {
   unspecified: boolean;
   /** the synthetic bucket holding every value past the requested limit */
   other: boolean;
-  /** the aggregate over the measure column, when one was asked for */
-  measure: number | null;
   bucket_min: number | null;
   bucket_max: number | null;
 }
@@ -44,10 +38,6 @@ export interface StatisticsOut {
   items: BreakdownItem[];
   distinct_values: number;
   truncated: boolean;
-  /** echoed back, so the screen labels its figures from the response rather than from
-   *  what it happens to have in state */
-  measure_column: string | null;
-  agg: AggFunc;
   numeric: NumericSummary | null;
   /** time the server spent, in ms, reported by the API */
   execution_ms: number;
@@ -71,8 +61,6 @@ export interface StatisticsParams {
   sort?: "count" | "value";
   granularity?: Granularity;
   bins?: number;
-  measure_column?: string | null;
-  agg?: AggFunc;
 }
 
 /**
@@ -93,8 +81,6 @@ export async function fetchStatistics(
     sort: params.sort ?? "count",
     granularity: params.granularity ?? "year",
     bins: params.bins ?? 20,
-    measure_column: params.measure_column ?? null,
-    agg: params.agg ?? "count",
   });
   return { ...data, elapsed_ms: Math.round(performance.now() - started) };
 }
@@ -182,8 +168,7 @@ export interface StatisticsExportRequest {
   headers: string[];
   rows: { label: string; count: number; percentage: number }[];
   total_label: string;
-  /** left off when the rows carry aggregates, which have no meaningful total */
-  total?: number;
+  total: number;
 }
 
 /**

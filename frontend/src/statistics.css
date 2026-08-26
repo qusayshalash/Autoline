@@ -1184,19 +1184,6 @@ html[dir="rtl"] .stats-export {
   min-height: 320px;
 }
 
-/* The measure is the answer when one is asked for, so it leads the numeric columns
-   rather than sitting among them. */
-.stats-table .stats-measure-col {
-  color: var(--primary);
-  white-space: nowrap;
-}
-
-/* With the ring gone, the bar chart takes the whole row rather than leaving the space
-   the ring used to fill. */
-.stats-charts.single {
-  grid-template-columns: 1fr;
-}
-
 .stats-spinner {
   width: 26px;
   height: 26px;

@@ -6,7 +6,7 @@ import { columnLabel } from "../../data/columnDictionary";
 import EChart from "./EChart";
 import type { ChartHandle } from "./EChart";
 import { IconChart, IconDonut, IconImage } from "./StatsIcons";
-import { formatCount, formatMeasure, formatPercent } from "./labels";
+import { formatCount, formatPercent } from "./labels";
 import type { ChartRow } from "./rows";
 import { useThemeTokens } from "./useThemeTokens";
 
@@ -16,13 +16,9 @@ interface Props {
   showPercent: boolean;
   onToggle: (key: string) => void;
   onShowAll: () => void;
-  /** set when the buckets carry an aggregate rather than a row count */
-  measureLabel?: string;
 }
 
-export default function BreakdownCharts({
-  stats, rows, showPercent, onToggle, onShowAll, measureLabel,
-}: Props) {
+export default function BreakdownCharts({ stats, rows, showPercent, onToggle, onShowAll }: Props) {
   const { t, i18n } = useTranslation();
   const lang = i18n.language;
   const theme = useThemeTokens();
@@ -31,7 +27,6 @@ export default function BreakdownCharts({
 
   const visible = rows.filter((r) => !r.hidden);
   const columnName = columnLabel(stats.group_by, lang);
-  const measured = !!measureLabel;
 
   // Long Hebrew colour names and trade names need room, so categories run down the side
   // and the bars run across. Years and histogram buckets are read as a sequence, so
@@ -91,22 +86,14 @@ export default function BreakdownCharts({
 
   const barOption = useMemo(() => {
     const labels = visible.map((r) => r.label);
-    const values = visible.map((r) =>
-      measured ? (r.measure ?? 0) : showPercent ? r.percentage : r.count
-    );
+    const values = visible.map((r) => (showPercent ? r.percentage : r.count));
     const valueAxis = {
       type: "value" as const,
       inverse: horizontal && rtl,
-      // A count starts at zero because a bar's length is the figure. A measure does not:
-      // mean years of manufacture all sit near 2,025, and an axis anchored at zero draws
-      // fifty bars of visually identical length. The dot plot below encodes position
-      // rather than length, which is what makes a cropped axis honest here.
-      scale: measured,
       axisLabel: {
         color: theme.muted,
         fontSize: 11,
-        formatter: (v: number) =>
-          measured ? formatMeasure(v, lang) : showPercent ? `${v}%` : compact(v, lang),
+        formatter: (v: number) => (showPercent ? `${v}%` : compact(v, lang)),
       },
       splitLine: { lineStyle: { color: theme.border, type: "dashed" as const } },
     };
@@ -127,27 +114,11 @@ export default function BreakdownCharts({
         formatter: (params: { dataIndex: number }[]) => {
           const row = visible[params[0]?.dataIndex ?? 0];
           if (!row) return "";
-          const lines = [`<strong>${escapeHtml(row.label)}</strong>`];
-          if (measured) {
-            lines.push(
-              `${escapeHtml(measureLabel)}: ${row.measure === null ? "—" : formatMeasure(row.measure, lang)}`,
-              `${t("statistics.based_on")}: ${formatCount(row.count, lang)}`
-            );
-          } else {
-            lines.push(
-              `${t("statistics.count")}: ${formatCount(row.count, lang)}`,
-              `${t("statistics.share")}: ${formatPercent(row.percentage, lang)}`
-            );
-          }
-          // The running total counts every bucket above this one, including any the
-          // user has hidden - so it keeps matching the table, and never implies the
-          // hidden rows stopped existing.
-          if (stats.mode === "value" && !measured) {
-            lines.push(
-              `${t("statistics.cumulative")}: ${formatPercent(row.cumulative, lang)}`
-            );
-          }
-          return lines.join("<br/>");
+          return [
+            `<strong>${escapeHtml(row.label)}</strong>`,
+            `${t("statistics.count")}: ${formatCount(row.count, lang)}`,
+            `${t("statistics.share")}: ${formatPercent(row.percentage, lang)}`,
+          ].join("<br/>");
         },
       },
       // a horizontal bar chart reads bottom-up, so the ranking is reversed to put the
@@ -157,36 +128,21 @@ export default function BreakdownCharts({
         ? { ...categoryAxis, inverse: true, position: rtl ? ("right" as const) : ("left" as const) }
         : valueAxis,
       series: [
-        measured
-          ? {
-              // Position, not length: with the axis cropped to the data, the gaps between
-              // the dots are the differences between the figures.
-              //
-              // A scatter point is a coordinate pair even when one axis is categorical,
-              // so the category's index has to be supplied explicitly - a bare list of
-              // values plots nothing at all.
-              type: "scatter" as const,
-              symbolSize: 13,
-              data: values.map((v, i) => ({
-                value: horizontal ? [v, i] : [i, v],
-                itemStyle: { color: visible[i].color },
-              })),
-            }
-          : {
-              type: "bar" as const,
-              data: values.map((v, i) => ({ value: v, itemStyle: { color: visible[i].color } })),
-              barMaxWidth: 26,
-              itemStyle: {
-                borderRadius: horizontal
-                  ? rtl
-                    ? [4, 0, 0, 4]
-                    : [0, 4, 4, 0]
-                  : [4, 4, 0, 0],
-              },
-            },
+        {
+          type: "bar",
+          data: values.map((v, i) => ({ value: v, itemStyle: { color: visible[i].color } })),
+          barMaxWidth: 26,
+          itemStyle: {
+            borderRadius: horizontal
+              ? rtl
+                ? [4, 0, 0, 4]
+                : [0, 4, 4, 0]
+              : [4, 4, 0, 0],
+          },
+        },
       ],
     };
-  }, [visible, showPercent, horizontal, rtl, theme, tooltip, t, lang, stats.mode, measured, measureLabel]);
+  }, [visible, showPercent, horizontal, rtl, theme, tooltip, t, lang]);
 
   function download(handle: ChartHandle | null, suffix: string) {
     const url = handle?.toPng(theme.surface);
@@ -211,11 +167,7 @@ export default function BreakdownCharts({
   }
 
   return (
-    <section className={measured ? "stats-charts single" : "stats-charts"}>
-      {/* A ring divides a whole into its parts. An average is not a total and has no
-          parts, so under a measure there is nothing for the ring to divide and it is
-          left out rather than drawn over figures that do not add up. */}
-      {!measured && (
+    <section className="stats-charts">
       <div className="stats-panel">
         <header className="stats-panel-head">
           <h3>
@@ -245,13 +197,12 @@ export default function BreakdownCharts({
           </div>
         </div>
       </div>
-      )}
 
       <div className="stats-panel">
         <header className="stats-panel-head">
           <h3>
             <IconChart />
-            {measureLabel ?? t("statistics.comparison")}
+            {t("statistics.comparison")}
           </h3>
           <button
             type="button"

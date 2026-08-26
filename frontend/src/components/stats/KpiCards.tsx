@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 
 import type { StatisticsOut } from "../../api/statistics";
-import { formatCount, formatMeasure, formatPercent } from "./labels";
+import { formatCount, formatPercent } from "./labels";
 import type { ChartRow } from "./rows";
 
 /** Category cards beyond this are noise; the full list is in the table underneath. */
@@ -11,8 +11,6 @@ interface Props {
   stats: StatisticsOut;
   rows: ChartRow[];
   onToggle: (key: string) => void;
-  /** set when the buckets carry an aggregate rather than a row count */
-  measureLabel?: string;
 }
 
 /**
@@ -22,11 +20,10 @@ interface Props {
  * other card is a fraction of. The rest carry a count and a percentage each, in their
  * chart colour, and clicking one hides it from the charts just like the legend does.
  */
-export default function KpiCards({ stats, rows, onToggle, measureLabel }: Props) {
+export default function KpiCards({ stats, rows, onToggle }: Props) {
   const { t, i18n } = useTranslation();
   const lang = i18n.language;
   const share = stats.grand_total > 0 ? (stats.total * 100) / stats.grand_total : 0;
-  const measured = !!measureLabel;
 
   return (
     <section className="stats-kpis">
@@ -52,28 +49,12 @@ export default function KpiCards({ stats, rows, onToggle, measureLabel }: Props)
           <span className="stats-kpi-label" title={r.label}>
             {r.label}
           </span>
-          <strong className="stats-kpi-value">
-            {measured
-              ? r.measure === null
-                ? "—"
-                : formatMeasure(r.measure, lang)
-              : formatCount(r.count, lang)}
-          </strong>
+          <strong className="stats-kpi-value">{formatCount(r.count, lang)}</strong>
           <span className="stats-kpi-foot">
-            {measured ? (
-              // How many rows the figure rests on. The share bar is dropped: it measures
-              // a part against a whole, and an average is neither.
-              <span className="stats-kpi-pct">
-                {t("statistics.based_on")}: {formatCount(r.count, lang)}
-              </span>
-            ) : (
-              <>
-                <span className="stats-kpi-pct">{formatPercent(r.percentage, lang)}</span>
-                <span className="stats-kpi-track">
-                  <span style={{ width: `${Math.min(100, r.percentage)}%`, background: r.color }} />
-                </span>
-              </>
-            )}
+            <span className="stats-kpi-pct">{formatPercent(r.percentage, lang)}</span>
+            <span className="stats-kpi-track">
+              <span style={{ width: `${Math.min(100, r.percentage)}%`, background: r.color }} />
+            </span>
           </span>
         </article>
       ))}

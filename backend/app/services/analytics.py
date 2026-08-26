@@ -10,11 +10,6 @@ Three breakdown modes, chosen from the column's inferred kind:
   date      - GROUP BY a truncated year/month/day
   histogram - equal-width buckets across the numeric range
 
-A bucket reports its row count by default. Naming a measure column and an aggregate
-reports a figure drawn from that column instead - the mean year of manufacture per make
-rather than the number of vehicles per make - which is the difference between asking how
-many and asking how much.
-
 Filters and search reuse the exact builders the data grid uses (`sql_utils`), so a
 statistic always describes the same subset the user would see in the table. Values are
 bound as parameters throughout; only column names reach the SQL text, and only after
@@ -44,17 +39,6 @@ from app.services.query import column_kind, column_types
 # (degem_nm has 10k distinct values).
 _DEFAULT_ITEMS = 50
 _HARD_MAX_ITEMS = 200
-
-# The aggregates a measure column may be put through. A fixed map, not a formatted name:
-# the aggregate arrives from the request and is the one part of these queries that would
-# otherwise be user text reaching the SQL.
-_AGG_SQL = {
-    "sum": "SUM",
-    "avg": "AVG",
-    "min": "MIN",
-    "max": "MAX",
-    "median": "MEDIAN",
-}
 
 # Above this many distinct values a numeric column is bucketed into a histogram instead
 # of being grouped value by value. Years (31 distinct) stay discrete; mileage does not.
@@ -156,21 +140,6 @@ def compute(dataset_id: str, q: StatisticsQuery) -> StatisticsOut:
 
     kind = column_kind(dataset_id, q.source, q.group_by)
 
-    # A measure only exists once both halves are given. Asking for an aggregate without
-    # saying what to aggregate is a request with no answer, and silently counting instead
-    # would return a number that looks like the one asked for.
-    measure_sql = ""
-    if q.measure_column:
-        if q.measure_column not in columns:
-            raise ValueError(f"Unknown column: {q.measure_column}")
-        if q.agg == "count":
-            raise ValueError("A measure column needs an aggregate other than count")
-        # Every column is imported as text, so the measure is read as a number here and
-        # rows that do not read as one drop out of the aggregate rather than failing it.
-        measure_sql = f"TRY_CAST({sql_utils.quote_ident(q.measure_column)} AS DOUBLE)"
-    elif q.agg != "count":
-        raise ValueError(f"Aggregate {q.agg!r} needs a measure column")
-
     where_sql, params = _build_where(q, columns)
     where_clause = f" WHERE {where_sql}" if where_sql else ""
     table_sql = sql_utils.quote_ident(table)
@@ -192,19 +161,11 @@ def compute(dataset_id: str, q: StatisticsQuery) -> StatisticsOut:
             items=[],
             distinct_values=0,
             truncated=False,
-            measure_column=q.measure_column,
-            agg=q.agg,
             execution_ms=round((time.perf_counter() - started) * 1000, 1),
         )
 
     mode = _mode_for(cur, table_sql, col_sql, kind, where_clause, params)
     numeric = None
-
-    # A histogram splits a numeric column into ranges of itself, so a second column to
-    # measure has nothing to attach to. Grouping by the value instead keeps the request
-    # answerable and answers what was actually asked.
-    if mode == "histogram" and measure_sql:
-        mode = "value"
 
     if mode == "histogram":
         items, distinct, truncated, numeric = _histogram(
@@ -214,7 +175,7 @@ def compute(dataset_id: str, q: StatisticsQuery) -> StatisticsOut:
         date_parse = _date_parse_expr(cur, table_sql, col_sql) if mode == "date" else ""
         expr = _bucket_expr(q.group_by, mode, q.granularity, date_parse)
         items, distinct, truncated = _grouped(
-            cur, table_sql, expr, where_clause, params, total, limit, q.sort, measure_sql, q.agg
+            cur, table_sql, expr, where_clause, params, total, limit, q.sort
         )
         if kind == "number":
             numeric = _numeric_summary(cur, table_sql, col_sql, where_clause, params)
@@ -229,8 +190,6 @@ def compute(dataset_id: str, q: StatisticsQuery) -> StatisticsOut:
         distinct_values=distinct,
         truncated=truncated,
         numeric=numeric,
-        measure_column=q.measure_column,
-        agg=q.agg,
         execution_ms=round((time.perf_counter() - started) * 1000, 1),
     )
 
@@ -255,14 +214,7 @@ def _grouped(
     total: int,
     limit: int,
     sort: str,
-    measure_sql: str = "",
-    agg: str = "count",
 ) -> tuple[list[BreakdownItem], int, bool]:
-    if measure_sql:
-        return _grouped_measure(
-            cur, table_sql, expr, where_clause, params, total, limit, sort, measure_sql, agg
-        )
-
     # "value" ordering matters for years and months, where chronological beats popular.
     order_sql = "bucket NULLS LAST" if sort == "value" else "n DESC, bucket"
 
@@ -315,70 +267,6 @@ def _grouped(
             )
         )
     return items, distinct, truncated
-
-
-def _grouped_measure(
-    cur,
-    table_sql: str,
-    expr: str,
-    where_clause: str,
-    params: list,
-    total: int,
-    limit: int,
-    sort: str,
-    measure_sql: str,
-    agg: str,
-) -> tuple[list[BreakdownItem], int, bool]:
-    """The same split, reporting an aggregate over a second column instead of a count.
-
-    Two things differ from the counting path, both deliberate.
-
-    `count` here is how many rows actually contributed to the figure, not how many landed
-    in the bucket. Every column is stored as text, so a value only counts once it reads
-    as a number; an average over 300,000 parseable years should not be presented as
-    resting on the 316,000 rows the make happens to have.
-
-    And there is no "other" bucket. When buckets carry counts, folding the tail into one
-    row keeps the percentages adding to 100. An average has no such arithmetic - the mean
-    of everything else is a figure about a heap of unrelated categories, and putting it
-    in the same column as the real ones invites a comparison it cannot support. The
-    truncation flag still says the list was cut.
-    """
-    agg_fn = _AGG_SQL[agg]
-    # `sort == "value"` keeps years chronological. Otherwise the largest measure leads,
-    # since "which make averages the newest" is the question this view exists to answer.
-    order_sql = "bucket NULLS LAST" if sort == "value" else "m DESC, bucket"
-
-    rows = cur.execute(
-        f"""
-        WITH buckets AS (
-            SELECT {expr} AS bucket,
-                   {agg_fn}({measure_sql}) AS m,
-                   COUNT({measure_sql}) AS n
-            FROM {table_sql}{where_clause}
-            GROUP BY bucket
-        )
-        SELECT bucket, n, (SELECT COUNT(*) FROM buckets), m
-        FROM buckets
-        WHERE m IS NOT NULL
-        ORDER BY {order_sql}
-        LIMIT ?
-        """,
-        [*params, limit],
-    ).fetchall()
-
-    distinct = rows[0][2] if rows else 0
-    items = [
-        BreakdownItem(
-            value=r[0] if r[0] is not None else "",
-            count=r[1],
-            percentage=round(r[1] * 100.0 / total, 2) if total else 0.0,
-            unspecified=r[0] is None,
-            measure=float(r[3]),
-        )
-        for r in rows
-    ]
-    return items, distinct, len(items) < distinct
 
 
 def _numeric_summary(cur, table_sql: str, col_sql: str, where_clause: str, params: list):

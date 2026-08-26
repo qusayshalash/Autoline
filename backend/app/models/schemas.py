@@ -606,21 +606,11 @@ class StatisticsQuery(BaseModel):
     # numeric histograms only
     bins: int = Field(default=20, ge=2, le=100)
 
-    # What each bucket reports. Left alone, a bucket reports how many rows fell into it,
-    # which is the only question this ever answered. Naming a measure column and an
-    # aggregate instead reports a figure computed from that column's values - the mean
-    # year of manufacture per make, rather than the number of vehicles per make.
-    measure_column: Optional[str] = None
-    agg: Literal["count", "sum", "avg", "min", "max", "median"] = "count"
-
 
 class BreakdownItem(BaseModel):
     value: str
     count: int
     percentage: float
-    # The aggregate over the measure column, when one was asked for. None otherwise, and
-    # None for a bucket in which no row held a value that could be read as a number.
-    measure: Optional[float] = None
     # NULL or empty in the source - the frontend labels these "unspecified"
     unspecified: bool = False
     # the synthetic bucket holding everything past `limit`
@@ -650,10 +640,6 @@ class StatisticsOut(BaseModel):
     distinct_values: int
     truncated: bool
     numeric: Optional[NumericSummary] = None
-    # Echoed back so the screen can label its own figures without having to remember what
-    # it asked for - and so a stored or shared response explains itself.
-    measure_column: Optional[str] = None
-    agg: str = "count"
     execution_ms: float = 0.0
 
 
@@ -715,10 +701,7 @@ class PivotOut(BaseModel):
 
 class StatisticsExportRow(BaseModel):
     label: str
-    # A row count when the breakdown counted rows, and the aggregate over the measure
-    # column when it measured one - which is why this is not an int. Whichever it is, the
-    # header the client sends names it.
-    count: float
+    count: int
     percentage: float
 
 
@@ -737,9 +720,7 @@ class StatisticsExportRequest(BaseModel):
     headers: list[str] = Field(default_factory=lambda: ["Value", "Count", "Percentage"])
     rows: list[StatisticsExportRow] = Field(default_factory=list, max_length=1000)
     total_label: str = Field(default="Total", max_length=80)
-    # Left unset when the figures are aggregates: averages do not add up, and a total
-    # row under them would be a number nobody asked for.
-    total: Optional[float] = None
+    total: int = 0
 
 
 class ExportRequest(BaseModel):
