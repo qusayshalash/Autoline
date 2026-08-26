@@ -288,6 +288,42 @@ export async function purgeActivity(olderThanDays: number): Promise<ActivityPurg
   return data;
 }
 
+// ---- catalog housekeeping ----
+
+export interface HousekeepingStatus {
+  jobs_total: number;
+  jobs_retention_days: number;
+  jobs_due: number;
+  /** Old export rows kept anyway, because their file is still downloadable. */
+  jobs_held_by_exports: number;
+  cleaning_total: number;
+  cleaning_retention_days: number;
+  cleaning_due: number;
+}
+
+export interface HousekeepingSweepResult {
+  jobs_removed: number;
+  jobs_held: number;
+  cleaning_removed: number;
+}
+
+export async function fetchHousekeeping(): Promise<HousekeepingStatus> {
+  const { data } = await api.get<HousekeepingStatus>("/admin/housekeeping");
+  return data;
+}
+
+export async function setHousekeeping(
+  body: { jobs_retention_days?: number; cleaning_retention_days?: number }
+): Promise<HousekeepingStatus> {
+  const { data } = await api.patch<HousekeepingStatus>("/admin/housekeeping", body);
+  return data;
+}
+
+export async function sweepHousekeeping(): Promise<HousekeepingSweepResult> {
+  const { data } = await api.post<HousekeepingSweepResult>("/admin/housekeeping/sweep", {});
+  return data;
+}
+
 // ---- backups ----
 
 export interface BackupItem {

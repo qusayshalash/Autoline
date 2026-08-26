@@ -46,6 +46,12 @@ os.environ["DATA_DIR"] = str(_TMP_DATA)
 os.environ["ADMIN_USERNAME"] = "test_admin"
 os.environ["ADMIN_PASSWORD"] = "test-admin-pw"
 
+# The backup schedule and the catalog sweep both write on a timer of their own. Left
+# running they would delete rows in the middle of assertions about those rows, which is
+# the kind of failure that only shows up on a slow machine. The tests call both directly
+# instead - see test_housekeeping.py.
+os.environ["DISABLE_BACKGROUND_SCHEDULES"] = "1"
+
 # Hebrew values reach stdout through job-progress prints; on a Windows console that
 # defaults to cp1252 those prints raise and would be reported as a test failure in a
 # completely unrelated place.

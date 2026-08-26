@@ -25,6 +25,9 @@ from app.models.schemas import (
     BackupSummary,
     CompactionEstimate,
     CompactionOut,
+    HousekeepingRequest,
+    HousekeepingStatus,
+    HousekeepingSweepResult,
     LanguageOut,
     LockoutOut,
     OverviewOut,
@@ -40,6 +43,7 @@ from app.jobs import JobCancelled, check_cancelled, submit
 from app.models.schemas import JobOut
 from app.services import backup as backup_service
 from app.services import compaction as compaction_service
+from app.services import housekeeping as housekeeping_service
 from app.services import login_guard
 from app.services import storage as storage_service
 
@@ -292,6 +296,54 @@ def set_retention(
         actor, "storage.retention_changed", "system", "storage", "", f"{hours}h"
     )
     return storage_overview()
+
+
+# ---- catalog housekeeping ---------------------------------------------------
+#
+# The jobs and cleaning_operations tables grow with every operation and were never
+# pruned. Unlike export retention and the activity log, this sweep runs on its own
+# without being switched on - see app/services/housekeeping.py for why that is safe
+# here and not there, and for the one row it must never delete on time alone.
+
+
+@router.get("/housekeeping", response_model=HousekeepingStatus,
+            dependencies=[Depends(require_permission("system.view"))])
+def housekeeping_status() -> HousekeepingStatus:
+    return HousekeepingStatus(**housekeeping_service.status())
+
+
+@router.patch("/housekeeping", response_model=HousekeepingStatus)
+def set_housekeeping(
+    body: HousekeepingRequest,
+    actor: dict = Depends(require_permission("system.manage")),
+) -> HousekeepingStatus:
+    changed = []
+    if body.jobs_retention_days is not None:
+        days = housekeeping_service.set_jobs_retention_days(body.jobs_retention_days)
+        changed.append(f"jobs={days}d")
+    if body.cleaning_retention_days is not None:
+        days = housekeeping_service.set_cleaning_retention_days(body.cleaning_retention_days)
+        changed.append(f"cleaning={days}d")
+    if changed:
+        admin_db.log_activity(
+            actor, "housekeeping.retention_changed", "system", "housekeeping", "",
+            ", ".join(changed),
+        )
+    return HousekeepingStatus(**housekeeping_service.status())
+
+
+@router.post("/housekeeping/sweep", response_model=HousekeepingSweepResult)
+def run_housekeeping(
+    actor: dict = Depends(require_permission("system.manage")),
+) -> HousekeepingSweepResult:
+    """The same sweep the schedule runs, on demand. Offered because a policy nobody can
+    watch take effect is a policy nobody can check."""
+    result = housekeeping_service.sweep()
+    admin_db.log_activity(
+        actor, "housekeeping.swept", "system", "housekeeping", "",
+        f"{result['jobs_removed']} job(s), {result['cleaning_removed']} cleaning record(s)",
+    )
+    return HousekeepingSweepResult(**result)
 
 
 # ---- backups ----------------------------------------------------------------

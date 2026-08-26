@@ -8,6 +8,7 @@ import QueryState from "../../components/QueryState";
 import ActivityRetentionPanel from "./ActivityRetentionPanel";
 import BackupPanel from "./BackupPanel";
 import CompactionPanel from "./CompactionPanel";
+import HousekeepingPanel from "./HousekeepingPanel";
 import LockoutPanel from "./LockoutPanel";
 import StoragePanel from "./StoragePanel";
 
@@ -37,6 +38,7 @@ export default function SettingsPage() {
         <BackupPanel />
         <LockoutPanel />
         <CompactionPanel />
+        <HousekeepingPanel />
         <ActivityRetentionPanel />
 
         <AdminPanel icon={<IconSettings />} title={t("admin.settings.about")}>

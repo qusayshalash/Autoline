@@ -1,3 +1,4 @@
+import os
 import threading
 import time
 
@@ -20,6 +21,7 @@ from app.routers import (
     users,
 )
 from app.services import backup as backup_service
+from app.services import housekeeping
 from app.services import storage
 from app.services.security import bootstrap_admin
 
@@ -79,7 +81,7 @@ def on_startup() -> None:
     # backup is older than the interval. A machine that was switched off does not miss
     # its window - it takes one as soon as it comes back, which is what somebody
     # returning after a week actually wants.
-    _start_backup_schedule()
+    _start_housekeeping()
 
 
 app.include_router(auth.router)
@@ -99,7 +101,7 @@ def health() -> dict:
     return {"status": "ok"}
 
 
-# ---- backup schedule --------------------------------------------------------
+# ---- periodic housekeeping --------------------------------------------------
 
 # How often the schedule is re-examined. Not how often a backup is taken - that is the
 # configured interval. Checking is a directory listing, so it can be cheap and frequent
@@ -120,11 +122,34 @@ def _backup_if_due() -> None:
         print(f"[backup] scheduled backup failed: {exc}")
 
 
-def _start_backup_schedule() -> None:
+def _sweep_job_history() -> None:
+    """Prunes settled job rows and old cleaning records. Runs at startup and on the
+    same tick as the backup check - startup alone would never fire on a server that
+    stays up for months, which is precisely the machine where the tables grow."""
+    try:
+        swept = housekeeping.sweep()
+        if swept["jobs_removed"] or swept["cleaning_removed"]:
+            print(
+                f"[housekeeping] pruned {swept['jobs_removed']} finished job(s) and "
+                f"{swept['cleaning_removed']} cleaning record(s)"
+            )
+    except Exception as exc:  # noqa: BLE001 - never let housekeeping stop the server
+        print(f"[housekeeping] sweep failed: {exc}")
+
+
+def _start_housekeeping() -> None:
+    # The test harness sets this. Both of these write to the catalog on their own
+    # schedule, which under a test suite means a thread deleting rows while an assertion
+    # is reading them - a source of failures that appear and disappear with timing. The
+    # functions themselves are called directly by the tests that cover them.
+    if os.environ.get("DISABLE_BACKGROUND_SCHEDULES") == "1":
+        return
+
     def loop() -> None:
         while True:
             _backup_if_due()
+            _sweep_job_history()
             time.sleep(_SCHEDULE_CHECK_SECONDS)
 
     # a daemon thread: the schedule must never be the reason the process refuses to exit
-    threading.Thread(target=loop, name="backup-schedule", daemon=True).start()
+    threading.Thread(target=loop, name="housekeeping", daemon=True).start()

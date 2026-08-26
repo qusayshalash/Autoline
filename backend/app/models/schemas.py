@@ -429,6 +429,32 @@ class RetentionRequest(BaseModel):
     hours: int = Field(ge=0, le=24 * 365)
 
 
+class HousekeepingStatus(BaseModel):
+    """What the automatic catalog sweep holds and what it would remove next."""
+
+    jobs_total: int
+    jobs_retention_days: int
+    jobs_due: int
+    # Export jobs old enough to prune whose file is still downloadable, so their row has
+    # to stay: it is what tells the download endpoint the file's format.
+    jobs_held_by_exports: int
+    cleaning_total: int
+    cleaning_retention_days: int
+    cleaning_due: int
+
+
+class HousekeepingRequest(BaseModel):
+    # 0 turns that sweep off; anything positive is clamped up to a week
+    jobs_retention_days: Optional[int] = Field(default=None, ge=0, le=3650)
+    cleaning_retention_days: Optional[int] = Field(default=None, ge=0, le=3650)
+
+
+class HousekeepingSweepResult(BaseModel):
+    jobs_removed: int
+    jobs_held: int
+    cleaning_removed: int
+
+
 class UploadResponse(BaseModel):
     dataset_id: str
     original_filename: str

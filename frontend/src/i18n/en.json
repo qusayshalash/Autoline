@@ -576,6 +576,23 @@
       "purge": "Trim the log",
       "confirm": "Confirm removing {{count}} entries",
       "removed_done": "Removed {{count}} entries, and recorded it."
+    },
+    "housekeeping": {
+      "title": "Operation history",
+      "rows": "{{count}} records",
+      "hint": "This runs on its own - every half hour, and at every start. Unlike export retention and the activity log it needs no switching on, because what it removes is neither a file somebody asked for nor evidence: it is a row saying an operation finished months ago.",
+      "off": "Off",
+      "days": "Older than {{count}} days",
+      "jobs": "Finished jobs",
+      "jobs_hint": "One row per import, quality check, export, backup and compaction. A job that has not finished is never removed however old it looks - age is not evidence it is over.",
+      "jobs_state": "{{total}} rows, {{due}} of them due.",
+      "held": "And {{count}} export rows kept past their date: the file is still downloadable, and the row is what tells the download endpoint its format.",
+      "cleaning": "Cleaning history",
+      "cleaning_hint": "A longer period, deliberately: this is the record of what was done to the data - how many rows a run removed, which columns it dropped - not a note that something ran.",
+      "cleaning_state": "{{total}} records, {{due}} of them due.",
+      "sweep_now": "Sweep now",
+      "swept": "Removed {{count}} rows.",
+      "nothing_due": "Nothing is due."
     }
   },
   "statistics": {

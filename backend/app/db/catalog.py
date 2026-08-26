@@ -356,6 +356,51 @@ def is_cancelling(job_id: str) -> bool:
     return row is not None and row[0] == "cancelling"
 
 
+# The statuses a job never leaves. Only these are ever prunable: a pending or running
+# job is still being polled by whoever started it, and a "cancelling" one has not yet
+# reached the checkpoint that will settle it.
+FINISHED_JOB_STATUSES = ("done", "error", "cancelled")
+
+
+def finished_jobs_before(cutoff: datetime) -> list[dict]:
+    """Settled jobs older than the cutoff - the candidates for pruning, not the verdict.
+
+    Returns rows rather than deleting, because whether a row is actually removable is
+    not something this layer can decide: an export job is also the record that makes its
+    downloaded file reachable. See app/services/housekeeping.py.
+    """
+    placeholders = ", ".join("?" for _ in FINISHED_JOB_STATUSES)
+    conn = _connection()
+    with _lock:
+        rows = conn.execute(
+            f"SELECT id, dataset_id, kind, status, result_json FROM jobs"
+            f" WHERE created_at < ? AND status IN ({placeholders})",
+            [cutoff, *FINISHED_JOB_STATUSES],
+        ).fetchall()
+        cols = [d[0] for d in conn.description]
+    return [dict(zip(cols, r)) for r in rows]
+
+
+def delete_jobs(job_ids: list[str]) -> int:
+    """Deletes exactly the listed jobs. Returns how many rows went."""
+    if not job_ids:
+        return 0
+    placeholders = ", ".join("?" for _ in job_ids)
+    conn = _connection()
+    with _lock:
+        removed = conn.execute(
+            f"SELECT COUNT(*) FROM jobs WHERE id IN ({placeholders})", list(job_ids)
+        ).fetchone()[0]
+        conn.execute(f"DELETE FROM jobs WHERE id IN ({placeholders})", list(job_ids))
+    return removed
+
+
+def count_jobs() -> int:
+    conn = _connection()
+    with _lock:
+        return conn.execute("SELECT COUNT(*) FROM jobs").fetchone()[0]
+
+
 # ---- cleaning operations ----
 
 def record_cleaning_operation(
@@ -399,6 +444,34 @@ def list_cleaning_operations(dataset_id: str) -> list[dict]:
         ).fetchall()
         cols = [d[0] for d in conn.description]
     return [dict(zip(cols, r)) for r in rows]
+
+
+def count_cleaning_operations_before(cutoff: datetime) -> int:
+    conn = _connection()
+    with _lock:
+        return conn.execute(
+            "SELECT COUNT(*) FROM cleaning_operations WHERE created_at < ?", [cutoff]
+        ).fetchone()[0]
+
+
+def delete_cleaning_operations_before(cutoff: datetime) -> int:
+    """Age is the only filter offered, for the same reason it is the only one offered on
+    the activity log: this is the record of what was done to somebody's data - how many
+    rows a run removed, which columns it dropped - and a history that can be edited row
+    by row is not a history."""
+    conn = _connection()
+    with _lock:
+        removed = conn.execute(
+            "SELECT COUNT(*) FROM cleaning_operations WHERE created_at < ?", [cutoff]
+        ).fetchone()[0]
+        conn.execute("DELETE FROM cleaning_operations WHERE created_at < ?", [cutoff])
+    return removed
+
+
+def count_cleaning_operations() -> int:
+    conn = _connection()
+    with _lock:
+        return conn.execute("SELECT COUNT(*) FROM cleaning_operations").fetchone()[0]
 
 
 # ---- users ----
