@@ -1,4 +1,4 @@
-import { BarChart, PieChart } from "echarts/charts";
+import { BarChart, PieChart, ScatterChart } from "echarts/charts";
 import {
   GridComponent,
   LegendComponent,
@@ -10,11 +10,12 @@ import { CanvasRenderer } from "echarts/renderers";
 import { useEffect, useImperativeHandle, useRef } from "react";
 import type { Ref } from "react";
 
-// Only the pieces these charts need are registered, so the bundle carries a donut and a
-// bar chart rather than all of ECharts.
+// Only the pieces these charts need are registered, so the bundle carries a donut, a
+// bar chart and a dot plot rather than all of ECharts.
 echarts.use([
   PieChart,
   BarChart,
+  ScatterChart,
   TooltipComponent,
   LegendComponent,
   GridComponent,

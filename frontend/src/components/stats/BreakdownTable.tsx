@@ -46,9 +46,15 @@ export default function BreakdownTable({ rows, total, onToggle, measureLabel }: 
               {hasMeasure && <th className="num stats-measure-col">{measureLabel}</th>}
               <th className="num">{t(hasMeasure ? "statistics.based_on" : "statistics.count")}</th>
               <th className="num">{t("statistics.share")}</th>
-              <th className="num" title={t("statistics.cumulative_hint") ?? ""}>
-                {t("statistics.cumulative")}
-              </th>
+              {/* The running total only reads as a Pareto curve because the buckets are
+                  ordered by size. Under a measure they are ordered by the measure, so
+                  the same column would be a running sum down a list sorted by something
+                  unrelated to it - a number with no reading. */}
+              {!hasMeasure && (
+                <th className="num" title={t("statistics.cumulative_hint") ?? ""}>
+                  {t("statistics.cumulative")}
+                </th>
+              )}
               <th className="col-bar">{t("statistics.distribution")}</th>
             </tr>
           </thead>
@@ -73,7 +79,9 @@ export default function BreakdownTable({ rows, total, onToggle, measureLabel }: 
                 )}
                 <td className="num">{formatCount(r.count, lang)}</td>
                 <td className="num strong">{formatPercent(r.percentage, lang)}</td>
-                <td className="num stats-cumulative">{formatPercent(r.cumulative, lang)}</td>
+                {!hasMeasure && (
+                  <td className="num stats-cumulative">{formatPercent(r.cumulative, lang)}</td>
+                )}
                 <td className="col-bar">
                   <span className="stats-minibar">
                     <span style={{ width: `${(r.count / max) * 100}%`, background: r.color }} />
@@ -93,7 +101,7 @@ export default function BreakdownTable({ rows, total, onToggle, measureLabel }: 
               <td className="num strong">{formatPercent(sum(rows), lang)}</td>
               {/* The cumulative column needs no total of its own: its last row is the
                   total, by construction. */}
-              <td />
+              {!hasMeasure && <td />}
               <td />
             </tr>
           </tfoot>

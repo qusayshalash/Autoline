@@ -97,11 +97,16 @@ export default function BreakdownCharts({
     const valueAxis = {
       type: "value" as const,
       inverse: horizontal && rtl,
+      // A count starts at zero because a bar's length is the figure. A measure does not:
+      // mean years of manufacture all sit near 2,025, and an axis anchored at zero draws
+      // fifty bars of visually identical length. The dot plot below encodes position
+      // rather than length, which is what makes a cropped axis honest here.
+      scale: measured,
       axisLabel: {
         color: theme.muted,
         fontSize: 11,
         formatter: (v: number) =>
-          measured ? compact(v, lang) : showPercent ? `${v}%` : compact(v, lang),
+          measured ? formatMeasure(v, lang) : showPercent ? `${v}%` : compact(v, lang),
       },
       splitLine: { lineStyle: { color: theme.border, type: "dashed" as const } },
     };
@@ -152,18 +157,33 @@ export default function BreakdownCharts({
         ? { ...categoryAxis, inverse: true, position: rtl ? ("right" as const) : ("left" as const) }
         : valueAxis,
       series: [
-        {
-          type: "bar",
-          data: values.map((v, i) => ({ value: v, itemStyle: { color: visible[i].color } })),
-          barMaxWidth: 26,
-          itemStyle: {
-            borderRadius: horizontal
-              ? rtl
-                ? [4, 0, 0, 4]
-                : [0, 4, 4, 0]
-              : [4, 4, 0, 0],
-          },
-        },
+        measured
+          ? {
+              // Position, not length: with the axis cropped to the data, the gaps between
+              // the dots are the differences between the figures.
+              //
+              // A scatter point is a coordinate pair even when one axis is categorical,
+              // so the category's index has to be supplied explicitly - a bare list of
+              // values plots nothing at all.
+              type: "scatter" as const,
+              symbolSize: 13,
+              data: values.map((v, i) => ({
+                value: horizontal ? [v, i] : [i, v],
+                itemStyle: { color: visible[i].color },
+              })),
+            }
+          : {
+              type: "bar" as const,
+              data: values.map((v, i) => ({ value: v, itemStyle: { color: visible[i].color } })),
+              barMaxWidth: 26,
+              itemStyle: {
+                borderRadius: horizontal
+                  ? rtl
+                    ? [4, 0, 0, 4]
+                    : [0, 4, 4, 0]
+                  : [4, 4, 0, 0],
+              },
+            },
       ],
     };
   }, [visible, showPercent, horizontal, rtl, theme, tooltip, t, lang, stats.mode, measured, measureLabel]);
