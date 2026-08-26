@@ -262,7 +262,7 @@ def storage_plan(
 @router.post("/storage/cleanup", response_model=StorageCleanupResult)
 def storage_cleanup(
     body: StorageCleanupRequest,
-    actor: dict = Depends(require_permission("datasets.delete")),
+    actor: dict = Depends(require_permission("system.manage")),
 ) -> StorageCleanupResult:
     """Removes derived files. Originals and databases are refused at the service layer
     regardless of what is requested, so no combination of flags can delete data."""
@@ -285,7 +285,7 @@ def storage_cleanup(
 @router.patch("/storage/retention", response_model=StorageOverview)
 def set_retention(
     body: RetentionRequest,
-    actor: dict = Depends(require_permission("system.view")),
+    actor: dict = Depends(require_permission("system.manage")),
 ) -> StorageOverview:
     hours = storage_service.set_retention_hours(body.hours)
     admin_db.log_activity(
@@ -319,7 +319,7 @@ def backup_summary() -> BackupSummary:
 @router.post("/backups", response_model=JobOut)
 def start_backup(
     body: BackupRequest,
-    actor: dict = Depends(require_permission("system.view")),
+    actor: dict = Depends(require_permission("system.manage")),
 ) -> JobOut:
     job_id = catalog.create_job("", "backup")
     admin_db.log_activity(
@@ -358,7 +358,7 @@ def _run_backup_job(job_id: str, include_originals: bool) -> None:
 
 
 @router.post("/backups/prune", response_model=BackupPruneResult)
-def prune_backups(actor: dict = Depends(require_permission("datasets.delete"))) -> BackupPruneResult:
+def prune_backups(actor: dict = Depends(require_permission("system.manage"))) -> BackupPruneResult:
     result = backup_service.prune()
     admin_db.log_activity(
         actor, "backup.pruned", "system", "backup", "", f"{result['removed']} removed"
@@ -368,7 +368,7 @@ def prune_backups(actor: dict = Depends(require_permission("datasets.delete"))) 
 
 @router.delete("/backups/{name}")
 def delete_backup(
-    name: str, actor: dict = Depends(require_permission("datasets.delete"))
+    name: str, actor: dict = Depends(require_permission("system.manage"))
 ) -> dict:
     if not backup_service.delete(name):
         raise HTTPException(404, "Backup not found")
@@ -415,7 +415,7 @@ def compaction_estimate(dataset_id: str) -> CompactionEstimate:
 
 @router.post("/datasets/{dataset_id}/compaction", response_model=JobOut)
 def start_compaction(
-    dataset_id: str, actor: dict = Depends(require_permission("datasets.delete"))
+    dataset_id: str, actor: dict = Depends(require_permission("system.manage"))
 ) -> JobOut:
     row = catalog.get_dataset(dataset_id)
     if row is None:
@@ -446,7 +446,7 @@ def _run_compaction_job(dataset_id: str, job_id: str) -> None:
 @router.patch("/backups/schedule", response_model=BackupSummary)
 def set_backup_schedule(
     body: BackupScheduleRequest,
-    actor: dict = Depends(require_permission("system.view")),
+    actor: dict = Depends(require_permission("system.manage")),
 ) -> BackupSummary:
     """Sets how often a backup should be taken, in hours. 0 turns the schedule off."""
     hours = backup_service.set_interval_hours(admin_db.set_setting, body.hours)

@@ -91,7 +91,7 @@ export default function StoragePanel() {
     );
   }
 
-  const canClean = can("datasets.delete");
+  const canClean = can("system.manage");
   const previewBytes = preview?.reduce((a, p) => a + p.bytes, 0) ?? 0;
 
   return (
@@ -152,7 +152,7 @@ export default function StoragePanel() {
             key={h}
             type="button"
             className={storage.retention_hours === h ? "active" : ""}
-            disabled={retention.isPending || !can("system.view")}
+            disabled={retention.isPending || !can("system.manage")}
             onClick={() => retention.mutate(h)}
           >
             {h === 0 ? t("admin.storage.retention_off") : t("admin.storage.retention_hours", { hours: h })}

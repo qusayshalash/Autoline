@@ -27,7 +27,7 @@ export default function CompactionPanel() {
   const { data: files } = useQuery({ queryKey: ["datasets"], queryFn: listDatasets });
   const ready = (files ?? []).filter((f) => f.status === "ready");
 
-  if (!can("datasets.delete") || ready.length === 0) return null;
+  if (!can("system.manage") || ready.length === 0) return null;
 
   return (
     <AdminPanel icon={<IconDatabase />} title={t("admin.compaction.title")}>

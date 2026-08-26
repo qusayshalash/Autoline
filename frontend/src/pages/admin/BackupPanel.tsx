@@ -131,7 +131,7 @@ export default function BackupPanel() {
   }
 
   const busy = run.isPending || progress !== null;
-  const canDelete = can("datasets.delete");
+  const canDelete = can("system.manage");
 
   return (
     <AdminPanel

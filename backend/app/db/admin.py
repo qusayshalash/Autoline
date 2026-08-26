@@ -39,6 +39,11 @@ PERMISSIONS: list[tuple[str, str, str]] = [
     # and to no other, so an existing admin role does not silently gain it on upgrade.
     ("activity.purge", "activity", "delete"),
     ("system.view", "system", "view"),
+    # Split out of system.view, which used to gate the writes as well - so a role could
+    # not be given sight of disk usage and backup history without also being handed the
+    # retention policy that deletes files. See _split_system_view for how existing
+    # installs keep what they had.
+    ("system.manage", "system", "manage"),
 ]
 
 ALL_PERMISSION_KEYS = [p[0] for p in PERMISSIONS]
@@ -96,6 +101,27 @@ def new_id() -> str:
     return uuid.uuid4().hex
 
 
+def _split_system_view(conn) -> None:
+    """Gives system.manage to every role that already held system.view.
+
+    system.manage did not exist before; system.view gated both reading system state and
+    changing it. Seeding alone would not reach a built-in role that already exists - only
+    super_admin picks up later permissions - so an upgrade would quietly take backups and
+    retention away from the Admin role on every installation already running.
+
+    This is a split of one permission into two, not a new capability, so the rule is that
+    nobody loses anything: whoever could do it yesterday can still do it today, and the
+    separation only matters for roles created from here on. It runs on every startup and
+    does nothing after the first, since the grants it would add are already there.
+    """
+    conn.execute(
+        "INSERT INTO role_permissions (role_slug, permission_key)"
+        " SELECT role_slug, 'system.manage' FROM role_permissions"
+        " WHERE permission_key = 'system.view'"
+        " ON CONFLICT DO NOTHING"
+    )
+
+
 def seed() -> None:
     """Writes the permission catalogue and the built-in roles.
 
@@ -128,6 +154,8 @@ def seed() -> None:
                         " ON CONFLICT DO NOTHING",
                         [role["slug"], key],
                     )
+
+        _split_system_view(conn)
 
         # super admin always holds every permission, including ones added by a later
         # version of the app
