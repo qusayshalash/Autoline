@@ -104,6 +104,20 @@ class ActivityPage(BaseModel):
     total: int
 
 
+class ActivityPurgeRequest(BaseModel):
+    """How far back to keep. Age is the only filter offered: see purge_activity_before."""
+
+    # A floor of a week, so a slip in the box cannot wipe this morning's trail. The
+    # ceiling is only there to keep the value sane.
+    older_than_days: int = Field(ge=7, le=3650)
+
+
+class ActivityPurgeResult(BaseModel):
+    removed: int
+    remaining: int
+    cutoff: str
+
+
 class OverviewOut(BaseModel):
     users_total: int
     users_active: int

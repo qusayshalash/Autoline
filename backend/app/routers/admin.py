@@ -2,6 +2,7 @@
 system status. Everything here reports real state - nothing is stubbed."""
 
 import time
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Optional
 
@@ -15,6 +16,8 @@ from app.db import catalog
 from app.models.schemas import (
     ActivityItem,
     ActivityPage,
+    ActivityPurgeRequest,
+    ActivityPurgeResult,
     BackupOut,
     BackupPruneResult,
     BackupRequest,
@@ -125,6 +128,46 @@ def activity(
     limit = min(max(limit, 1), 200)
     rows, total = admin_db.list_activity(limit=limit, offset=max(offset, 0), action=action, actor_id=actor_id)
     return ActivityPage(items=[_activity_item(r) for r in rows], total=total)
+
+
+def _activity_cutoff(older_than_days: int) -> datetime:
+    return datetime.now(timezone.utc) - timedelta(days=older_than_days)
+
+
+@router.get("/activity/purge-plan", response_model=ActivityPurgeResult,
+            dependencies=[Depends(require_permission("activity.purge"))])
+def activity_purge_plan(older_than_days: int = 90) -> ActivityPurgeResult:
+    """What a purge at this cutoff would remove, without removing it."""
+    older_than_days = min(max(older_than_days, 7), 3650)
+    cutoff = _activity_cutoff(older_than_days)
+    removed = admin_db.count_activity_before(cutoff)
+    _, total = admin_db.list_activity(limit=1)
+    return ActivityPurgeResult(removed=removed, remaining=total - removed, cutoff=cutoff.isoformat())
+
+
+@router.post("/activity/purge", response_model=ActivityPurgeResult)
+def activity_purge(
+    body: ActivityPurgeRequest,
+    actor: dict = Depends(require_permission("activity.purge")),
+) -> ActivityPurgeResult:
+    """Drops entries older than the cutoff, then records that it happened.
+
+    The order matters: logging first would delete the entry that says the purge ran if
+    the clock ever sat oddly, and the whole point of writing it is that the trail says
+    what was removed from it and by whom.
+    """
+    cutoff = _activity_cutoff(body.older_than_days)
+    removed = admin_db.purge_activity_before(cutoff)
+    admin_db.log_activity(
+        actor,
+        "activity.purged",
+        "system",
+        "activity",
+        "",
+        f"{removed} entr(ies) older than {body.older_than_days} day(s)",
+    )
+    _, total = admin_db.list_activity(limit=1)
+    return ActivityPurgeResult(removed=removed, remaining=total, cutoff=cutoff.isoformat())
 
 
 @router.get("/languages", response_model=list[LanguageOut],

@@ -34,10 +34,20 @@ PERMISSIONS: list[tuple[str, str, str]] = [
     ("roles.manage", "roles", "manage"),
     ("languages.manage", "languages", "manage"),
     ("activity.view", "activity", "view"),
+    # Pruning the audit trail is deliberately not part of "manage the system". It is
+    # seeded onto super_admin alone - the loop below grants every permission to that role
+    # and to no other, so an existing admin role does not silently gain it on upgrade.
+    ("activity.purge", "activity", "delete"),
     ("system.view", "system", "view"),
 ]
 
 ALL_PERMISSION_KEYS = [p[0] for p in PERMISSIONS]
+
+# What a full administrator gets. Everything except pruning the audit trail: an admin who
+# can erase the record of what they did leaves a log that proves nothing, so that one
+# stays with the single protected role. Written as a subtraction so a permission added
+# later reaches admin by default and has to be excluded on purpose.
+ADMIN_PERMISSION_KEYS = [k for k in ALL_PERMISSION_KEYS if k != "activity.purge"]
 
 # Built-in roles. The permission sets reproduce exactly what the role guards allowed
 # before permissions existed, so upgrading changes nobody's access.
@@ -52,7 +62,7 @@ SYSTEM_ROLES: list[dict] = [
         "slug": "admin",
         "name": "Admin",
         "description": "Manages users, files and system configuration.",
-        "permissions": ALL_PERMISSION_KEYS,
+        "permissions": ADMIN_PERMISSION_KEYS,
     },
     {
         "slug": "editor",
@@ -324,6 +334,33 @@ def list_activity(
         ).fetchall()
         cols = [d[0] for d in conn.description]
     return [dict(zip(cols, r)) for r in rows], total
+
+
+def count_activity_before(cutoff: datetime) -> int:
+    """How many entries a purge at this cutoff would remove. Asked before deleting, so
+    the confirmation names a real number rather than a guess."""
+    conn = get_connection()
+    with db_lock:
+        return conn.execute(
+            "SELECT COUNT(*) FROM activity_log WHERE occurred_at < ?", [cutoff]
+        ).fetchone()[0]
+
+
+def purge_activity_before(cutoff: datetime) -> int:
+    """Deletes every entry older than the cutoff and reports how many went.
+
+    Only ever a cutoff - there is no way to delete one entry, or entries by actor, or by
+    action. A trail that can be edited selectively is not evidence of anything, and the
+    line most worth erasing would be the one somebody wanted gone. Age is the only filter
+    that cannot be aimed.
+    """
+    conn = get_connection()
+    with db_lock:
+        removed = conn.execute(
+            "SELECT COUNT(*) FROM activity_log WHERE occurred_at < ?", [cutoff]
+        ).fetchone()[0]
+        conn.execute("DELETE FROM activity_log WHERE occurred_at < ?", [cutoff])
+    return removed
 
 
 # ---- settings ----

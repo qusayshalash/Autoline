@@ -556,6 +556,18 @@
       "freed": "Reclaimed {{size}} - from {{before}} to {{after}}",
       "already_compact": "The file is already compact; it was left untouched.",
       "failed": "Compaction failed"
+    },
+    "activity_retention": {
+      "title": "Activity log retention",
+      "hint": "The log is append-only. It can be trimmed by age alone — not by entry and not by user, because the first line worth erasing is the one somebody wants gone. The trim itself is recorded.",
+      "cutoff": "Keep for",
+      "days": "Older than {{count}} days",
+      "remaining": "{{count}} entries",
+      "will_remove": "{{count}} entries would be removed.",
+      "nothing_to_remove": "Nothing is older than this.",
+      "purge": "Trim the log",
+      "confirm": "Confirm removing {{count}} entries",
+      "removed_done": "Removed {{count}} entries, and recorded it."
     }
   },
   "statistics": {

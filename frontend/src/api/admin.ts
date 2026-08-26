@@ -265,6 +265,29 @@ export async function setRetention(hours: number): Promise<StorageOverview> {
   return data;
 }
 
+// ---- activity trail ----
+
+export interface ActivityPurgeResult {
+  removed: number;
+  remaining: number;
+  cutoff: string;
+}
+
+/** What a purge at this cutoff would remove, without removing it. */
+export async function fetchActivityPurgePlan(olderThanDays: number): Promise<ActivityPurgeResult> {
+  const { data } = await api.get<ActivityPurgeResult>("/admin/activity/purge-plan", {
+    params: { older_than_days: olderThanDays },
+  });
+  return data;
+}
+
+export async function purgeActivity(olderThanDays: number): Promise<ActivityPurgeResult> {
+  const { data } = await api.post<ActivityPurgeResult>("/admin/activity/purge", {
+    older_than_days: olderThanDays,
+  });
+  return data;
+}
+
 // ---- backups ----
 
 export interface BackupItem {
