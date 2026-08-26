@@ -19,7 +19,7 @@ _MEDIA_TYPES = {
 
 
 @router.post("/{dataset_id}/export", response_model=JobOut)
-def request_export(dataset_id: str, req: ExportRequest, user: dict = Depends(require_permission("datasets.export"))) -> JobOut:
+def request_export(dataset_id: str, req: ExportRequest, user: dict = Depends(require_permission("datasets.view", "datasets.export"))) -> JobOut:
     row = catalog.get_dataset(dataset_id)
     if row is None:
         raise HTTPException(404, "Dataset not found")
@@ -33,7 +33,7 @@ def request_export(dataset_id: str, req: ExportRequest, user: dict = Depends(req
 
 
 @router.get("/{dataset_id}/export/{job_id}/download")
-def download_export(dataset_id: str, job_id: str, user: dict = Depends(require_permission("datasets.export"))) -> FileResponse:
+def download_export(dataset_id: str, job_id: str, user: dict = Depends(require_permission("datasets.view", "datasets.export"))) -> FileResponse:
     job = catalog.get_job(job_id)
     if job is None or job["dataset_id"] != dataset_id:
         raise HTTPException(404, "Export job not found")

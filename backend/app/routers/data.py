@@ -2,7 +2,7 @@ from typing import Literal, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from app.auth import get_current_user
+from app.auth import require_permission
 from app.db import catalog
 from app.models.schemas import (
     ColumnProfile,
@@ -20,6 +20,12 @@ from app.services import stats as stats_service
 
 router = APIRouter(prefix="/api/datasets", tags=["data"])
 
+# Every route below hands back the contents of a dataset - rows, columns, the values a
+# column holds, a summary of them. They are all `datasets.view`, the same permission the
+# statistics screen has always required, because they are the same data: reading it a row
+# at a time is not a lesser act than reading it aggregated. Being signed in is not the
+# question these endpoints have to answer.
+
 
 def _require_ready(dataset_id: str) -> dict:
     row = catalog.get_dataset(dataset_id)
@@ -31,7 +37,7 @@ def _require_ready(dataset_id: str) -> dict:
 
 
 @router.post("/{dataset_id}/data", response_model=DataPage)
-def get_data(dataset_id: str, q: DataQuery, user: dict = Depends(get_current_user)) -> DataPage:
+def get_data(dataset_id: str, q: DataQuery, user: dict = Depends(require_permission("datasets.view"))) -> DataPage:
     _require_ready(dataset_id)
     try:
         return query_service.fetch_page(dataset_id, q)
@@ -48,7 +54,7 @@ def get_data_get(
     sort_dir: Literal["asc", "desc"] = "asc",
     search: Optional[str] = None,
     source: Literal["raw", "cleaned"] = "cleaned",
-    user: dict = Depends(get_current_user),
+    user: dict = Depends(require_permission("datasets.view")),
 ) -> DataPage:
     """GET variant for simple browsing (no filters) - handy for shareable links / bookmarking."""
     _require_ready(dataset_id)
@@ -74,7 +80,7 @@ def get_distinct_values(
     search: Optional[str] = None,
     source: Literal["raw", "cleaned"] = "cleaned",
     limit: Optional[int] = None,
-    user: dict = Depends(get_current_user),
+    user: dict = Depends(require_permission("datasets.view")),
 ) -> DistinctValuesOut:
     _require_ready(dataset_id)
     try:
@@ -84,7 +90,7 @@ def get_distinct_values(
 
 
 @router.post("/{dataset_id}/group", response_model=GroupPage)
-def get_groups(dataset_id: str, q: GroupQuery, user: dict = Depends(get_current_user)) -> GroupPage:
+def get_groups(dataset_id: str, q: GroupQuery, user: dict = Depends(require_permission("datasets.view"))) -> GroupPage:
     _require_ready(dataset_id)
     try:
         return query_service.fetch_groups(dataset_id, q)
@@ -96,14 +102,14 @@ def get_groups(dataset_id: str, q: GroupQuery, user: dict = Depends(get_current_
 def get_columns(
     dataset_id: str,
     source: Literal["raw", "cleaned"] = "cleaned",
-    user: dict = Depends(get_current_user),
+    user: dict = Depends(require_permission("datasets.view")),
 ) -> ColumnsOut:
     _require_ready(dataset_id)
     return query_service.column_types(dataset_id, source)
 
 
 @router.get("/{dataset_id}/stats", response_model=StatsOut)
-def get_stats(dataset_id: str, user: dict = Depends(get_current_user)) -> StatsOut:
+def get_stats(dataset_id: str, user: dict = Depends(require_permission("datasets.view"))) -> StatsOut:
     _require_ready(dataset_id)
     return stats_service.get_stats(dataset_id)
 
@@ -119,7 +125,7 @@ def get_stats(dataset_id: str, user: dict = Depends(get_current_user)) -> StatsO
 def get_profile_overview(
     dataset_id: str,
     source: str = "cleaned",
-    user: dict = Depends(get_current_user),
+    user: dict = Depends(require_permission("datasets.view")),
 ) -> ProfileOverview:
     _require_ready(dataset_id)
     return ProfileOverview(**profiling.profile_overview(dataset_id, source))
@@ -130,7 +136,7 @@ def get_column_profile(
     dataset_id: str,
     column: str,
     source: str = "cleaned",
-    user: dict = Depends(get_current_user),
+    user: dict = Depends(require_permission("datasets.view")),
 ) -> ColumnProfile:
     _require_ready(dataset_id)
     try:

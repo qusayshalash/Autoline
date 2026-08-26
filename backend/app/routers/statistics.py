@@ -113,7 +113,7 @@ def post_pivot(
 def export_statistics(
     dataset_id: str,
     req: StatisticsExportRequest,
-    user: dict = Depends(require_permission("datasets.export")),
+    user: dict = Depends(require_permission("datasets.view", "datasets.export")),
 ) -> Response:
     """Returns the current breakdown as a file, built and sent on this request.
 

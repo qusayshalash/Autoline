@@ -4,7 +4,7 @@ import json
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from fastapi import File as FastAPIFile
 
-from app.auth import get_current_user, require_permission
+from app.auth import require_permission
 from app.services import clocks
 from app.config import settings
 from app.db import admin as admin_db
@@ -164,12 +164,12 @@ def start_import(
 
 
 @router.get("", response_model=list[DatasetOut])
-def list_datasets(user: dict = Depends(get_current_user)) -> list[DatasetOut]:
+def list_datasets(user: dict = Depends(require_permission("datasets.view"))) -> list[DatasetOut]:
     return [_dataset_out(r) for r in catalog.list_datasets()]
 
 
 @router.get("/{dataset_id}", response_model=DatasetOut)
-def get_dataset(dataset_id: str, user: dict = Depends(get_current_user)) -> DatasetOut:
+def get_dataset(dataset_id: str, user: dict = Depends(require_permission("datasets.view"))) -> DatasetOut:
     row = catalog.get_dataset(dataset_id)
     if row is None:
         raise HTTPException(404, "Dataset not found")
@@ -177,7 +177,7 @@ def get_dataset(dataset_id: str, user: dict = Depends(get_current_user)) -> Data
 
 
 @router.get("/{dataset_id}/quality", response_model=QualityReport)
-def get_quality(dataset_id: str, user: dict = Depends(get_current_user)) -> QualityReport:
+def get_quality(dataset_id: str, user: dict = Depends(require_permission("datasets.view"))) -> QualityReport:
     """The stored report. 404 until one has been produced - datasets imported before
     this existed have none until the report is requested."""
     row = catalog.get_dataset(dataset_id)

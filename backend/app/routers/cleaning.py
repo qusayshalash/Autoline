@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 
-from app.auth import get_current_user, require_permission
+from app.auth import require_permission
 from app.db import admin as admin_db
 from app.db import catalog
 from app.models.schemas import CleaningConfig, CleaningResult
@@ -31,7 +31,7 @@ def clean_dataset(
 
 
 @router.get("/{dataset_id}/cleaning-operations")
-def get_cleaning_history(dataset_id: str, user: dict = Depends(get_current_user)) -> list[dict]:
+def get_cleaning_history(dataset_id: str, user: dict = Depends(require_permission("datasets.view"))) -> list[dict]:
     row = catalog.get_dataset(dataset_id)
     if row is None:
         raise HTTPException(404, "Dataset not found")
