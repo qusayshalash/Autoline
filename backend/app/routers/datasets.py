@@ -13,6 +13,7 @@ from app.db.connection import datasets as dataset_connections
 from app.jobs import submit
 from app.models.schemas import (
     DatasetOut,
+    DatasetRenameRequest,
     ImportConfig,
     JobOut,
     QualityReport,
@@ -206,6 +207,24 @@ def start_quality(
     job_id = catalog.create_job(dataset_id, "quality")
     submit(quality.run_quality_job, dataset_id, job_id)
     return JobOut(id=job_id, dataset_id=dataset_id, kind="quality", status="pending", progress="")
+
+
+@router.patch("/{dataset_id}", response_model=DatasetOut)
+def rename_dataset(
+    dataset_id: str, body: DatasetRenameRequest, user: dict = Depends(require_permission("datasets.clean"))
+) -> DatasetOut:
+    """The display name only - never the id, and never anything on disk, both of which
+    are keyed off the id precisely so a rename can be this cheap and this safe."""
+    row = catalog.get_dataset(dataset_id)
+    if row is None:
+        raise HTTPException(404, "Dataset not found")
+    name = body.name.strip()
+    if not name:
+        raise HTTPException(400, "Name cannot be empty")
+    old_name = row.get("original_filename") or ""
+    catalog.update_dataset(dataset_id, original_filename=name)
+    admin_db.log_activity(user, "dataset.renamed", "dataset", dataset_id, name, f"was: {old_name}")
+    return _dataset_out(catalog.get_dataset(dataset_id))
 
 
 @router.delete("/{dataset_id}")

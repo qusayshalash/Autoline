@@ -3,9 +3,19 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { apiErrorMessage, getDataset, getJob, repreviewDataset, startImport, type UploadResponse } from "../api/client";
+import {
+  apiErrorMessage,
+  cancelJob,
+  getDataset,
+  getJob,
+  repreviewDataset,
+  startImport,
+  type UploadResponse,
+} from "../api/client";
 import Breadcrumb from "../components/Breadcrumb";
 import ErrorBanner from "../components/ErrorBanner";
+
+const TERMINAL_STATUSES = new Set(["done", "error", "cancelled"]);
 
 const DELIMITERS = [
   { value: ",", labelKey: "import_wizard.delimiter_comma" },
@@ -78,8 +88,13 @@ export default function ImportWizardPage() {
     queryKey: ["job", jobId],
     queryFn: () => getJob(jobId!),
     enabled: !!jobId,
-    refetchInterval: (q) => (q.state.data?.status === "done" || q.state.data?.status === "error" ? false : 1000),
+    refetchInterval: (q) => (TERMINAL_STATUSES.has(q.state.data?.status ?? "") ? false : 1000),
     refetchIntervalInBackground: true,
+  });
+
+  const cancelMutation = useMutation({
+    mutationFn: () => cancelJob(jobId!),
+    onSuccess: (updated) => qc.setQueryData(["job", jobId], updated),
   });
 
   useEffect(() => {
@@ -165,15 +180,29 @@ export default function ImportWizardPage() {
           </>
         )}
 
-        {job && job.status !== "done" && job.status !== "error" && (
+        {job && !TERMINAL_STATUSES.has(job.status) && (
           <div>
-            <p>{t("import_wizard.importing")}</p>
+            <p>{job.status === "cancelling" ? t("import_wizard.cancelling") : t("import_wizard.importing")}</p>
             <p className="muted">
               {job.progress.startsWith("normalizing:")
                 ? t("import_wizard.normalizing_progress", { count: job.progress.split(":")[1] })
                 : job.progress}
             </p>
+            {job.status !== "cancelling" && (
+              <button
+                type="button"
+                className="btn secondary"
+                onClick={() => cancelMutation.mutate()}
+                disabled={cancelMutation.isPending}
+              >
+                {t("import_wizard.cancel")}
+              </button>
+            )}
           </div>
+        )}
+
+        {job?.status === "cancelled" && (
+          <p style={{ color: "var(--danger)" }}>{t("import_wizard.cancelled")}</p>
         )}
 
         {job?.status === "done" && (

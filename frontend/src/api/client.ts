@@ -12,6 +12,12 @@ api.interceptors.response.use(
     if (error?.response?.status === 401 && !url.includes("/auth/") && window.location.pathname !== "/login") {
       window.location.href = "/login";
     }
+    // The permission list AuthContext holds is fetched once and cached; a 403 means it
+    // is already wrong (a role change landed on the server since), so the tab is told to
+    // re-fetch it rather than waiting for the next scheduled refresh.
+    if (error?.response?.status === 403) {
+      window.dispatchEvent(new Event("auth:forbidden"));
+    }
     return Promise.reject(error);
   }
 );
@@ -172,7 +178,7 @@ export interface JobOut {
   id: string;
   dataset_id: string;
   kind: string;
-  status: "pending" | "running" | "done" | "error";
+  status: "pending" | "running" | "cancelling" | "cancelled" | "done" | "error";
   progress: string;
   result?: Record<string, unknown> | null;
   error_message?: string | null;
@@ -261,8 +267,18 @@ export async function deleteDataset(datasetId: string): Promise<void> {
   await api.delete(`/datasets/${datasetId}`);
 }
 
+export async function renameDataset(datasetId: string, name: string): Promise<Dataset> {
+  const { data } = await api.patch<Dataset>(`/datasets/${datasetId}`, { name });
+  return data;
+}
+
 export async function getJob(jobId: string): Promise<JobOut> {
   const { data } = await api.get<JobOut>(`/jobs/${jobId}`);
+  return data;
+}
+
+export async function cancelJob(jobId: string): Promise<JobOut> {
+  const { data } = await api.post<JobOut>(`/jobs/${jobId}/cancel`, {});
   return data;
 }
 

@@ -27,6 +27,7 @@ from typing import Callable, Optional
 from app.config import settings
 from app.db import catalog
 from app.db.connection import datasets, read_locked
+from app.jobs import JobCancelled, check_cancelled
 from app.services import sql_utils
 
 csv.field_size_limit(10_000_000)
@@ -327,10 +328,18 @@ def analyze(dataset_id: str, on_progress: Optional[Progress] = None) -> dict:
 
 def run_quality_job(dataset_id: str, job_id: str) -> None:
     """Background wrapper, so a multi-million-row file does not hold a request open."""
+
+    def progress(stage: str) -> None:
+        catalog.update_job(job_id, progress=stage)
+        check_cancelled(job_id)
+
     try:
+        check_cancelled(job_id)
         catalog.update_job(job_id, status="running", progress="starting")
-        report = analyze(dataset_id, lambda p: catalog.update_job(job_id, progress=p))
+        report = analyze(dataset_id, progress)
         catalog.update_dataset(dataset_id, quality_json=report)
         catalog.update_job(job_id, status="done", progress="ready", result_json={"verdict": report["verdict"]})
+    except JobCancelled:
+        catalog.update_job(job_id, status="cancelled", progress="cancelled")
     except Exception as exc:  # noqa: BLE001 - surface the failure on the job record
         catalog.update_job(job_id, status="error", error_message=str(exc))

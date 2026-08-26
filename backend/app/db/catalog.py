@@ -54,8 +54,8 @@ def _init_schema(conn: duckdb.DuckDBPyConnection) -> None:
         CREATE TABLE IF NOT EXISTS jobs (
             id VARCHAR PRIMARY KEY,
             dataset_id VARCHAR,
-            kind VARCHAR,                 -- import|clean|export
-            status VARCHAR,               -- pending|running|done|error
+            kind VARCHAR,                 -- import|quality|export|backup|compact
+            status VARCHAR,               -- pending|running|cancelling|cancelled|done|error
             progress VARCHAR,
             result_json VARCHAR,
             error_message VARCHAR,
@@ -327,6 +327,33 @@ def get_job(job_id: str) -> Optional[dict]:
     if row is None:
         return None
     return dict(zip(cols, row))
+
+
+def request_job_cancel(job_id: str) -> Optional[str]:
+    """Marks a still-ahead job for cancellation. Returns the status it now has, or None
+    if there is no such job. A job already at done/error/cancelled is left alone -
+    cancellation only interrupts a job that has not finished yet."""
+    conn = _connection()
+    with _lock:
+        row = conn.execute("SELECT status FROM jobs WHERE id = ?", [job_id]).fetchone()
+        if row is None:
+            return None
+        status = row[0]
+        if status in ("pending", "running"):
+            conn.execute(
+                "UPDATE jobs SET status = 'cancelling', updated_at = ? WHERE id = ?",
+                [_now(), job_id],
+            )
+            return "cancelling"
+        return status
+
+
+def is_cancelling(job_id: str) -> bool:
+    """Cheap poll used from inside a running job at a checkpoint."""
+    conn = _connection()
+    with _lock:
+        row = conn.execute("SELECT status FROM jobs WHERE id = ?", [job_id]).fetchone()
+    return row is not None and row[0] == "cancelling"
 
 
 # ---- cleaning operations ----

@@ -446,6 +446,10 @@ class ImportConfig(BaseModel):
     has_header: bool = True
 
 
+class DatasetRenameRequest(BaseModel):
+    name: str = Field(min_length=1, max_length=255)
+
+
 class DatasetOut(BaseModel):
     id: str
     original_filename: str

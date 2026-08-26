@@ -36,7 +36,7 @@ from app.models.schemas import (
     SystemStatusOut,
     UpdateLanguagesRequest,
 )
-from app.jobs import submit
+from app.jobs import JobCancelled, check_cancelled, submit
 from app.models.schemas import JobOut
 from app.services import backup as backup_service
 from app.services import compaction as compaction_service
@@ -331,12 +331,14 @@ def start_backup(
 
 
 def _run_backup_job(job_id: str, include_originals: bool) -> None:
+    def progress(stage: str) -> None:
+        catalog.update_job(job_id, progress=stage)
+        check_cancelled(job_id)
+
     try:
+        check_cancelled(job_id)  # never started if it was cancelled while still queued
         catalog.update_job(job_id, status="running", progress="starting")
-        manifest = backup_service.run(
-            include_originals=include_originals,
-            progress=lambda stage: catalog.update_job(job_id, progress=stage),
-        )
+        manifest = backup_service.run(include_originals=include_originals, progress=progress)
         if not manifest["verified"]:
             # the files are kept: an unverified backup is evidence, and deleting it would
             # destroy the only record of what went wrong
@@ -353,6 +355,8 @@ def _run_backup_job(job_id: str, include_originals: bool) -> None:
             job_id, status="done", progress="ready",
             result_json={**manifest, "pruned": pruned},
         )
+    except JobCancelled:
+        catalog.update_job(job_id, status="cancelled", progress="cancelled")
     except Exception as exc:  # noqa: BLE001 - the job record is where failures surface
         catalog.update_job(job_id, status="error", error_message=str(exc))
 
@@ -434,11 +438,16 @@ def start_compaction(
 
 def _run_compaction_job(dataset_id: str, job_id: str) -> None:
     try:
+        check_cancelled(job_id)  # never started if it was cancelled while still queued
         catalog.update_job(job_id, status="running", progress="starting")
         result = compaction_service.compact(
-            dataset_id, progress=lambda stage: catalog.update_job(job_id, progress=stage)
+            dataset_id,
+            progress=lambda stage: catalog.update_job(job_id, progress=stage),
+            should_cancel=lambda: catalog.is_cancelling(job_id),
         )
         catalog.update_job(job_id, status="done", progress="ready", result_json=result.as_dict())
+    except JobCancelled:
+        catalog.update_job(job_id, status="cancelled", progress="cancelled")
     except Exception as exc:  # noqa: BLE001 - the job record is where failures surface
         catalog.update_job(job_id, status="error", error_message=str(exc))
 

@@ -15,6 +15,7 @@ from fastapi import UploadFile
 from app.config import settings
 from app.db import catalog
 from app.db.connection import datasets
+from app.jobs import JobCancelled, check_cancelled
 
 ALLOWED_DELIMITERS = [",", ";", "|", "\t"]
 
@@ -196,6 +197,7 @@ def import_csv_to_duckdb(
 
 def run_import_job(dataset_id: str, job_id: str, encoding: str, delimiter: str, has_header: bool) -> None:
     try:
+        check_cancelled(job_id)  # a queued job can be cancelled before it does anything
         catalog.update_job(job_id, status="running", progress="normalizing")
         catalog.update_dataset(dataset_id, status="normalizing")
 
@@ -204,9 +206,14 @@ def run_import_job(dataset_id: str, job_id: str, encoding: str, delimiter: str, 
 
         def progress(lines: int) -> None:
             catalog.update_job(job_id, progress=f"normalizing:{lines}")
+            check_cancelled(job_id)
 
         normalize_to_utf8(src, dst, encoding, delimiter, on_progress=progress)
 
+        # Once DuckDB starts loading the file there is nothing left worth stopping for -
+        # the load is one statement and the dataset would be left half-imported either
+        # way, so cancellation is only honored up to here.
+        check_cancelled(job_id)
         catalog.update_job(job_id, progress="importing")
         catalog.update_dataset(dataset_id, status="importing")
 
@@ -248,6 +255,12 @@ def run_import_job(dataset_id: str, job_id: str, encoding: str, delimiter: str, 
             progress="ready",
             result_json={"row_count": row_count, "quality_verdict": verdict},
         )
+    except JobCancelled:
+        # The dataset is left as "error" rather than a new "cancelled" state: the file
+        # on disk is a half-normalized or half-loaded leftover either way, and "error" is
+        # already the status that offers re-import instead of pretending it's usable.
+        catalog.update_dataset(dataset_id, status="error", error_message="Import cancelled")
+        catalog.update_job(job_id, status="cancelled", progress="cancelled")
     except Exception as exc:  # noqa: BLE001 - surface any failure to the job/dataset record
         catalog.update_dataset(dataset_id, status="error", error_message=str(exc))
         catalog.update_job(job_id, status="error", error_message=str(exc))

@@ -29,6 +29,7 @@ from typing import Callable, Optional
 import duckdb
 
 from app.db.connection import datasets
+from app.jobs import JobCancelled
 from app.services.backup import _snapshot, _table_counts
 
 Progress = Optional[Callable[[str], None]]
@@ -80,12 +81,25 @@ def estimate(dataset_id: str) -> dict:
     }
 
 
-def compact(dataset_id: str, *, progress: Progress = None) -> CompactionResult:
-    """Rewrites the dataset file without its free space. Verifies before swapping."""
+def compact(
+    dataset_id: str, *, progress: Progress = None, should_cancel: Optional[Callable[[], bool]] = None
+) -> CompactionResult:
+    """Rewrites the dataset file without its free space. Verifies before swapping.
+
+    should_cancel is polled at the two points where stopping is still free: before the
+    rewrite starts, and after it is verified but before it replaces the original. Once
+    "swapping" is announced nothing checks it again - that is the point of no return the
+    module docstring describes, and a cancellation request arriving after it is simply
+    too late to matter.
+    """
 
     def say(stage: str) -> None:
         if progress:
             progress(stage)
+
+    def check_cancel() -> None:
+        if should_cancel and should_cancel():
+            raise JobCancelled(dataset_id)
 
     started = time.perf_counter()
     path = datasets.path_for(dataset_id)
@@ -103,47 +117,56 @@ def compact(dataset_id: str, *, progress: Progress = None) -> CompactionResult:
     # would write into the file that is about to be replaced, and its work would vanish
     # with the swap.
     with datasets.write_lock(dataset_id):
-        say("writing")
-        expected = _snapshot(datasets.cursor(dataset_id), replacement)
-
-        say("verifying")
-        errors = _verify_against(replacement, expected)
-        if errors:
-            replacement.unlink(missing_ok=True)
-            raise RuntimeError("compaction produced an unusable file: " + "; ".join(errors))
-
-        after = replacement.stat().st_size
-        if after >= before / MIN_WORTHWHILE_RATIO:
-            # Nothing meaningful to reclaim. The original is untouched either way, so
-            # this costs a temporary file and nothing else.
-            replacement.unlink(missing_ok=True)
-            return CompactionResult(
-                dataset_id=dataset_id,
-                bytes_before=before,
-                bytes_after=before,
-                freed_bytes=0,
-                tables=expected,
-                duration_s=time.perf_counter() - started,
-                skipped=True,
-                reason="already compact",
-            )
-
-        say("swapping")
-        # The connection has to go before the file can be replaced on Windows, and the
-        # pool reopens on next use.
-        datasets.close(dataset_id)
-        wal = path.with_suffix(path.suffix + ".wal")
-
-        path.replace(displaced)
         try:
-            replacement.replace(path)
-        except OSError:
-            # put the original back rather than leave the dataset without a file
-            displaced.replace(path)
+            check_cancel()
+            say("writing")
+            expected = _snapshot(datasets.cursor(dataset_id), replacement)
+
+            say("verifying")
+            errors = _verify_against(replacement, expected)
+            if errors:
+                replacement.unlink(missing_ok=True)
+                raise RuntimeError("compaction produced an unusable file: " + "; ".join(errors))
+
+            after = replacement.stat().st_size
+            if after >= before / MIN_WORTHWHILE_RATIO:
+                # Nothing meaningful to reclaim. The original is untouched either way, so
+                # this costs a temporary file and nothing else.
+                replacement.unlink(missing_ok=True)
+                return CompactionResult(
+                    dataset_id=dataset_id,
+                    bytes_before=before,
+                    bytes_after=before,
+                    freed_bytes=0,
+                    tables=expected,
+                    duration_s=time.perf_counter() - started,
+                    skipped=True,
+                    reason="already compact",
+                )
+
+            # Last point cancellation is still free: the replacement is verified but the
+            # original has not moved.
+            check_cancel()
+
+            say("swapping")
+            # The connection has to go before the file can be replaced on Windows, and the
+            # pool reopens on next use.
+            datasets.close(dataset_id)
+            wal = path.with_suffix(path.suffix + ".wal")
+
+            path.replace(displaced)
+            try:
+                replacement.replace(path)
+            except OSError:
+                # put the original back rather than leave the dataset without a file
+                displaced.replace(path)
+                raise
+            if wal.exists():
+                wal.unlink()
+            displaced.unlink(missing_ok=True)
+        except JobCancelled:
+            replacement.unlink(missing_ok=True)
             raise
-        if wal.exists():
-            wal.unlink()
-        displaced.unlink(missing_ok=True)
 
     say("done")
     # read through the pool again, so the result reflects a working dataset rather than

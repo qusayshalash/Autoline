@@ -15,7 +15,7 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
 from app.config import settings
 from app.db import catalog
 from app.db.connection import datasets
-from app.jobs import submit
+from app.jobs import JobCancelled, check_cancelled, submit
 from app.models.schemas import ExportRequest
 from app.services import sql_utils
 from app.services.pdf_fonts import data_font
@@ -142,6 +142,10 @@ def export_pdf(dataset_id: str, req: ExportRequest, out_path: Path) -> None:
 
 def run_export_job(dataset_id: str, job_id: str, req: ExportRequest) -> None:
     try:
+        # Each format writes its file in one pass with no checkpoint in between, so this
+        # is the only point cancellation can be honored - a queued export never starts;
+        # one already writing runs to completion, same as a single long SQL statement.
+        check_cancelled(job_id)
         catalog.update_job(job_id, status="running", progress="exporting")
         out_dir = settings.exports_dir / dataset_id
         out_dir.mkdir(parents=True, exist_ok=True)
@@ -163,6 +167,8 @@ def run_export_job(dataset_id: str, job_id: str, req: ExportRequest) -> None:
             progress="ready",
             result_json={"filename": out_path.name, "size_bytes": size_bytes, "format": req.format},
         )
+    except JobCancelled:
+        catalog.update_job(job_id, status="cancelled", progress="cancelled")
     except Exception as exc:  # noqa: BLE001
         catalog.update_job(job_id, status="error", error_message=str(exc))
 

@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import type { CompactionResult } from "../../api/admin";
 import { fetchCompactionEstimate, startCompaction } from "../../api/admin";
-import { apiErrorMessage, getJob, listDatasets } from "../../api/client";
+import { apiErrorMessage, cancelJob, getJob, listDatasets } from "../../api/client";
 import { useAuth } from "../../auth/AuthContext";
 import { IconDatabase } from "../../components/admin/AdminIcons";
 import { AdminPanel, formatBytes } from "../../components/admin/AdminUI";
@@ -52,6 +52,8 @@ function CompactionRow({
   const { t } = useTranslation();
   const [progress, setProgress] = useState<string | null>(null);
   const [done, setDone] = useState<CompactionResult | null>(null);
+  const [jobId, setJobId] = useState<string | null>(null);
+  const [cancelling, setCancelling] = useState(false);
   const timer = useRef<number | null>(null);
 
   const { data: estimate, refetch } = useQuery({
@@ -68,20 +70,24 @@ function CompactionRow({
   async function run() {
     onError(null);
     setDone(null);
+    setCancelling(false);
     setProgress(t("admin.compaction.running"));
     try {
       const job = await startCompaction(datasetId);
+      setJobId(job.id);
       timer.current = window.setInterval(async () => {
         try {
           const state = await getJob(job.id);
-          setProgress(describe(state.progress, t));
-          if (state.status === "done" || state.status === "error") {
+          setProgress(state.status === "cancelling" ? t("admin.compaction.cancelling") : describe(state.progress, t));
+          if (state.status === "done" || state.status === "error" || state.status === "cancelled") {
             if (timer.current) window.clearInterval(timer.current);
             timer.current = null;
             setProgress(null);
+            setJobId(null);
+            setCancelling(false);
             if (state.status === "error") {
               onError(state.error_message || t("admin.compaction.failed"));
-            } else {
+            } else if (state.status === "done") {
               setDone(state.result as unknown as CompactionResult);
               refetch();
             }
@@ -90,11 +96,23 @@ function CompactionRow({
           if (timer.current) window.clearInterval(timer.current);
           timer.current = null;
           setProgress(null);
+          setJobId(null);
           onError(apiErrorMessage(e, t("common.error_generic")));
         }
       }, POLL_MS);
     } catch (e) {
       setProgress(null);
+      onError(apiErrorMessage(e, t("common.error_generic")));
+    }
+  }
+
+  async function cancel() {
+    if (!jobId) return;
+    setCancelling(true);
+    try {
+      await cancelJob(jobId);
+    } catch (e) {
+      setCancelling(false);
       onError(apiErrorMessage(e, t("common.error_generic")));
     }
   }
@@ -107,7 +125,19 @@ function CompactionRow({
       </span>
       <span className="compaction-action">
         {progress ? (
-          <span className="backup-progress">{progress}</span>
+          <>
+            <span className="backup-progress">{progress}</span>
+            {jobId && (
+              <button
+                type="button"
+                className="btn secondary small"
+                disabled={cancelling}
+                onClick={cancel}
+              >
+                {t("common.cancel")}
+              </button>
+            )}
+          </>
         ) : (
           <button type="button" className="btn secondary small" onClick={run}>
             {t("admin.compaction.run")}

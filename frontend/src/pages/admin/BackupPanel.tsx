@@ -10,7 +10,7 @@ import {
   setBackupSchedule,
   startBackup,
 } from "../../api/admin";
-import { apiErrorMessage, getJob } from "../../api/client";
+import { apiErrorMessage, cancelJob, getJob } from "../../api/client";
 import { useAuth } from "../../auth/AuthContext";
 import { IconDatabase, IconTrash } from "../../components/admin/AdminIcons";
 import { AdminPanel, formatBytes } from "../../components/admin/AdminUI";
@@ -47,6 +47,7 @@ export default function BackupPanel() {
   const [includeOriginals, setIncludeOriginals] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState<string | null>(null);
+  const [jobId, setJobId] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
   const timer = useRef<number | null>(null);
 
@@ -81,14 +82,16 @@ export default function BackupPanel() {
       setProgress(t("admin.backup.starting"));
     },
     onSuccess: (job) => {
+      setJobId(job.id);
       timer.current = window.setInterval(async () => {
         try {
           const state = await getJob(job.id);
-          setProgress(describe(state.progress, t));
-          if (state.status === "done" || state.status === "error") {
+          setProgress(state.status === "cancelling" ? t("admin.backup.cancelling") : describe(state.progress, t));
+          if (state.status === "done" || state.status === "error" || state.status === "cancelled") {
             if (timer.current) window.clearInterval(timer.current);
             timer.current = null;
             setProgress(null);
+            setJobId(null);
             if (state.status === "error") {
               setError(state.error_message || t("admin.backup.failed"));
             }
@@ -98,6 +101,7 @@ export default function BackupPanel() {
           if (timer.current) window.clearInterval(timer.current);
           timer.current = null;
           setProgress(null);
+          setJobId(null);
           setError(apiErrorMessage(e, t("common.error_generic")));
         }
       }, POLL_MS);
@@ -106,6 +110,11 @@ export default function BackupPanel() {
       setProgress(null);
       setError(apiErrorMessage(e, t("common.error_generic")));
     },
+  });
+
+  const cancel = useMutation({
+    mutationFn: () => cancelJob(jobId!),
+    onError: (e) => setError(apiErrorMessage(e, t("common.error_generic"))),
   });
 
   const schedule = useMutation({
@@ -224,6 +233,16 @@ export default function BackupPanel() {
           {busy ? t("admin.backup.running") : t("admin.backup.run_now")}
         </button>
         {progress && <span className="backup-progress">{progress}</span>}
+        {jobId && (
+          <button
+            type="button"
+            className="btn secondary"
+            disabled={cancel.isPending}
+            onClick={() => cancel.mutate()}
+          >
+            {t("common.cancel")}
+          </button>
+        )}
       </div>
 
       {backups && backups.length > 0 && (

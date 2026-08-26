@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
-import { apiErrorMessage, deleteDataset, listDatasets, uploadDataset } from "../api/client";
+import { apiErrorMessage, deleteDataset, listDatasets, renameDataset, uploadDataset } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
 import EmptyState from "../components/EmptyState";
 import ErrorBanner from "../components/ErrorBanner";
@@ -30,8 +30,15 @@ export default function DatasetsPage() {
   const canUpload = can("datasets.upload");
   const canDelete = can("datasets.delete");
   const canRunQuality = can("datasets.view");
+  // The permission set has no separate "rename" key - renaming is a metadata edit in the
+  // same class as cleaning, which is already the "update" permission for datasets, so it
+  // rides on that instead of adding a permission for one small screen.
+  const canRename = can("datasets.clean");
   const [progress, setProgress] = useState(0);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [renameError, setRenameError] = useState<string | null>(null);
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState("");
   // which dataset's import report is expanded, if any
   const [quality, setQualityFor] = useState<string | null>(null);
 
@@ -58,6 +65,31 @@ export default function DatasetsPage() {
     onError: (err) => setDeleteError(apiErrorMessage(err, t("common.error_generic"))),
   });
 
+  const renameMutation = useMutation({
+    mutationFn: ({ id, name }: { id: string; name: string }) => renameDataset(id, name),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["datasets"] });
+      setRenamingId(null);
+      setRenameError(null);
+    },
+    onError: (err) => setRenameError(apiErrorMessage(err, t("common.error_generic"))),
+  });
+
+  function startRename(id: string, currentName: string) {
+    setRenamingId(id);
+    setRenameValue(currentName);
+    setRenameError(null);
+  }
+
+  function commitRename(id: string) {
+    const name = renameValue.trim();
+    if (!name) {
+      setRenamingId(null);
+      return;
+    }
+    renameMutation.mutate({ id, name });
+  }
+
   function statusBadgeClass(status: string) {
     if (status === "ready") return "ready";
     if (status === "error") return "error";
@@ -80,6 +112,7 @@ export default function DatasetsPage() {
         </div>
       )}
       <ErrorBanner message={deleteError} />
+      <ErrorBanner message={renameError} />
 
       {isLoading ? (
         <div className="dataset-list">
@@ -94,7 +127,50 @@ export default function DatasetsPage() {
           {datasets.map((d) => (
             <div className="dataset-row" key={d.id}>
               <div>
-                <div style={{ fontWeight: 600 }}>{d.original_filename}</div>
+                {renamingId === d.id ? (
+                  <div style={{ display: "flex", gap: "0.4rem", alignItems: "center" }}>
+                    <input
+                      type="text"
+                      autoFocus
+                      value={renameValue}
+                      onChange={(e) => setRenameValue(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") commitRename(d.id);
+                        if (e.key === "Escape") setRenamingId(null);
+                      }}
+                      disabled={renameMutation.isPending}
+                    />
+                    <button
+                      type="button"
+                      className="btn secondary small"
+                      disabled={renameMutation.isPending}
+                      onClick={() => commitRename(d.id)}
+                    >
+                      {t("common.save")}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn secondary small"
+                      disabled={renameMutation.isPending}
+                      onClick={() => setRenamingId(null)}
+                    >
+                      {t("common.cancel")}
+                    </button>
+                  </div>
+                ) : (
+                  <div style={{ display: "flex", gap: "0.4rem", alignItems: "center" }}>
+                    <span style={{ fontWeight: 600 }}>{d.original_filename}</span>
+                    {canRename && (
+                      <button
+                        type="button"
+                        className="linkish"
+                        onClick={() => startRename(d.id, d.original_filename)}
+                      >
+                        {t("datasets.rename")}
+                      </button>
+                    )}
+                  </div>
+                )}
                 <div className="muted">
                   {t("datasets.rows_raw")}: {d.row_count_raw?.toLocaleString() ?? "-"} ·{" "}
                   {t("datasets.rows_cleaned")}: {d.row_count_cleaned?.toLocaleString() ?? "-"} ·{" "}

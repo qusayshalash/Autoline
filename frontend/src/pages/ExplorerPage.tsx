@@ -6,6 +6,7 @@ import { Link, useParams } from "react-router-dom";
 import {
   apiErrorMessage,
   applyCleaning,
+  cancelJob,
   downloadExportUrl,
   fetchColumns,
   fetchData,
@@ -49,6 +50,8 @@ import {
 /** Which toolbar panel is expanded under the toolbar strip, if any.
  *  Filtering is a modal dialog rather than a strip panel, so it isn't listed here. */
 type Panel = "columns" | "stats" | null;
+
+const EXPORT_TERMINAL_STATUSES = new Set(["done", "error", "cancelled"]);
 
 /** Sub-second timings read better in milliseconds; anything longer in seconds. */
 function formatMs(ms: number): string {
@@ -197,8 +200,14 @@ export default function ExplorerPage() {
     queryKey: ["job", exportJobId],
     queryFn: () => getJob(exportJobId!),
     enabled: !!exportJobId,
-    refetchInterval: (q) => (q.state.data?.status === "done" || q.state.data?.status === "error" ? false : 1000),
+    refetchInterval: (q) =>
+      EXPORT_TERMINAL_STATUSES.has(q.state.data?.status ?? "") ? false : 1000,
     refetchIntervalInBackground: true,
+  });
+
+  const cancelExportMutation = useMutation({
+    mutationFn: () => cancelJob(exportJobId!),
+    onSuccess: (updated) => qc.setQueryData(["job", exportJobId], updated),
   });
 
   // Large exports complete in the background. Make the ready file immediately obvious
@@ -614,10 +623,26 @@ export default function ExplorerPage() {
                 type="button"
                 className="sheet-tool primary"
                 onClick={() => exportMutation.mutate()}
-                disabled={exportMutation.isPending || (!!exportJob && exportJob.status !== "error")}
+                disabled={
+                  exportMutation.isPending ||
+                  (!!exportJob && exportJob.status !== "error" && exportJob.status !== "cancelled")
+                }
               >
                 <IconDownload />
-                {exportJob && exportJob.status !== "error" ? t("explorer.exporting") : t("explorer.export")}
+                {exportJob && !EXPORT_TERMINAL_STATUSES.has(exportJob.status)
+                  ? t("explorer.exporting")
+                  : t("explorer.export")}
+              </button>
+            )}
+            {exportJob && (exportJob.status === "pending" || exportJob.status === "running") && (
+              <button
+                type="button"
+                className="sheet-tool"
+                onClick={() => cancelExportMutation.mutate()}
+                disabled={cancelExportMutation.isPending}
+              >
+                <IconClose />
+                {t("common.cancel")}
               </button>
             )}
           </>

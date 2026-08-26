@@ -145,7 +145,7 @@ def wait_for_job(client: TestClient, job_id: str, timeout: float = JOB_TIMEOUT_S
         r = client.get(f"/api/jobs/{job_id}")
         assert r.status_code == 200, r.text
         last = r.json()
-        if last["status"] in ("done", "error"):
+        if last["status"] in ("done", "error", "cancelled"):
             return last
         time.sleep(0.05)
     raise AssertionError(f"job {job_id} did not finish within {timeout}s; last state: {last}")

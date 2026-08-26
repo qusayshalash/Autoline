@@ -28,6 +28,7 @@ import duckdb
 from app.config import settings
 from app.db import catalog
 from app.db.connection import datasets
+from app.jobs import JobCancelled
 
 MANIFEST_NAME = "manifest.json"
 
@@ -162,86 +163,93 @@ def run(*, include_originals: bool = False, progress: Progress = None) -> dict:
     root = _new_backup_dir()
     name = root.name
 
-    items: list[dict] = []
-    errors: list[str] = []
+    try:
+        items: list[dict] = []
+        errors: list[str] = []
 
-    say("catalog")
-    catalog_dest = root / "catalog.duckdb"
-    # a cursor, not the shared catalog connection: this query runs for as long as the
-    # catalog takes to copy, and the rest of the app keeps reading the catalog meanwhile
-    counts = _snapshot(catalog.cursor(), catalog_dest)
-    errors += _verify(catalog_dest, counts)
-    items.append(
-        {
-            "kind": "catalog",
-            "file": "catalog.duckdb",
-            "bytes": catalog_dest.stat().st_size,
-            "tables": counts,
-        }
-    )
-
-    rows = catalog.list_datasets()
-    for i, row in enumerate(rows, start=1):
-        dataset_id = row["id"]
-        say(f"dataset:{i}/{len(rows)}")
-        dest = root / "datasets" / f"{dataset_id}.duckdb"
-        # under the write lock: an import or a cleaning run halfway through a table swap
-        # would otherwise be snapshotted mid-swap
-        with datasets.write_lock(dataset_id):
-            counts = _snapshot(datasets.cursor(dataset_id), dest)
-        errors += _verify(dest, counts)
+        say("catalog")
+        catalog_dest = root / "catalog.duckdb"
+        # a cursor, not the shared catalog connection: this query runs for as long as the
+        # catalog takes to copy, and the rest of the app keeps reading the catalog meanwhile
+        counts = _snapshot(catalog.cursor(), catalog_dest)
+        errors += _verify(catalog_dest, counts)
         items.append(
             {
-                "kind": "dataset",
-                "dataset_id": dataset_id,
-                "name": row.get("original_filename") or "",
-                "file": f"datasets/{dataset_id}.duckdb",
-                "bytes": dest.stat().st_size,
+                "kind": "catalog",
+                "file": "catalog.duckdb",
+                "bytes": catalog_dest.stat().st_size,
                 "tables": counts,
             }
         )
 
-    # 64 bytes, and without it every existing session is invalidated on restore. Copied
-    # as a plain file because it is a plain file - nothing is writing to it.
-    if settings.data_dir.joinpath("secret_key").exists():
-        say("key")
-        shutil.copy2(settings.data_dir / "secret_key", root / "secret_key")
-        items.append({"kind": "key", "file": "secret_key", "bytes": 64, "tables": {}})
-
-    if include_originals:
-        say("originals")
-        for src in sorted(settings.uploads_dir.glob("*/raw.*")):
-            dest = root / "uploads" / src.parent.name / src.name
-            dest.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(src, dest)
-            if dest.stat().st_size != src.stat().st_size:
-                errors.append(f"{src.name}: copied size does not match the original")
+        rows = catalog.list_datasets()
+        for i, row in enumerate(rows, start=1):
+            dataset_id = row["id"]
+            say(f"dataset:{i}/{len(rows)}")
+            dest = root / "datasets" / f"{dataset_id}.duckdb"
+            # under the write lock: an import or a cleaning run halfway through a table swap
+            # would otherwise be snapshotted mid-swap
+            with datasets.write_lock(dataset_id):
+                counts = _snapshot(datasets.cursor(dataset_id), dest)
+            errors += _verify(dest, counts)
             items.append(
                 {
-                    "kind": "original",
-                    "dataset_id": src.parent.name,
-                    "file": f"uploads/{src.parent.name}/{src.name}",
+                    "kind": "dataset",
+                    "dataset_id": dataset_id,
+                    "name": row.get("original_filename") or "",
+                    "file": f"datasets/{dataset_id}.duckdb",
                     "bytes": dest.stat().st_size,
-                    "tables": {},
+                    "tables": counts,
                 }
             )
 
-    manifest = {
-        "name": name,
-        "created_at": _now().isoformat(timespec="seconds"),
-        "duration_s": round(time.perf_counter() - started, 1),
-        "include_originals": include_originals,
-        "same_disk_as_data": same_disk_as_data(),
-        "total_bytes": sum(i["bytes"] for i in items),
-        "items": items,
-        "verified": not errors,
-        "errors": errors,
-    }
-    (root / MANIFEST_NAME).write_text(
-        json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
-    say("done")
-    return manifest
+        # 64 bytes, and without it every existing session is invalidated on restore. Copied
+        # as a plain file because it is a plain file - nothing is writing to it.
+        if settings.data_dir.joinpath("secret_key").exists():
+            say("key")
+            shutil.copy2(settings.data_dir / "secret_key", root / "secret_key")
+            items.append({"kind": "key", "file": "secret_key", "bytes": 64, "tables": {}})
+
+        if include_originals:
+            say("originals")
+            for src in sorted(settings.uploads_dir.glob("*/raw.*")):
+                dest = root / "uploads" / src.parent.name / src.name
+                dest.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(src, dest)
+                if dest.stat().st_size != src.stat().st_size:
+                    errors.append(f"{src.name}: copied size does not match the original")
+                items.append(
+                    {
+                        "kind": "original",
+                        "dataset_id": src.parent.name,
+                        "file": f"uploads/{src.parent.name}/{src.name}",
+                        "bytes": dest.stat().st_size,
+                        "tables": {},
+                    }
+                )
+
+        manifest = {
+            "name": name,
+            "created_at": _now().isoformat(timespec="seconds"),
+            "duration_s": round(time.perf_counter() - started, 1),
+            "include_originals": include_originals,
+            "same_disk_as_data": same_disk_as_data(),
+            "total_bytes": sum(i["bytes"] for i in items),
+            "items": items,
+            "verified": not errors,
+            "errors": errors,
+        }
+        (root / MANIFEST_NAME).write_text(
+            json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+        say("done")
+        return manifest
+    except JobCancelled:
+        # Nothing here is a finished backup yet - no manifest means nothing else in the
+        # app will ever list or verify this folder, so it is just disk space to give back
+        # rather than a partial backup worth keeping.
+        shutil.rmtree(root, ignore_errors=True)
+        raise
 
 
 # ---- reading and pruning -----------------------------------------------------------
