@@ -5,7 +5,7 @@ import { fetchOverview, fetchSystemStatus } from "../../api/admin";
 import { IconSettings } from "../../components/admin/AdminIcons";
 import { AdminPanel } from "../../components/admin/AdminUI";
 import QueryState from "../../components/QueryState";
-import ActivityRetentionPanel from "./ActivityRetentionPanel";
+import ActivityTrimPanel from "./ActivityTrimPanel";
 import BackupPanel from "./BackupPanel";
 import CompactionPanel from "./CompactionPanel";
 import HousekeepingPanel from "./HousekeepingPanel";
@@ -39,7 +39,7 @@ export default function SettingsPage() {
         <LockoutPanel />
         <CompactionPanel />
         <HousekeepingPanel />
-        <ActivityRetentionPanel />
+        <ActivityTrimPanel />
 
         <AdminPanel icon={<IconSettings />} title={t("admin.settings.about")}>
           <dl className="detail-list">

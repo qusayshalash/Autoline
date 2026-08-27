@@ -565,9 +565,9 @@
       "already_compact": "The file is already compact; it was left untouched.",
       "failed": "Compaction failed"
     },
-    "activity_retention": {
-      "title": "Activity log retention",
-      "hint": "The log is append-only. It can be trimmed by age alone — not by entry and not by user, because the first line worth erasing is the one somebody wants gone. The trim itself is recorded.",
+    "activity_trim": {
+      "title": "Trim the activity log",
+      "hint": "This never runs on its own: not one line goes without you picking a period, pressing the button and confirming. The log is append-only, and it is trimmed by age alone — not by entry and not by user, because the first line worth erasing is the one somebody wants gone. The trim itself is recorded.",
       "cutoff": "Keep for",
       "days": "Older than {{count}} days",
       "remaining": "{{count}} entries",

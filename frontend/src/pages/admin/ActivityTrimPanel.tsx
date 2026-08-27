@@ -27,7 +27,7 @@ const DEFAULT_CUTOFF = 365;
  * The count is fetched before anything is removed, so the confirmation names a real
  * number, and the purge writes itself into the trail it just shortened.
  */
-export default function ActivityRetentionPanel() {
+export default function ActivityTrimPanel() {
   const { t, i18n } = useTranslation();
   const { can } = useAuth();
   const queryClient = useQueryClient();
@@ -69,19 +69,19 @@ export default function ActivityRetentionPanel() {
   return (
     <AdminPanel
       icon={<IconActivity />}
-      title={t("admin.activity_retention.title")}
+      title={t("admin.activity_trim.title")}
       note={
         plan.data
-          ? t("admin.activity_retention.remaining", {
+          ? t("admin.activity_trim.remaining", {
               count: plan.data.remaining.toLocaleString(lang),
             })
           : undefined
       }
     >
       <ErrorBanner message={error} />
-      <p className="muted admin-note">{t("admin.activity_retention.hint")}</p>
+      <p className="muted admin-note">{t("admin.activity_trim.hint")}</p>
 
-      <div className="storage-retention" role="group" aria-label={t("admin.activity_retention.cutoff") ?? ""}>
+      <div className="storage-retention" role="group" aria-label={t("admin.activity_trim.cutoff") ?? ""}>
         {CUTOFFS.map((d) => (
           <button
             key={d}
@@ -93,20 +93,20 @@ export default function ActivityRetentionPanel() {
               setDone(null);
             }}
           >
-            {t("admin.activity_retention.days", { count: d })}
+            {t("admin.activity_trim.days", { count: d })}
           </button>
         ))}
       </div>
 
       <p className="admin-note">
         {removable > 0
-          ? t("admin.activity_retention.will_remove", { count: removable.toLocaleString(lang) })
-          : t("admin.activity_retention.nothing_to_remove")}
+          ? t("admin.activity_trim.will_remove", { count: removable.toLocaleString(lang) })
+          : t("admin.activity_trim.nothing_to_remove")}
       </p>
 
       {done !== null && (
         <p className="admin-note" role="status">
-          {t("admin.activity_retention.removed_done", { count: done.toLocaleString(lang) })}
+          {t("admin.activity_trim.removed_done", { count: done.toLocaleString(lang) })}
         </p>
       )}
 
@@ -120,7 +120,7 @@ export default function ActivityRetentionPanel() {
               onClick={() => purge.mutate()}
             >
               <IconTrash />
-              {t("admin.activity_retention.confirm", { count: removable.toLocaleString(lang) })}
+              {t("admin.activity_trim.confirm", { count: removable.toLocaleString(lang) })}
             </button>
             <button type="button" className="btn secondary" onClick={() => setConfirming(false)}>
               {t("common.cancel")}
@@ -138,7 +138,7 @@ export default function ActivityRetentionPanel() {
             }}
           >
             <IconTrash />
-            {t("admin.activity_retention.purge")}
+            {t("admin.activity_trim.purge")}
           </button>
         )}
       </div>
