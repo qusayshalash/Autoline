@@ -471,6 +471,8 @@
   margin-inline-start: auto;
 }
 
+/* Two panels side by side. Used as-is by the overview, which has exactly two and so
+ * cannot develop the gap problem the modifier below exists to solve. */
 .admin-columns {
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
@@ -478,8 +480,39 @@
   align-items: start;
 }
 
+/* A column that stacks its own panels, for pages with more of them than will fit in one
+ * row. Placed straight into the grid instead, each grid row is as tall as its tallest
+ * panel and the shorter one leaves a hole underneath - on the settings page that came to
+ * roughly 460px of dead space plus a final row with one empty cell. A stack has no such
+ * gaps: a short panel is simply followed by the next. */
+.admin-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  min-width: 0;
+}
+
+/* The settings page, whose first column carries the backup history: a five-column table
+ * measuring 506px, which the column has to clear or the table scrolls sideways inside
+ * its own card. 1.35 clears it on a 1280-wide laptop with a little room to spare. */
+.admin-columns--stacked {
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+}
+
 @media (max-width: 1000px) {
   .admin-columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Collapses earlier than the plain grid above, and for a reason that only applies here:
+ * below this the second column drops under 350px - too narrow for the rows of period
+ * buttons - while the first stops clearing the table, so the split costs a cramped
+ * column and a scrolling table and buys nothing. One column gives every panel the full
+ * width, and the table fits again. Must stay last: it and the modifier above have equal
+ * specificity, so order is what settles them. */
+@media (max-width: 1200px) {
+  .admin-columns--stacked {
     grid-template-columns: 1fr;
   }
 }
