@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 
 from app.auth import COOKIE_NAME, get_current_user
+from app.config import settings
 from app.services import clocks
 from app.db import admin as admin_db
 from app.db import catalog
@@ -85,8 +86,11 @@ def login(body: LoginRequest, request: Request, response: Response) -> MeOut:
         key=COOKIE_NAME,
         value=token,
         httponly=True,
-        samesite="lax",
-        secure=False,  # set True when served over HTTPS
+        samesite=settings.cookie_samesite,
+        # Derived, not hardcoded: see Settings.cookie_is_secure. It stays off over
+        # http://localhost because the browser would otherwise discard the cookie, and
+        # comes on by itself once the app is served from an https address.
+        secure=settings.cookie_is_secure,
         max_age=int(security.ACCESS_TOKEN_TTL.total_seconds()),
         path="/",
     )
@@ -98,7 +102,17 @@ def login(body: LoginRequest, request: Request, response: Response) -> MeOut:
 
 @router.post("/logout")
 def logout(response: Response) -> dict:
-    response.delete_cookie(COOKIE_NAME, path="/")
+    # The same attributes the cookie was set with. A deletion is itself a Set-Cookie,
+    # and a browser that rejects it - as one will for a SameSite=None cookie arriving
+    # without Secure - leaves the session cookie in place, so logging out would appear
+    # to work and change nothing.
+    response.delete_cookie(
+        COOKIE_NAME,
+        path="/",
+        httponly=True,
+        samesite=settings.cookie_samesite,
+        secure=settings.cookie_is_secure,
+    )
     return {"logged_out": True}
 
 

@@ -53,6 +53,47 @@ class Settings(BaseSettings):
     # How many verified backups to keep. Older ones are pruned after a successful run.
     backup_keep: int = 3
 
+    # ---- session cookie -------------------------------------------------------
+    #
+    # The cookie is the whole session: whoever holds it is signed in, without a
+    # password. It is already httponly (script cannot read it) and SameSite (another
+    # site cannot make the browser send it). The third protection is Secure, which
+    # tells the browser to withhold it from any connection that is not HTTPS -
+    # without it, one plain-http request puts the token on the wire in clear text for
+    # anyone sharing the network.
+    #
+    # It cannot simply default to on: over http://localhost the browser would discard
+    # the cookie and nobody could sign in at all. So the value is derived rather than
+    # hardcoded - see cookie_is_secure. Setting PUBLIC_ORIGIN to an https:// address
+    # turns it on by itself, which is the point: a protection that has to be
+    # remembered on deployment day is one that gets left off, and nothing about the
+    # app looks broken when it is.
+    public_origin: Optional[str] = None
+
+    # Overrides the derivation in both directions. Needed when TLS is terminated by a
+    # proxy in front of this process - the app only ever sees http, so it cannot work
+    # out on its own that the browser is on https.
+    cookie_secure: Optional[bool] = None
+
+    # "lax" suits an API served from the same site as the app. Cross-site needs
+    # "none", which browsers accept only alongside Secure - see cookie_is_secure.
+    cookie_samesite: str = "lax"
+
+    @property
+    def cookie_is_secure(self) -> bool:
+        """Whether the session cookie is withheld from plain http.
+
+        Explicit setting first; otherwise inferred from the address the app is served
+        on. SameSite=None forces it on regardless, because a browser silently drops
+        that combination without Secure - which presents as "login does nothing", with
+        no error anywhere to say why.
+        """
+        if self.cookie_secure is not None:
+            return self.cookie_secure
+        if self.cookie_samesite.lower() == "none":
+            return True
+        return (self.public_origin or "").strip().lower().startswith("https://")
+
     @property
     def uploads_dir(self) -> Path:
         return self.data_dir / "uploads"

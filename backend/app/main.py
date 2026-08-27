@@ -27,14 +27,25 @@ from app.services.security import bootstrap_admin
 
 app = FastAPI(title="CSV Analyzer API", version="0.1.0")
 
+# The dev server, plus wherever the app is actually served from once it is deployed.
+# PUBLIC_ORIGIN has to appear here as well as driving the cookie's Secure flag: with
+# allow_credentials the list cannot be "*", so an origin missing from it cannot reach
+# the API at all - and a setting that switched on cookie security while making the API
+# unreachable would be worse than no setting.
+_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:5174",
+    "http://127.0.0.1:5174",
+]
+if settings.public_origin:
+    origin = settings.public_origin.strip().rstrip("/")
+    if origin not in _ALLOWED_ORIGINS:
+        _ALLOWED_ORIGINS.append(origin)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://localhost:5174",
-        "http://127.0.0.1:5174",
-    ],
+    allow_origins=_ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
