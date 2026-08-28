@@ -2,14 +2,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { fetchActivityPurgePlan, purgeActivity } from "../../../api/admin";
+import { fetchActivity, fetchActivityPurgePlan, purgeActivity } from "../../../api/admin";
 import { apiErrorMessage } from "../../../api/client";
 import { useAuth } from "../../../auth/AuthContext";
 import { IconActivity } from "../../../components/admin/AdminIcons";
 import {
   Choice,
   ConfirmDialog,
-  Notice,
   SettingRow,
   SettingsCard,
   StatusBadge,
@@ -53,6 +52,14 @@ export default function LogsSection() {
     enabled: mayPurge,
   });
 
+  // The trail records its own trimming, so the last one is simply the newest entry with
+  // that action - no extra state to keep, and it cannot disagree with the log.
+  const lastTrim = useQuery({
+    queryKey: ["activity", "activity.purged", 1],
+    queryFn: () => fetchActivity({ action: "activity.purged", limit: 1 }),
+    enabled: mayPurge,
+  });
+
   const purge = useMutation({
     mutationFn: () => purgeActivity(days),
     onSuccess: (result) => {
@@ -60,6 +67,7 @@ export default function LogsSection() {
       queryClient.invalidateQueries({ queryKey: ["admin-activity"] });
       queryClient.invalidateQueries({ queryKey: ["activity-purge-plan"] });
       queryClient.invalidateQueries({ queryKey: ["admin-overview"] });
+      queryClient.invalidateQueries({ queryKey: ["activity", "activity.purged"] });
       toast(
         "success",
         t("admin.activity_trim.removed_done", {
@@ -100,18 +108,14 @@ export default function LogsSection() {
         )}
 
         <SettingRow
-          title={t("admin.activity_trim.cutoff")}
-          description={
-            removable > 0
-              ? t("admin.activity_trim.will_remove", { count: n(removable) })
-              : t("admin.activity_trim.nothing_to_remove")
-          }
+          title={t("settings.logs.policy")}
+          description={t("settings.logs.policy_desc")}
           hint={t("admin.activity_trim.hint")}
           control={
             <Choice
               value={days}
               disabled={plan.isFetching}
-              ariaLabel={t("admin.activity_trim.cutoff")}
+              ariaLabel={t("settings.logs.policy")}
               onChange={(d) => {
                 setDays(d);
                 setError(null);
@@ -125,28 +129,49 @@ export default function LogsSection() {
         />
 
         <SettingRow
+          title={t("settings.logs.matching")}
+          description={t("settings.logs.matching_desc", { days })}
+          control={
+            <StatusBadge tone={removable > 0 ? "warning" : "neutral"}>
+              {t("settings.logs.matching_count", { count: n(removable) })}
+            </StatusBadge>
+          }
+        />
+
+        <SettingRow
+          title={t("settings.logs.last_trim")}
+          description={t("settings.logs.last_trim_desc")}
+          control={
+            <span className="set-row-desc" style={{ margin: 0 }}>
+              {lastTrim.data?.items?.[0]?.at
+                ? new Date(lastTrim.data.items[0].at as string).toLocaleString(i18n.language)
+                : t("settings.logs.never_trimmed")}
+            </span>
+          }
+        />
+
+        <SettingRow
           title={t("admin.activity_trim.purge")}
           description={t("settings.logs.manual_note")}
           control={
+            /* Disabled rather than red when there is nothing to remove: a destructive
+               button that would do nothing still reads as a threat, and offering it
+               invites a click that has to be answered with "nothing happened". */
             <button
               type="button"
-              className="set-btn danger"
+              className={removable > 0 ? "set-btn danger" : "set-btn secondary"}
               disabled={removable === 0 || plan.isFetching}
               onClick={() => {
                 setError(null);
                 setConfirming(true);
               }}
             >
-              {t("admin.activity_trim.purge")}
+              {removable > 0
+                ? t("settings.logs.purge_count", { count: n(removable) })
+                : t("admin.activity_trim.purge")}
             </button>
           }
-        >
-          {removable === 0 && (
-            <div style={{ marginTop: 12 }}>
-              <Notice>{t("admin.activity_trim.nothing_to_remove")}</Notice>
-            </div>
-          )}
-        </SettingRow>
+        />
       </SettingsCard>
 
       <ConfirmDialog

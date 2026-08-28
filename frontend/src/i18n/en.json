@@ -795,7 +795,13 @@
       "backups_sub": "Latest {{when}}",
       "records": "Operation records",
       "records_sub": "{{count}} due for removal",
-      "go_fix": "Go to section"
+      "go_fix": "Go to section",
+      "storage_state": "Storage",
+      "system_state": "System",
+      "used_pct": "{{pct}}% used",
+      "of_capacity": "of {{total}}",
+      "quick_title": "Quick actions",
+      "quick_desc": "Straight to the controls people reach for most."
     },
     "storage": {
       "title": "Storage",
@@ -809,7 +815,8 @@
       "retention_saved_off": "Automatic export expiry turned off.",
       "confirm_cleanup_title": "Delete the selected files?",
       "confirm_cleanup_body": "{{count}} files totalling {{size}} will be removed. The database, original uploads and catalogue are untouched. This cannot be undone.",
-      "confirm_cleanup_ok": "Delete"
+      "confirm_cleanup_ok": "Delete",
+      "used": "{{size}} used"
     },
     "compaction": {
       "desc": "A database file does not shrink on its own. Compaction rewrites it with only what it holds, verifying the new copy before replacing the old one.",
@@ -846,7 +853,16 @@
       "desc": "The activity log is append-only. It is trimmed by age alone, and only by hand.",
       "manual_note": "Nothing happens on its own - no line goes without you pressing and confirming.",
       "confirm_title": "Trim the activity log?",
-      "confirm_body": "{{count}} entries older than {{days}} days will be removed. This cannot be undone, and the trim itself is recorded."
+      "confirm_body": "{{count}} entries older than {{days}} days will be removed. This cannot be undone, and the trim itself is recorded.",
+      "policy": "Retention policy",
+      "policy_desc": "Only entries older than the chosen period are removed.",
+      "matching": "Entries matching",
+      "matching_desc": "How many lines are older than {{days}} days right now.",
+      "matching_count": "{{count}} entries",
+      "last_trim": "Last trim",
+      "last_trim_desc": "Read from the activity log itself.",
+      "never_trimmed": "Never trimmed",
+      "purge_count": "Trim {{count}} entries"
     },
     "security": {
       "empty_desc": "No accounts or addresses are currently being held off.",

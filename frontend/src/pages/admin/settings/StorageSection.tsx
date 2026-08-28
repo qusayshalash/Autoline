@@ -148,16 +148,12 @@ export default function StorageSection() {
       >
         <ErrorBanner message={error} />
 
-        <div className="set-storage-total">
-          <strong>{formatBytes(storage.total_bytes)}</strong>
+        <div className="set-gauge-head">
+          <strong>{t("settings.storage.used", { size: formatBytes(storage.total_bytes) })}</strong>
           <span>{t("settings.storage.free", { size: formatBytes(storage.disk_free_bytes) })}</span>
         </div>
 
-        <div
-          className="set-stack"
-          role="img"
-          aria-label={t("settings.storage.title")}
-        >
+        <div className="set-stack" role="img" aria-label={t("settings.storage.title")}>
           {shown.map((c) => (
             <i
               key={c.key}
@@ -182,24 +178,22 @@ export default function StorageSection() {
           ))}
         </div>
 
-        <div style={{ marginTop: 18 }}>
-          <dl className="set-kv">
-            <div>
-              <dt>{t("admin.storage.reclaimable")}</dt>
-              <dd>
-                {formatBytes(storage.reclaimable_bytes)}
-                {storage.reclaimable_files > 0 &&
-                  ` · ${storage.reclaimable_files.toLocaleString(i18n.language)}`}
-              </dd>
-            </div>
-            <div>
-              <dt>{t("admin.storage.data_dir")}</dt>
-              <dd>
-                <PathValue>{storage.data_dir}</PathValue>
-              </dd>
-            </div>
-          </dl>
-        </div>
+        <dl className="set-kv" style={{ marginTop: 14 }}>
+          <div>
+            <dt>{t("admin.storage.reclaimable")}</dt>
+            <dd>
+              {formatBytes(storage.reclaimable_bytes)}
+              {storage.reclaimable_files > 0 &&
+                ` · ${storage.reclaimable_files.toLocaleString(i18n.language)}`}
+            </dd>
+          </div>
+          <div>
+            <dt>{t("admin.storage.data_dir")}</dt>
+            <dd>
+              <PathValue>{storage.data_dir}</PathValue>
+            </dd>
+          </div>
+        </dl>
       </SettingsCard>
 
       <SettingsCard

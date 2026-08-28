@@ -248,3 +248,20 @@ export function IconFileText() {
     </svg>
   );
 }
+
+export function IconZap() {
+  return (
+    <svg {...base}>
+      <path d="M11.5 2.5L4 11.5h5l-.5 6 7.5-9h-5z" />
+    </svg>
+  );
+}
+
+/** Points right. Flipped for rtl in CSS, so "forward" means forward in either direction. */
+export function IconArrow() {
+  return (
+    <svg {...base}>
+      <path d="M4 10h12M11.5 5.5L16 10l-4.5 4.5" />
+    </svg>
+  );
+}

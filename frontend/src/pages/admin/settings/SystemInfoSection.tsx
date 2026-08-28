@@ -27,26 +27,29 @@ export default function SystemInfoSection({
       title={t("admin.settings.about")}
       description={t("admin.settings.note")}
     >
-      <dl className="set-kv">
-        <div>
+      {/* A grid of facts, not five full-width rows and not five cards. Each of these is a
+          short value with a short label, which is exactly the shape that reads fastest
+          two or three across. */}
+      <dl className="set-facts">
+        <div className="set-fact">
           <dt>{t("admin.system.status")}</dt>
           <dd>
             <StatusBadge tone="healthy">{t("admin.system.operational")}</StatusBadge>
           </dd>
         </div>
-        <div>
+        <div className="set-fact">
           <dt>{t("admin.system.started_at")}</dt>
           <dd>{system.started_at}</dd>
         </div>
-        <div>
+        <div className="set-fact">
           <dt>{t("admin.overview.files")}</dt>
           <dd>{n(overview.files_total)}</dd>
         </div>
-        <div>
+        <div className="set-fact">
           <dt>{t("admin.overview.users_total")}</dt>
           <dd>{n(overview.users_total)}</dd>
         </div>
-        <div>
+        <div className="set-fact">
           <dt>{t("admin.overview.roles")}</dt>
           <dd>{n(overview.roles_total)}</dd>
         </div>

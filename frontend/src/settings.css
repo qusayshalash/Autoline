@@ -15,31 +15,40 @@
  * Spacing is on a 4px scale: 4 8 12 16 20 24 32.
  */
 
+/* One measure for every section, so the page does not appear to change width as you
+   move between them. The old panels each sized themselves to their content, which read
+   as a different page each time. */
 .settings-page {
   --set-gap: 24px;
   --set-pad: 22px;
   --set-row-pad: 18px;
+  --set-nav-width: 248px;
   display: flex;
   flex-direction: column;
   gap: var(--set-gap);
-  padding-bottom: 40px;
+  max-width: 1400px;
+  margin-inline: auto;
+  padding: 8px 8px 40px;
 }
 
 /* --- layout ---------------------------------------------------------------- */
 
 .settings-body {
   display: grid;
-  grid-template-columns: 210px minmax(0, 1fr);
+  grid-template-columns: var(--set-nav-width) minmax(0, 1fr);
   gap: 28px;
   align-items: start;
 }
 
+/* Sticks to the top of .admin-content, which is the element that actually scrolls -
+   the window never does. `align-items: start` on the grid is what leaves the column
+   shorter than the row, which is what gives sticky somewhere to travel. */
 .settings-nav {
   position: sticky;
-  top: 8px;
+  top: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
 }
 
 .settings-nav button {
@@ -47,9 +56,9 @@
   align-items: center;
   gap: 10px;
   width: 100%;
-  padding: 9px 12px;
+  padding: 7px 11px;
   border: 1px solid transparent;
-  border-radius: 9px;
+  border-radius: 8px;
   background: transparent;
   color: var(--text-muted);
   font: inherit;
@@ -1122,4 +1131,111 @@
   .settings-head h1 {
     font-size: 21px;
   }
+}
+
+/* --- overview dashboard ----------------------------------------------------- */
+
+/* Two panels of equal weight. They answer different questions - how full is it, and is
+   it well - so neither is allowed to dominate the other. */
+.set-duo {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--set-gap);
+  align-items: start;
+}
+
+/* A bar with its own scale printed on it, for the one place that shows used against
+   capacity rather than a breakdown of used alone. */
+.set-gauge-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+
+.set-gauge-head strong {
+  font-size: 17px;
+  font-weight: 640;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+.set-gauge-head span {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Quick access to the controls that live one section away. These navigate; they do not
+   act, which is why they are named for the destination rather than phrased as commands. */
+.set-quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.set-quick .set-btn {
+  flex: 1 1 auto;
+  justify-content: space-between;
+  min-width: 180px;
+}
+
+.set-quick .set-btn svg:last-child {
+  opacity: 0.45;
+}
+
+/* --- compact key/value grid -------------------------------------------------- */
+
+/* For a handful of read-only facts. Two columns of label-over-value, which reads faster
+   than the same facts as full-width rows and takes half the height - without giving each
+   number a card of its own. */
+.set-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.set-fact {
+  background: var(--surface);
+  padding: 13px 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.set-fact dt {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.set-fact dd {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+/* Same idea, but sitting inside a card that already has its own border. */
+.set-card-body > .set-facts {
+  border-radius: 10px;
+}
+
+@media (max-width: 900px) {
+  .set-duo {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* The arrow points right by default; in an rtl page "forward" is left. */
+[dir="rtl"] .set-quick .set-btn svg {
+  transform: scaleX(-1);
 }

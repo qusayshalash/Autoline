@@ -147,7 +147,9 @@ export default function SettingsPage() {
           </div>
 
           <div className="settings-sections">
-            {active === "overview" && <OverviewSection overview={overview.data} onGo={go} />}
+            {active === "overview" && (
+              <OverviewSection overview={overview.data} system={system.data} onGo={go} />
+            )}
             {active === "storage" && <StorageSection />}
             {active === "backups" && <BackupsSection />}
             {active === "maintenance" && <MaintenanceSection />}

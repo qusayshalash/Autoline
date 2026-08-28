@@ -210,27 +210,33 @@ export default function BackupsSection() {
           </div>
         )}
 
-        <dl className="set-kv">
-          <div>
+        {/* The four figures as a row of facts rather than four full-width rows: they are
+            short, unrelated to each other, and read faster side by side. The path stays
+            a row of its own because it is long and must not be squeezed. */}
+        <dl className="set-facts">
+          <div className="set-fact">
             <dt>{t("admin.backup.latest")}</dt>
             <dd>
               {summary.latest_at
-                ? new Date(summary.latest_at).toLocaleString(i18n.language)
+                ? new Date(summary.latest_at).toLocaleDateString(i18n.language)
                 : t("admin.backup.never")}
             </dd>
           </div>
-          <div>
+          <div className="set-fact">
             <dt>{t("admin.backup.occupied")}</dt>
             <dd>{formatBytes(summary.total_bytes)}</dd>
           </div>
-          <div>
+          <div className="set-fact">
             <dt>{t("admin.backup.keep")}</dt>
             <dd>{t("admin.backup.keep_value", { count: summary.keep })}</dd>
           </div>
-          <div>
+          <div className="set-fact">
             <dt>{t("admin.storage.disk_free")}</dt>
             <dd>{formatBytes(summary.disk_free_bytes)}</dd>
           </div>
+        </dl>
+
+        <dl className="set-kv" style={{ marginTop: 14 }}>
           <div>
             <dt>{t("admin.backup.destination")}</dt>
             <dd>
