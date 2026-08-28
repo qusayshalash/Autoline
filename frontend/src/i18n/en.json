@@ -261,7 +261,9 @@
     "retry": "Try again",
     "access_denied": "You do not have permission to access this page.",
     "access_denied_help": "Contact your system administrator if you need this permission.",
-    "go_to_available_area": "Go to an available page"
+    "go_to_available_area": "Go to an available page",
+    "copy": "Copy",
+    "copied": "Copied"
   },
   "theme": {
     "label": "Theme",
@@ -289,7 +291,7 @@
       "languages": "Which languages users can choose",
       "files": "Imported files and the space they use",
       "activity": "A record of every action taken on the system",
-      "settings": "Paths, storage and system information"
+      "settings": "Manage storage, backups, maintenance, security and system settings."
     },
     "status": {
       "active": "Active",
@@ -772,6 +774,83 @@
       "mixed_lengths": "Inconsistent lengths: {{pct}}% are {{length}} characters, the rest differ.",
       "not_numeric_values": "{{count}} values are not numbers, in a column treated as numeric.",
       "outliers": "{{count}} values sit outside the usual range (below {{low}} or above {{high}})."
+    }
+  },
+  "settings": {
+    "nav": {
+      "overview": "Overview",
+      "storage": "Storage & database",
+      "backups": "Backups",
+      "maintenance": "Cleanup & maintenance",
+      "logs": "Logs",
+      "security": "Security",
+      "system": "System information"
+    },
+    "overview": {
+      "storage": "Available space",
+      "storage_sub": "Used: {{used}}",
+      "database": "Database",
+      "database_sub": "{{count}} datasets",
+      "backups": "Verified backups",
+      "backups_sub": "Latest {{when}}",
+      "records": "Operation records",
+      "records_sub": "{{count}} due for removal",
+      "go_fix": "Go to section"
+    },
+    "storage": {
+      "title": "Storage",
+      "desc": "What the system holds on disk, split between what can be removed and what never is.",
+      "free": "Free on disk: {{size}}",
+      "reclaim_title": "Reclaiming space",
+      "reclaim_desc": "What expires on its own, and what you can remove by hand after previewing it.",
+      "retention_short": "Exports older than this are removed when the system starts.",
+      "cleanup_short": "Choose what to remove, then preview the list before anything is deleted.",
+      "retention_saved": "Retention saved: {{hours}} hours.",
+      "retention_saved_off": "Automatic export expiry turned off.",
+      "confirm_cleanup_title": "Delete the selected files?",
+      "confirm_cleanup_body": "{{count}} files totalling {{size}} will be removed. The database, original uploads and catalogue are untouched. This cannot be undone.",
+      "confirm_cleanup_ok": "Delete"
+    },
+    "compaction": {
+      "desc": "A database file does not shrink on its own. Compaction rewrites it with only what it holds, verifying the new copy before replacing the old one.",
+      "size": "File size: {{size}}",
+      "cancelled": "Compaction cancelled.",
+      "confirm_title": "Start compacting this database?",
+      "confirm_body": "No data is removed. It may take a while, and the new copy is verified row by row before it replaces the old one.",
+      "confirm_ok": "Start compaction"
+    },
+    "backups": {
+      "desc": "Backups you can actually restore from: each is read back after writing and compared against what was there when it was taken.",
+      "run_title": "Taking a backup",
+      "run_desc": "By hand now, or automatically on an interval you choose.",
+      "schedule_short": "Checked every half hour: a backup is taken if the newest verified one is older than this.",
+      "schedule_saved": "Automatic backups: {{label}}.",
+      "schedule_off_saved": "Automatic backups turned off.",
+      "history_title": "Backup history",
+      "history_desc": "Select a date to see what that backup contains.",
+      "empty_desc": "No backup has been taken yet. The data exists on one disk only.",
+      "done": "Backup completed and verified.",
+      "cancelled": "Backup cancelled.",
+      "deleted": "Backup deleted.",
+      "confirm_delete_title": "Delete this backup?",
+      "confirm_delete_body": "The backup from {{date}} will be permanently removed from disk. This cannot be undone."
+    },
+    "maintenance": {
+      "desc": "The jobs and cleaning tables are trimmed automatically: at every start and every half hour.",
+      "saved": "Period saved.",
+      "due_badge": "{{count}} due",
+      "clean_badge": "Nothing due",
+      "sweep_desc": "Run the same sweep the schedule runs, now."
+    },
+    "logs": {
+      "desc": "The activity log is append-only. It is trimmed by age alone, and only by hand.",
+      "manual_note": "Nothing happens on its own - no line goes without you pressing and confirming.",
+      "confirm_title": "Trim the activity log?",
+      "confirm_body": "{{count}} entries older than {{days}} days will be removed. This cannot be undone, and the trim itself is recorded."
+    },
+    "security": {
+      "empty_desc": "No accounts or addresses are currently being held off.",
+      "unlocked": "Lock lifted."
     }
   }
 }

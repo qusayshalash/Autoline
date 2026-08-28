@@ -145,3 +145,106 @@ export function IconDatabase() {
     </svg>
   );
 }
+
+/* --- settings page --- */
+
+export function IconHardDrive() {
+  return (
+    <svg {...base}>
+      <path d="M2.5 11.5h15" />
+      <path d="M4.6 3.5h10.8l2.1 8v4a1 1 0 0 1-1 1h-14a1 1 0 0 1-1-1v-4z" />
+      <path d="M5.5 14.5h.01M8.5 14.5h.01" />
+    </svg>
+  );
+}
+
+export function IconArchive() {
+  return (
+    <svg {...base}>
+      <rect x="2.5" y="3" width="15" height="3.5" rx="1" />
+      <path d="M4 6.5v9a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-9" />
+      <path d="M8 10h4" />
+    </svg>
+  );
+}
+
+export function IconBroom() {
+  return (
+    <svg {...base}>
+      <path d="M12.5 2.5l5 5" />
+      <path d="M11 4l5 5-4.5 4.5-5-5z" />
+      <path d="M6.5 8.5L2.5 17.5l9-4" />
+    </svg>
+  );
+}
+
+export function IconClock() {
+  return (
+    <svg {...base}>
+      <circle cx="10" cy="10" r="7.5" />
+      <path d="M10 5.8V10l2.8 1.7" />
+    </svg>
+  );
+}
+
+export function IconRefresh() {
+  return (
+    <svg {...base}>
+      <path d="M17 10a7 7 0 1 1-2.05-4.95" />
+      <path d="M17 3v3.5h-3.5" />
+    </svg>
+  );
+}
+
+export function IconInfo() {
+  return (
+    <svg {...base}>
+      <circle cx="10" cy="10" r="7.5" />
+      <path d="M10 9.2v4.3M10 6.6h.01" />
+    </svg>
+  );
+}
+
+export function IconCheckCircle() {
+  return (
+    <svg {...base}>
+      <circle cx="10" cy="10" r="7.5" />
+      <path d="M6.8 10.2l2.2 2.2 4.2-4.4" />
+    </svg>
+  );
+}
+
+export function IconAlert() {
+  return (
+    <svg {...base}>
+      <path d="M10 3.2l7 12.3H3z" />
+      <path d="M10 8v3.2M10 13.6h.01" />
+    </svg>
+  );
+}
+
+export function IconChevron() {
+  return (
+    <svg {...base}>
+      <path d="M6 8l4 4 4-4" />
+    </svg>
+  );
+}
+
+export function IconCopy() {
+  return (
+    <svg {...base}>
+      <rect x="7" y="7" width="10" height="10" rx="1.5" />
+      <path d="M13 7V4.5a1.5 1.5 0 0 0-1.5-1.5h-7A1.5 1.5 0 0 0 3 4.5v7A1.5 1.5 0 0 0 4.5 13H7" />
+    </svg>
+  );
+}
+
+export function IconFileText() {
+  return (
+    <svg {...base}>
+      <path d="M11.5 2.5H6A1.5 1.5 0 0 0 4.5 4v12A1.5 1.5 0 0 0 6 17.5h8a1.5 1.5 0 0 0 1.5-1.5V6.5z" />
+      <path d="M11.5 2.5v4h4M7.5 10.5h5M7.5 13.5h5" />
+    </svg>
+  );
+}

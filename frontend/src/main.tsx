@@ -9,6 +9,7 @@ import { ThemeProvider } from "./theme/ThemeContext";
 import "./i18n";
 import "./index.css";
 import "./admin.css";
+import "./settings.css";
 import "./statistics.css";
 
 const queryClient = new QueryClient({

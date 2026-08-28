@@ -1,0 +1,1125 @@
+/* Settings page design system.
+ *
+ * The page it replaces was seven equally-weighted cards stacked in a grid, every one of
+ * them carrying a paragraph of prose, and nothing on it said which parts mattered or
+ * which were dangerous. What follows is built around three ideas:
+ *
+ *   - one card per *category*, never a card inside a card. Structure inside a card comes
+ *     from rows and dividers, which cost no border and no shadow.
+ *   - a setting is a row: name and one line of description on one side, the control on
+ *     the other. Rows make a long list scannable in a way stacked cards never do.
+ *   - severity is carried by the control, not by the card. A destructive action is red
+ *     text on a quiet border; full red is spent only inside the confirmation.
+ *
+ * Everything below reads from the app's existing tokens, so both themes come for free.
+ * Spacing is on a 4px scale: 4 8 12 16 20 24 32.
+ */
+
+.settings-page {
+  --set-gap: 24px;
+  --set-pad: 22px;
+  --set-row-pad: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--set-gap);
+  padding-bottom: 40px;
+}
+
+/* --- layout ---------------------------------------------------------------- */
+
+.settings-body {
+  display: grid;
+  grid-template-columns: 210px minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+}
+
+.settings-nav {
+  position: sticky;
+  top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.settings-nav button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: start;
+  cursor: pointer;
+  transition: background 0.14s ease, color 0.14s ease;
+}
+
+.settings-nav button svg {
+  flex: none;
+  opacity: 0.75;
+}
+
+.settings-nav button:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.settings-nav button.active {
+  background: var(--primary-soft);
+  border-color: color-mix(in srgb, var(--primary) 22%, transparent);
+  color: var(--primary-soft-text);
+  font-weight: 600;
+}
+
+.settings-nav button.active svg {
+  opacity: 1;
+}
+
+/* A count or a warning dot riding on a nav item. */
+.settings-nav .nav-tag {
+  margin-inline-start: auto;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--surface-muted);
+  color: var(--text-muted);
+}
+
+.settings-nav button.active .nav-tag {
+  background: color-mix(in srgb, var(--primary) 16%, transparent);
+  color: var(--primary-soft-text);
+}
+
+.settings-nav .nav-tag.warn {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.settings-sections {
+  display: flex;
+  flex-direction: column;
+  gap: var(--set-gap);
+  min-width: 0;
+}
+
+/* The mobile/tablet section picker, hidden while the sidebar is shown. */
+.settings-nav-select {
+  display: none;
+}
+
+/* --- cards ----------------------------------------------------------------- */
+
+.set-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.set-card-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: var(--set-pad);
+  padding-bottom: 14px;
+}
+
+.set-card-head > svg {
+  flex: none;
+  margin-top: 1px;
+  color: var(--text-muted);
+}
+
+.set-card-head h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 650;
+  color: var(--text);
+  letter-spacing: -0.005em;
+}
+
+.set-card-head p {
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--text-muted);
+  max-width: 68ch;
+}
+
+.set-card-head-actions {
+  margin-inline-start: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+
+.set-card-body {
+  padding: 0 var(--set-pad) var(--set-pad);
+}
+
+/* A body that is nothing but rows wants no padding of its own - the rows bring it. */
+.set-card-rows {
+  padding: 0;
+}
+
+.set-card-rows > .set-row:first-child {
+  border-top: 1px solid var(--border);
+}
+
+/* --- setting rows ---------------------------------------------------------- */
+
+.set-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: var(--set-row-pad) var(--set-pad);
+  border-bottom: 1px solid var(--border);
+}
+
+.set-row:last-child {
+  border-bottom: 0;
+}
+
+.set-row-main {
+  min-width: 0;
+  flex: 1;
+}
+
+.set-row-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13.5px;
+  font-weight: 550;
+  color: var(--text);
+}
+
+.set-row-desc {
+  margin: 3px 0 0;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--text-muted);
+  max-width: 64ch;
+}
+
+.set-row-control {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Stacks the control under the text when the row cannot hold both. */
+.set-row.stacked {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 14px;
+}
+
+.set-row.stacked .set-row-control {
+  justify-content: flex-start;
+}
+
+/* --- metric cards ---------------------------------------------------------- */
+
+.set-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.set-metric {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.set-metric-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 550;
+  color: var(--text-muted);
+}
+
+.set-metric-label svg {
+  width: 15px;
+  height: 15px;
+  flex: none;
+}
+
+.set-metric-value {
+  font-size: 21px;
+  font-weight: 640;
+  color: var(--text);
+  letter-spacing: -0.015em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
+}
+
+.set-metric-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* --- status badges --------------------------------------------------------- */
+
+.set-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+
+.set-badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+
+.set-badge.healthy {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.set-badge.warning {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.set-badge.critical {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.set-badge.neutral {
+  background: var(--surface-muted);
+  color: var(--text-muted);
+}
+
+/* Without the dot - for table cells where the dot is noise. */
+.set-badge.plain::before {
+  display: none;
+}
+
+/* --- inline notices -------------------------------------------------------- */
+
+.set-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 9px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  border: 1px solid transparent;
+}
+
+.set-notice svg {
+  flex: none;
+  margin-top: 1px;
+  width: 16px;
+  height: 16px;
+}
+
+.set-notice.warning {
+  background: var(--warning-soft);
+  border-color: color-mix(in srgb, var(--warning) 24%, transparent);
+  color: var(--text);
+}
+
+.set-notice.info {
+  background: var(--surface-2);
+  border-color: var(--border);
+  color: var(--text-muted);
+}
+
+.set-notice.success {
+  background: var(--success-soft);
+  border-color: color-mix(in srgb, var(--success) 24%, transparent);
+  color: var(--text);
+}
+
+.set-notices {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+/* --- controls -------------------------------------------------------------- */
+
+.set-select {
+  appearance: none;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  padding: 7px 30px 7px 12px;
+  font: inherit;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+  min-width: 148px;
+  /* An inline chevron rather than two CSS triangles: at 5px those rendered as a pair of
+     specks that read as stray characters next to Arabic text. stroke is hard-coded
+     because a data URI cannot see currentColor; this grey sits correctly on both themes. */
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 20 20' fill='none' stroke='%2367748a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 8l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: left 11px center;
+}
+
+[dir="rtl"] .set-select {
+  padding: 7px 12px 7px 30px;
+}
+
+.set-select:hover {
+  border-color: var(--primary);
+}
+
+.set-select:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+
+.set-select:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* A checkbox row with a name and a hint under it. */
+.set-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.set-check input {
+  margin: 2px 0 0;
+  flex: none;
+  width: 15px;
+  height: 15px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+.set-check-text strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 550;
+  color: var(--text);
+}
+
+.set-check-text small {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--text-muted);
+}
+
+.set-checks {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* --- buttons --------------------------------------------------------------- */
+
+.set-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 550;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.14s ease, border-color 0.14s ease, color 0.14s ease;
+}
+
+.set-btn svg {
+  width: 15px;
+  height: 15px;
+  flex: none;
+}
+
+.set-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.set-btn.primary {
+  background: var(--primary);
+  color: #fff;
+}
+
+.set-btn.primary:hover:not(:disabled) {
+  background: var(--primary-hover);
+}
+
+.set-btn.secondary {
+  background: var(--surface);
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+.set-btn.secondary:hover:not(:disabled) {
+  background: var(--surface-hover);
+  border-color: var(--primary);
+}
+
+/* Destructive, stated quietly. The loud version lives in the confirmation only. */
+.set-btn.danger {
+  background: transparent;
+  border-color: color-mix(in srgb, var(--danger) 35%, var(--border));
+  color: var(--danger);
+}
+
+.set-btn.danger:hover:not(:disabled) {
+  background: var(--danger-soft);
+  border-color: var(--danger);
+}
+
+.set-btn.small {
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+.set-btn.ghost {
+  background: transparent;
+  color: var(--text-muted);
+  border-color: transparent;
+  padding: 6px 8px;
+}
+
+.set-btn.ghost:hover:not(:disabled) {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.set-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* --- key/value lists ------------------------------------------------------- */
+
+.set-kv {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.set-kv > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.set-kv > div:last-child {
+  border-bottom: 0;
+}
+
+.set-kv dt {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  flex: none;
+}
+
+.set-kv dd {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 550;
+  color: var(--text);
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* A filesystem path is not Arabic text and must not be reordered by the bidi algorithm,
+   which turns C:\A\B into something that looks plausible and is wrong. */
+.set-path {
+  direction: ltr;
+  text-align: left;
+  font-family: ui-monospace, "SFMono-Regular", "Cascadia Code", Menlo, Consolas, monospace;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.set-copy {
+  flex: none;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  padding: 2px;
+  border-radius: 5px;
+  cursor: pointer;
+  line-height: 0;
+}
+
+.set-copy:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.set-copy svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* --- storage breakdown ----------------------------------------------------- */
+
+.set-storage-total {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.set-storage-total strong {
+  font-size: 24px;
+  font-weight: 640;
+  letter-spacing: -0.015em;
+  font-variant-numeric: tabular-nums;
+}
+
+.set-storage-total span {
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+/* The one stacked bar: every category as a segment of the whole. */
+.set-stack {
+  display: flex;
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--surface-muted);
+  margin-bottom: 16px;
+}
+
+.set-stack i {
+  display: block;
+  height: 100%;
+}
+
+/* Five categories that must stay apart at 9px. The hue carries the distinction that
+   actually matters: warm means the category can be deleted, cool means it never is. The
+   protected three then differ by depth rather than hue, so the eye reads "protected"
+   before it reads which one. */
+.set-stack i.db,
+.set-legend-key i.db {
+  background: var(--primary);
+}
+.set-stack i.originals,
+.set-legend-key i.originals {
+  background: color-mix(in srgb, var(--primary) 45%, var(--text-muted));
+}
+.set-stack i.catalog,
+.set-legend-key i.catalog {
+  background: color-mix(in srgb, var(--text-muted) 55%, var(--surface-muted));
+}
+.set-stack i.exports,
+.set-legend-key i.exports {
+  background: var(--warning);
+}
+.set-stack i.intermediates,
+.set-legend-key i.intermediates {
+  background: color-mix(in srgb, var(--warning) 50%, var(--surface-muted));
+}
+.set-stack i.other,
+.set-legend-key i.other {
+  background: var(--border-strong);
+}
+
+.set-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.set-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.set-legend-key {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+
+.set-legend-key i {
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+  flex: none;
+}
+
+.set-legend-lock {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--surface-muted);
+  color: var(--text-muted);
+  font-style: normal;
+  flex: none;
+}
+
+.set-legend-size {
+  font-variant-numeric: tabular-nums;
+  font-weight: 550;
+  flex: none;
+  font-size: 12.5px;
+}
+
+/* --- tables ---------------------------------------------------------------- */
+
+.set-table-wrap {
+  overflow-x: auto;
+  border-top: 1px solid var(--border);
+}
+
+.set-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+
+.set-table th {
+  text-align: start;
+  font-weight: 600;
+  font-size: 11.5px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 10px var(--set-pad);
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.set-table td {
+  padding: 11px var(--set-pad);
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  vertical-align: middle;
+}
+
+.set-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.set-table tbody tr:hover {
+  background: var(--surface-hover);
+}
+
+.set-table .num {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.set-table .shrink {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.set-table-linkish {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  color: var(--primary);
+  cursor: pointer;
+  text-align: start;
+}
+
+.set-table-linkish:hover {
+  text-decoration: underline;
+}
+
+/* An expanded detail row inside a table. */
+.set-table tr.detail td {
+  background: var(--surface-2);
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+
+.set-detail-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.set-detail-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 12px;
+}
+
+.set-detail-list li span:first-child {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.set-detail-errors {
+  margin: 0 0 10px;
+  padding-inline-start: 18px;
+  color: var(--danger);
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* --- empty state ----------------------------------------------------------- */
+
+.set-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 28px 20px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.set-empty svg {
+  width: 22px;
+  height: 22px;
+  opacity: 0.5;
+}
+
+.set-empty strong {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.set-empty p {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.6;
+  max-width: 46ch;
+}
+
+/* --- help tooltip ---------------------------------------------------------- */
+
+.set-hint {
+  position: relative;
+  display: inline-flex;
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--text-muted);
+  cursor: help;
+  line-height: 0;
+}
+
+.set-hint svg {
+  width: 14px;
+  height: 14px;
+}
+
+.set-hint:hover {
+  color: var(--primary);
+}
+
+.set-hint-bubble {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  inset-inline-start: 50%;
+  transform: translateX(50%);
+  width: max-content;
+  max-width: 280px;
+  padding: 9px 11px;
+  background: var(--text);
+  color: var(--surface);
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.55;
+  text-align: start;
+  box-shadow: var(--shadow-md);
+  z-index: 40;
+  pointer-events: none;
+}
+
+[dir="ltr"] .set-hint-bubble {
+  transform: translateX(-50%);
+}
+
+/* --- progress -------------------------------------------------------------- */
+
+.set-progress {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+.set-spinner {
+  width: 13px;
+  height: 13px;
+  border: 2px solid var(--border-strong);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: set-spin 0.7s linear infinite;
+  flex: none;
+}
+
+@keyframes set-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .set-spinner {
+    animation-duration: 2.4s;
+  }
+}
+
+/* --- confirmation dialog --------------------------------------------------- */
+
+.set-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 100;
+}
+
+.set-dialog {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow-md);
+  width: 100%;
+  max-width: 430px;
+  padding: 22px;
+}
+
+.set-dialog-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.set-dialog-icon.danger {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.set-dialog-icon.normal {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.set-dialog h3 {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 650;
+  color: var(--text);
+}
+
+.set-dialog p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--text-muted);
+}
+
+.set-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+/* Here, and only here, destructive is loud. */
+.set-btn.danger-solid {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #fff;
+}
+
+.set-btn.danger-solid:hover:not(:disabled) {
+  filter: brightness(0.93);
+}
+
+/* --- toasts ---------------------------------------------------------------- */
+
+.set-toasts {
+  position: fixed;
+  bottom: 20px;
+  inset-inline-start: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 120;
+  pointer-events: none;
+}
+
+.set-toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
+  font-size: 13px;
+  color: var(--text);
+  max-width: 360px;
+  pointer-events: auto;
+  animation: set-toast-in 0.18s ease-out;
+}
+
+.set-toast svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin-top: 1px;
+}
+
+.set-toast.success svg {
+  color: var(--success);
+}
+.set-toast.error svg {
+  color: var(--danger);
+}
+.set-toast.info svg {
+  color: var(--primary);
+}
+
+@keyframes set-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .set-toast {
+    animation: none;
+  }
+}
+
+/* --- responsive ------------------------------------------------------------ */
+
+@media (max-width: 1100px) {
+  .set-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Below this the sidebar costs more width than it earns, so the sections move to a
+   select. Same navigation, a control that fits. */
+@media (max-width: 900px) {
+  .settings-body {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+
+  .settings-nav {
+    display: none;
+  }
+
+  .settings-nav-select {
+    display: block;
+    width: 100%;
+  }
+
+  .settings-nav-select .set-select {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 620px) {
+  .settings-page {
+    --set-pad: 16px;
+    --set-row-pad: 14px;
+  }
+
+  .set-metrics {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* A row cannot hold text and control side by side at this width. */
+  .set-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .set-row-control {
+    justify-content: flex-start;
+  }
+
+  .set-select {
+    width: 100%;
+  }
+
+  .settings-head h1 {
+    font-size: 21px;
+  }
+}
