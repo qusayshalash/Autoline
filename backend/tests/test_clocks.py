@@ -193,3 +193,66 @@ def test_the_migration_leaves_nulls_alone(tmp_path):
     settings = _Settings()
     timestamp_migration.run(conn, settings.get_setting, settings.set_setting)
     assert conn.execute("SELECT last_login_at FROM users").fetchone()[0] is None
+
+
+# ---- the ordering the migration depends on -------------------------------------------
+
+def test_seeded_roles_are_not_shifted_by_the_migration(admin):
+    """The built-in roles and the bootstrap administrator are written seconds apart by
+    the same startup, so their timestamps must agree.
+
+    They did not. The migration ran after seed(), could not tell a row inserted a moment
+    earlier from one written by an older version, and moved all four roles back by the
+    machine's UTC offset - three hours, on the machine this was found on. The admin
+    account, created after the migration, was correct. Comparing the two is what makes
+    this test say something on a machine already at UTC, where the shift would be zero
+    and every absolute assertion would pass regardless.
+    """
+    roles = admin.get("/api/roles").json()
+    users = admin.get("/api/users").json()
+    assert roles and users
+
+    def parsed(value: str) -> datetime:
+        return datetime.fromisoformat(value.replace("Z", "+00:00"))
+
+    account = min(parsed(u["created_at"]) for u in users)
+    for role in roles:
+        written = parsed(role["created_at"])
+        drift = abs((written - account).total_seconds())
+        assert drift < 60, (
+            f"role {role['slug']} was stored {drift / 3600:.1f}h from the account created "
+            "in the same startup - the migration has shifted a freshly seeded row"
+        )
+
+
+def test_the_migration_runs_before_the_seed(admin):
+    """Pins the order itself, because the test above only fails on a machine that is not
+    already at UTC - and the ordering is the actual fix."""
+    import ast
+    from pathlib import Path
+
+    source = (Path(__file__).resolve().parent.parent / "app" / "main.py").read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    startup = next(
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.FunctionDef) and node.name == "on_startup"
+    )
+
+    migration_at = seed_at = None
+    for node in ast.walk(startup):
+        if not isinstance(node, ast.Call):
+            continue
+        name = getattr(node.func, "attr", getattr(node.func, "id", ""))
+        if name == "run" and getattr(node.func, "value", None) is not None:
+            if getattr(node.func.value, "id", "") == "timestamp_migration":
+                migration_at = node.lineno
+        if name == "seed":
+            seed_at = node.lineno
+
+    assert migration_at is not None, "the timestamp migration is no longer called at startup"
+    assert seed_at is not None, "seed() is no longer called at startup"
+    assert migration_at < seed_at, (
+        "the timestamp migration must run before seed(), or it shifts the rows seed() "
+        "has just written"
+    )

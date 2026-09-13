@@ -76,12 +76,20 @@ app.add_middleware(
 @app.on_event("startup")
 def on_startup() -> None:
     settings.ensure_dirs()
-    # roles and permissions must exist before the first account is created, since the
-    # bootstrap admin is given a role by slug
-    admin_db.seed()
 
     # Corrects timestamps written before the UTC rule was settled. Records that it has
     # run, so it cannot shift the same rows twice.
+    #
+    # It has to come before seed(), and the order is the whole of a bug this once had.
+    # The migration assumes every row it finds was written by an older version, in local
+    # wall-clock, and subtracts the offset. Run after seed() it found the built-in roles
+    # seed() had just inserted - correct UTC, written seconds earlier - and moved them
+    # three hours into the past. On a fresh install that was every role in the database;
+    # on an upgrade it would be any role a later version had newly added. Going first, it
+    # can only ever see rows that were already there, which is the only thing it is for.
+    #
+    # Nothing writes a timestamped row before this point: the schema is created empty,
+    # and reaching for the connection here is what creates it.
     try:
         result = timestamp_migration.run(
             admin_db.get_connection(), admin_db.get_setting, admin_db.set_setting
@@ -90,6 +98,10 @@ def on_startup() -> None:
             print(f"[startup] corrected {result['shifted_rows']:,} stored timestamps to UTC")
     except Exception as exc:  # noqa: BLE001 - never block startup over a migration
         print(f"[startup] timestamp migration failed: {exc}")
+
+    # roles and permissions must exist before the first account is created, since the
+    # bootstrap admin is given a role by slug
+    admin_db.seed()
 
     bootstrap_admin()
 

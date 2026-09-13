@@ -15,6 +15,11 @@ shift every timestamp a second time and there would be nothing left to detect it
     the correction would be a no-op anyway
   * it converts each value using the offset in force on that value's own date, so
     rows either side of a daylight-saving change are each corrected by their own offset
+
+The fourth safeguard is not in this file: it must run before anything this version
+writes. It cannot tell a legacy row from one inserted a second ago, so it treats both
+the same - which is fine while the only rows are legacy ones, and wrong the moment it
+runs after seed(). See the ordering in main.on_startup, and the tests that pin it.
 """
 
 from datetime import datetime, timezone
