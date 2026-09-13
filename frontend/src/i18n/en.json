@@ -263,7 +263,8 @@
     "access_denied_help": "Contact your system administrator if you need this permission.",
     "go_to_available_area": "Go to an available page",
     "copy": "Copy",
-    "copied": "Copied"
+    "copied": "Copied",
+    "confirm_title": "Are you sure?"
   },
   "theme": {
     "label": "Theme",

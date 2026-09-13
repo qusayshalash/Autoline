@@ -2,6 +2,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useConfirm } from "../../components/ConfirmProvider";
+
 import {
   createRole,
   deleteRole,
@@ -21,6 +23,7 @@ const ACTION_ORDER = ["view", "create", "update", "delete", "export", "manage"];
 
 export default function RolesPage() {
   const { t } = useTranslation();
+  const confirm = useConfirm();
   const { can } = useAuth();
   const qc = useQueryClient();
 
@@ -96,8 +99,8 @@ export default function RolesPage() {
           permissions={permissions ?? []}
           onClose={() => setOpenSlug(null)}
           onSaved={invalidate}
-          onDelete={(slug) => {
-            if (window.confirm(t("admin.roles.confirm_delete") ?? "")) remove.mutate(slug);
+          onDelete={async (slug) => {
+            if (await confirm({ body: t("admin.roles.confirm_delete") })) remove.mutate(slug);
           }}
         />
       )}

@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+
+import { useConfirm } from "../../components/ConfirmProvider";
 import { Link } from "react-router-dom";
 
 import { apiErrorMessage, deleteDataset, listDatasets } from "../../api/client";
@@ -12,6 +14,7 @@ import LoadingState from "../../components/LoadingState";
 
 export default function FilesPage() {
   const { t } = useTranslation();
+  const confirm = useConfirm();
   const { can } = useAuth();
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
@@ -96,8 +99,10 @@ export default function FilesPage() {
                     {can("datasets.delete") && (
                       <button
                         className="link-btn danger"
-                        onClick={() => {
-                          if (window.confirm(t("datasets.confirm_delete") ?? "")) remove.mutate(d.id);
+                        onClick={async () => {
+                          if (await confirm({ body: t("datasets.confirm_delete") })) {
+                            remove.mutate(d.id);
+                          }
                         }}
                       >
                         <IconTrash />

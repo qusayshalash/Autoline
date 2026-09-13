@@ -8,6 +8,9 @@ import {
   IconInfo,
 } from "./AdminIcons";
 
+// Moved out so the pages outside settings can ask the same question the same way.
+export { ConfirmDialog } from "../ConfirmDialog";
+
 /**
  * The pieces every settings section is built from.
  *
@@ -271,71 +274,3 @@ export function Working({ label }: { label: string }) {
   );
 }
 
-/* --- confirmation ---------------------------------------------------------- */
-
-export function ConfirmDialog({
-  open,
-  title,
-  body,
-  confirmLabel,
-  danger,
-  busy,
-  onConfirm,
-  onCancel,
-}: {
-  open: boolean;
-  title: string;
-  body: string;
-  confirmLabel: string;
-  danger?: boolean;
-  busy?: boolean;
-  onConfirm: () => void;
-  onCancel: () => void;
-}) {
-  const { t } = useTranslation();
-  const confirmRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    confirmRef.current?.focus();
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onCancel();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open, onCancel]);
-
-  if (!open) return null;
-
-  return (
-    <div
-      className="set-dialog-backdrop"
-      role="presentation"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onCancel();
-      }}
-    >
-      <div className="set-dialog" role="alertdialog" aria-modal="true" aria-label={title}>
-        <div className={`set-dialog-icon ${danger ? "danger" : "normal"}`}>
-          {danger ? <IconAlert /> : <IconInfo />}
-        </div>
-        <h3>{title}</h3>
-        <p>{body}</p>
-        <div className="set-dialog-actions">
-          <button type="button" className="set-btn secondary" onClick={onCancel} disabled={busy}>
-            {t("common.cancel")}
-          </button>
-          <button
-            ref={confirmRef}
-            type="button"
-            className={`set-btn ${danger ? "danger-solid" : "primary"}`}
-            onClick={onConfirm}
-            disabled={busy}
-          >
-            {confirmLabel}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}

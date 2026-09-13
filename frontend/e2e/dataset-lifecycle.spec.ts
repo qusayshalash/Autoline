@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { ADMIN, API, CSV_FIXTURE, acceptConfirms, requireCredentials, signIn } from "./helpers";
+import { ADMIN, API, CSV_FIXTURE, requireCredentials, signIn } from "./helpers";
 
 test.beforeAll(() => requireCredentials(ADMIN, "admin"));
 
@@ -10,7 +10,6 @@ test.beforeAll(() => requireCredentials(ADMIN, "admin"));
  */
 test.describe("Dataset lifecycle", () => {
   test("upload -> import -> read -> rename -> export -> delete", async ({ page, request }) => {
-    acceptConfirms(page);
     await signIn(page, ADMIN);
     await request.post(`${API}/auth/login`, {
       data: { username: ADMIN.user, password: ADMIN.pass },

@@ -263,7 +263,8 @@
     "access_denied_help": "פנו למנהל המערכת אם אתם זקוקים להרשאה זו.",
     "go_to_available_area": "מעבר לדף זמין",
     "copy": "העתק",
-    "copied": "הועתק"
+    "copied": "הועתק",
+    "confirm_title": "לאשר?"
   },
   "theme": {
     "label": "ערכת נושא",

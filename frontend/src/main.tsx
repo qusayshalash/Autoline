@@ -5,6 +5,7 @@ import { BrowserRouter } from "react-router-dom";
 
 import App from "./App.tsx";
 import { AuthProvider } from "./auth/AuthContext";
+import { ConfirmProvider } from "./components/ConfirmProvider";
 import { ThemeProvider } from "./theme/ThemeContext";
 import "./i18n";
 import "./index.css";
@@ -27,7 +28,9 @@ createRoot(document.getElementById("root")!).render(
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <AuthProvider>
-            <App />
+            <ConfirmProvider>
+              <App />
+            </ConfirmProvider>
           </AuthProvider>
         </BrowserRouter>
       </QueryClientProvider>

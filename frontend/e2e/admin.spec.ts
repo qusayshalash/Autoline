@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { ADMIN, API, acceptConfirms, requireCredentials, signIn } from "./helpers";
+import { ADMIN, API, cancelDialog, confirmDialog, requireCredentials, signIn } from "./helpers";
 
 test.beforeAll(() => requireCredentials(ADMIN, "admin"));
 
@@ -7,7 +7,6 @@ const TEST_USER = "QA_TEST_USER_E2E";
 
 test.describe("Administration", () => {
   test("creates, inspects and deletes a user through the interface", async ({ page, request }) => {
-    acceptConfirms(page);
     await request.post(`${API}/auth/login`, {
       data: { username: ADMIN.user, password: ADMIN.pass },
     });
@@ -49,7 +48,13 @@ test.describe("Administration", () => {
     const drawer = page.locator("dialog, [role=dialog]").last();
     await expect(drawer.getByText(TEST_USER)).toBeVisible();
 
+    // cancelling first: the account must survive a dialog that was dismissed
     await drawer.getByRole("button", { name: "حذف" }).click();
+    await cancelDialog(page);
+    await expect(page.getByText(TEST_USER).first()).toBeVisible();
+
+    await drawer.getByRole("button", { name: "حذف" }).click();
+    await confirmDialog(page);
     await expect(page.getByText(TEST_USER)).toHaveCount(0);
 
     const stillThere = (await (await request.get(`${API}/users`)).json()).find(

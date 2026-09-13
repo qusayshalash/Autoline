@@ -263,7 +263,8 @@
     "access_denied_help": "تواصل مع مسؤول النظام إذا كنت تحتاج هذه الصلاحية.",
     "go_to_available_area": "الانتقال إلى الصفحة المتاحة",
     "copy": "نسخ",
-    "copied": "نُسخ"
+    "copied": "نُسخ",
+    "confirm_title": "تأكيد"
   },
   "theme": {
     "label": "المظهر",

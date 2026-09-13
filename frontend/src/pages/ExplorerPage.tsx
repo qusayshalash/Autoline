@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+
+import { useConfirm } from "../components/ConfirmProvider";
 import { Link, useParams } from "react-router-dom";
 
 import {
@@ -68,6 +70,7 @@ function timingClass(ms: number): "fast" | "medium" | "slow" {
 
 export default function ExplorerPage() {
   const { t, i18n } = useTranslation();
+  const confirm = useConfirm();
   const labelFor = (c: string) => columnLabel(c, i18n.language);
   const { datasetId = "" } = useParams();
   const { can } = useAuth();
@@ -295,20 +298,20 @@ export default function ExplorerPage() {
 
   /** Permanently drops every hidden column - the natural follow-up to hiding a batch of
    *  columns you never want to see again. Rebuilds the cleaned table, so it is confirmed. */
-  function handleDeleteHiddenColumns() {
+  async function handleDeleteHiddenColumns() {
     const doomed = allColumns.filter((c) => hiddenColumns.has(c));
     if (doomed.length === 0) return;
     const message = t("sheet.confirm_delete_hidden", {
       count: doomed.length,
       columns: doomed.map(labelFor).join("، "),
     });
-    if (!window.confirm(message ?? "")) return;
+    if (!(await confirm({ body: message }))) return;
     deleteColumnsMutation.mutate(allColumns.filter((c) => !hiddenColumns.has(c)));
   }
 
-  function handleDeleteColumn(col: string) {
+  async function handleDeleteColumn(col: string) {
     const message = t("column_menu.confirm_delete", { column: labelFor(col) });
-    if (window.confirm(message ?? "")) deleteColumnMutation.mutate(col);
+    if (await confirm({ body: message })) deleteColumnMutation.mutate(col);
   }
 
   const MIN_COLUMN_WIDTH = 90;

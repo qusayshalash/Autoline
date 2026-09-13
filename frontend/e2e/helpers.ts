@@ -34,11 +34,26 @@ export async function signOut(page: Page) {
 }
 
 /**
- * Destructive actions use window.confirm, which Playwright dismisses by default -
- * so a delete would silently do nothing and the test would fail for the wrong reason.
+ * Confirms the app's own "are you sure?" dialog.
+ *
+ * Destructive actions used to call window.confirm, which Playwright dismisses by
+ * default - so a delete silently did nothing and the test failed for the wrong reason.
+ * They now open a dialog inside the page, which is both themeable and, usefully, a
+ * thing a test can actually see and assert on.
  */
-export function acceptConfirms(page: Page) {
-  page.on("dialog", (d) => d.accept());
+export async function confirmDialog(page: Page) {
+  const dialog = page.locator(".set-dialog");
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole("button", { name: "حذف" }).click();
+  await expect(dialog).toHaveCount(0);
+}
+
+/** Dismisses that dialog instead, for checking that cancelling really cancels. */
+export async function cancelDialog(page: Page) {
+  const dialog = page.locator(".set-dialog");
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole("button", { name: "إلغاء" }).click();
+  await expect(dialog).toHaveCount(0);
 }
 
 /** A logged-in API context, for asserting what the server does independently of the UI. */

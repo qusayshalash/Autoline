@@ -2,6 +2,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useConfirm } from "../../components/ConfirmProvider";
+
 import {
   createUser,
   deleteUser,
@@ -30,6 +32,7 @@ const STATUSES: UserStatus[] = ["active", "inactive", "suspended", "pending"];
 
 export default function AdminUsersPage() {
   const { t } = useTranslation();
+  const confirm = useConfirm();
   const { user: me, can } = useAuth();
   const qc = useQueryClient();
 
@@ -175,9 +178,9 @@ export default function AdminUsersPage() {
             {can("users.delete") && (
               <button
                 className="btn danger"
-                onClick={() => {
-                  if (window.confirm(t("admin.users.confirm_bulk_delete", { count: selected.size }) ?? ""))
-                    bulk("delete");
+                onClick={async () => {
+                  const body = t("admin.users.confirm_bulk_delete", { count: selected.size });
+                  if (await confirm({ body })) bulk("delete");
                 }}
               >
                 {t("admin.users.delete")}
@@ -257,9 +260,10 @@ export default function AdminUsersPage() {
         isSelf={detail?.id === me?.id}
         onClose={() => setDetailId(null)}
         onPatch={(body) => detail && patch.mutate({ id: detail.id, body })}
-        onDelete={() => {
-          if (detail && window.confirm(t("admin.users.confirm_delete", { name: detail.username }) ?? ""))
-            remove.mutate(detail.id);
+        onDelete={async () => {
+          if (!detail) return;
+          const body = t("admin.users.confirm_delete", { name: detail.username });
+          if (await confirm({ body })) remove.mutate(detail.id);
         }}
       />
 

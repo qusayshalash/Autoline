@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+
+import { useConfirm } from "../components/ConfirmProvider";
 import { useNavigate } from "react-router-dom";
 
 import { apiErrorMessage, deleteDataset, listDatasets, renameDataset, uploadDataset } from "../api/client";
@@ -24,6 +26,7 @@ function formatBytes(bytes: number | null | undefined): string {
 
 export default function DatasetsPage() {
   const { t } = useTranslation();
+  const confirm = useConfirm();
   const navigate = useNavigate();
   const qc = useQueryClient();
   const { can } = useAuth();
@@ -211,8 +214,10 @@ export default function DatasetsPage() {
                 {canDelete && (
                   <button
                     className="btn danger"
-                    onClick={() => {
-                      if (window.confirm(t("datasets.confirm_delete") ?? "")) deleteMutation.mutate(d.id);
+                    onClick={async () => {
+                      if (await confirm({ body: t("datasets.confirm_delete") })) {
+                        deleteMutation.mutate(d.id);
+                      }
                     }}
                   >
                     {t("datasets.delete")}

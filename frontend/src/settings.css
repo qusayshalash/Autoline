@@ -948,7 +948,12 @@
   align-items: center;
   justify-content: center;
   padding: 20px;
-  z-index: 100;
+  /* Above everything, deliberately. A confirmation is always opened by something else -
+     a drawer, a panel, a toast may be on screen - and it blocks the page until it is
+     answered, so it cannot be the layer that loses. The drawer overlay sits at 130 and
+     the export card at 140; asking "delete this account?" from inside the account
+     drawer put the question behind the drawer and left the buttons unclickable. */
+  z-index: 200;
 }
 
 .set-dialog {
