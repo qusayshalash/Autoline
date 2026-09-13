@@ -22,7 +22,45 @@ from app.services.pdf_fonts import data_font
 from app.services.query import sorts_numerically
 
 
-def build_export_query(dataset_id: str, req: ExportRequest) -> tuple[str, list, list[str]]:
+# The characters a spreadsheet reads as "this cell is a formula" when it opens a CSV.
+# Tab and carriage return are in the list because Excel strips leading whitespace before
+# deciding, so they can carry an = past a naive check.
+_FORMULA_LEADERS = ("=", "+", "@", "-", chr(9), chr(13))
+
+
+def _formula_safe(column: str) -> str:
+    """A projection of `column` that a spreadsheet will not execute.
+
+    A CSV is text until something opens it, and Excel decides a cell is a formula from
+    its first character. So =cmd|' /c calc'!A1 sitting in an imported file leaves here as
+    a working command the moment a colleague double-clicks the export. Prefixing an
+    apostrophe is the conventional answer: Excel and LibreOffice both read it as "what
+    follows is text" and do not display it.
+
+    Numbers are let through untouched, which is the whole reason this is not a plain
+    prefix check. Half the leaders are also how a number legitimately starts - a price of
+    -4000 or +1234 - and quoting those would put an apostrophe in front of a large share
+    of a numeric column to defend against nothing. A value that casts is a number, not a
+    formula; TRY_CAST is only reached for the few cells that start with one of these
+    characters at all.
+
+    This is the one place an export stops being a faithful copy of what was imported.
+    That is affordable because the uploaded file is kept as well - see the `originals`
+    category in storage - so the byte-for-byte copy still exists and this one is the
+    shareable one.
+    """
+    col = sql_utils.quote_ident(column)
+    leaders = ", ".join(f"chr({ord(c)})" for c in _FORMULA_LEADERS)
+    return (
+        f"CASE WHEN substr({col}, 1, 1) IN ({leaders})"
+        f" AND TRY_CAST({col} AS DOUBLE) IS NULL"
+        f" THEN chr(39) || {col} ELSE {col} END AS {col}"
+    )
+
+
+def build_export_query(
+    dataset_id: str, req: ExportRequest, *, neutralise_formulas: bool = False
+) -> tuple[str, list, list[str]]:
     table = sql_utils.resolve_source_table(dataset_id, req.source)
     columns = sql_utils.table_columns(dataset_id, table)
     valid = set(columns)
@@ -52,7 +90,10 @@ def build_export_query(dataset_id: str, req: ExportRequest) -> tuple[str, list, 
             req.sort_by, req.sort_dir, valid, numeric=numeric
         )
 
-    cols_sql = ", ".join(sql_utils.quote_ident(c) for c in columns)
+    cols_sql = ", ".join(
+        _formula_safe(c) if neutralise_formulas else sql_utils.quote_ident(c)
+        for c in columns
+    )
     sql = (
         f"SELECT {cols_sql} FROM {sql_utils.quote_ident(table)}"
         + (f" WHERE {where_sql}" if where_sql else "")
@@ -65,7 +106,10 @@ def export_csv(dataset_id: str, req: ExportRequest, out_path: Path) -> None:
     # held for the whole write: exporting four million rows takes minutes, and the file
     # must not be replaced or closed underneath it
     with datasets.reading(dataset_id) as cur:
-        sql, params, _columns = build_export_query(dataset_id, req)
+        # Only the CSV needs this. The workbook writer is told not to treat text as a
+        # formula at all, so it carries the values through unaltered, and a PDF cannot
+        # execute anything.
+        sql, params, _columns = build_export_query(dataset_id, req, neutralise_formulas=True)
         escaped = str(out_path).replace("'", "''")
         cur.execute(f"COPY ({sql}) TO '{escaped}' (FORMAT CSV, HEADER)", params)
 
@@ -79,7 +123,24 @@ def _export_xlsx(cur, dataset_id: str, req: ExportRequest, out_path: Path) -> No
     sql, params, columns = build_export_query(dataset_id, req)
     cur.execute(sql, params)
 
-    workbook = xlsxwriter.Workbook(str(out_path), {"constant_memory": True})
+    # strings_to_formulas is xlsxwriter's default, and it is the one that matters here:
+    # with it on, a cell whose text begins with "=" is written as a live formula rather
+    # than as the text the file actually contained. A registry row holding
+    # =cmd|' /c calc'!A1 - a value we faithfully imported as text - came back out as a
+    # working DDE formula in the workbook, aimed at whoever opened it. Nothing exported
+    # from here is ever a formula, so the conversion has no upside to weigh against that.
+    #
+    # strings_to_urls is off for a duller reason: it rewrites anything resembling a link
+    # into a hyperlink object, and a sheet may hold only 65,530 of them before the write
+    # fails outright. A column of addresses would take a whole export down with it.
+    workbook = xlsxwriter.Workbook(
+        str(out_path),
+        {
+            "constant_memory": True,
+            "strings_to_formulas": False,
+            "strings_to_urls": False,
+        },
+    )
     sheet_index = 1
     row_limit = settings.xlsx_sheet_row_limit
 
