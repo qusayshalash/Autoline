@@ -338,7 +338,11 @@
       "backup.deleted": "حذف نسخة احتياطية",
       "backup.pruned": "تقليم النسخ الاحتياطية",
       "dataset.compaction_started": "بدء ضغط قاعدة بيانات",
-      "backup.schedule_changed": "تغيير جدولة النسخ"
+      "backup.schedule_changed": "تغيير جدولة النسخ",
+      "dataset.renamed": "أعاد تسمية الملف",
+      "activity.purged": "قلّم سجل النشاط",
+      "housekeeping.swept": "قلّم سجلات العمليات",
+      "housekeeping.retention_changed": "غيّر مدة حفظ السجلات"
     },
     "time": {
       "just_now": "الآن",

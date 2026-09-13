@@ -338,7 +338,11 @@
       "backup.deleted": "Backup deleted",
       "backup.pruned": "Backups pruned",
       "dataset.compaction_started": "Compaction started",
-      "backup.schedule_changed": "Backup schedule changed"
+      "backup.schedule_changed": "Backup schedule changed",
+      "dataset.renamed": "renamed",
+      "activity.purged": "trimmed the activity log",
+      "housekeeping.swept": "trimmed the operation records",
+      "housekeeping.retention_changed": "changed how long records are kept"
     },
     "time": {
       "just_now": "just now",

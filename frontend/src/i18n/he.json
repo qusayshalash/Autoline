@@ -338,7 +338,11 @@
       "backup.deleted": "גיבוי נמחק",
       "backup.pruned": "גיבויים גוזמו",
       "dataset.compaction_started": "כיווץ החל",
-      "backup.schedule_changed": "לוח הגיבוי שונה"
+      "backup.schedule_changed": "לוח הגיבוי שונה",
+      "dataset.renamed": "שינה שם",
+      "activity.purged": "גזם את יומן הפעילות",
+      "housekeeping.swept": "גזם את רשומות הפעולות",
+      "housekeeping.retention_changed": "שינה את זמן שמירת הרשומות"
     },
     "time": {
       "just_now": "עכשיו",
