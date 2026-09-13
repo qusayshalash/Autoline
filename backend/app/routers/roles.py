@@ -80,7 +80,14 @@ def create_role(body: CreateRoleRequest, actor: dict = Depends(require_permissio
         raise ApiError(409, "role_name_taken", "A role with a similar name already exists")
     admin_db.create_role(slug, body.name, body.description, body.permissions)
     admin_db.log_activity(
-        actor, "role.created", "role", slug, body.name, f"{len(body.permissions)} permissions"
+        actor,
+        "role.created",
+        "role",
+        slug,
+        body.name,
+        f"{len(body.permissions)} permissions",
+        detail_code="permission_count",
+        count=len(body.permissions),
     )
     return get_role(slug)
 
@@ -101,7 +108,16 @@ def update_role(
 
     admin_db.update_role(slug, body.name, body.description, body.permissions)
     changed = [k for k, v in body.model_dump(exclude_none=True).items()]
-    admin_db.log_activity(actor, "role.updated", "role", slug, role["name"], ", ".join(changed))
+    admin_db.log_activity(
+        actor,
+        "role.updated",
+        "role",
+        slug,
+        role["name"],
+        ", ".join(changed),
+        detail_code="changed_fields",
+        fields=changed,
+    )
     return get_role(slug)
 
 

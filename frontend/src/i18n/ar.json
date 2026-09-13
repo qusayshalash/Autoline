@@ -264,7 +264,8 @@
     "go_to_available_area": "الانتقال إلى الصفحة المتاحة",
     "copy": "نسخ",
     "copied": "نُسخ",
-    "confirm_title": "تأكيد"
+    "confirm_title": "تأكيد",
+    "list_separator": "، "
   },
   "theme": {
     "label": "المظهر",
@@ -600,6 +601,40 @@
       "sweep_now": "قلّم الآن",
       "swept": "حُذف {{count}} صفًّا.",
       "nothing_due": "لا شيء مستحقّ الحذف."
+    },
+    "details": {
+      "backup_databases_only": "قواعد البيانات فقط",
+      "backup_with_originals": "مع الملفات الأصلية",
+      "backups_removed": "حُذفت {{removed}} نسخة",
+      "blocked_from": "من {{address}} · إعادة المحاولة بعد {{seconds}} ثانية",
+      "changed_fields": "تغيّر: {{fields}}",
+      "files_freed": "{{files}} ملفًا · {{bytes}}",
+      "import_config": "الترميز {{encoding}} · الفاصل {{delimiter}}",
+      "languages_enabled": "المفعّلة: {{codes}}",
+      "login_failed": "من {{address}} · المحاولة {{attempt}}",
+      "login_failed_locked": "من {{address}} · المحاولة {{attempt}} · قُفل {{seconds}} ثانية",
+      "permission_count": "{{count}} صلاحية",
+      "purged": "حُذف {{removed}} سجلًا أقدم من {{days}} يومًا",
+      "retention_both": "المهام {{jobs}} يومًا · التنظيف {{cleaning}} يومًا",
+      "retention_cleaning": "التنظيف {{cleaning}} يومًا",
+      "retention_hours": "{{hours}} ساعة",
+      "retention_jobs": "المهام {{jobs}} يومًا",
+      "rows_change": "{{before}} ← {{after}} صفًا",
+      "schedule_every": "كل {{hours}} ساعة",
+      "schedule_off": "معطّلة",
+      "swept": "{{jobs}} مهمة · {{cleaning}} سجل تنظيف",
+      "was_named": "كان: {{name}}",
+      "with_role": "الدور: {{role}}"
+    },
+    "fields": {
+      "description": "الوصف",
+      "email": "البريد",
+      "full_name": "الاسم",
+      "name": "الاسم",
+      "password_hash": "كلمة المرور",
+      "permissions": "الصلاحيات",
+      "role": "الدور",
+      "status": "الحالة"
     }
   },
   "statistics": {

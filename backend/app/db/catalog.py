@@ -164,6 +164,22 @@ def _init_schema(conn: duckdb.DuckDBPyConnection) -> None:
     )
     _migrate_users(conn)
     _migrate_datasets(conn)
+    _migrate_activity_log(conn)
+
+
+def _migrate_activity_log(conn: duckdb.DuckDBPyConnection) -> None:
+    """Adds the translatable form of an entry's detail line, in place.
+
+    `detail` is an English sentence assembled at the call site - "9 -> 8 rows",
+    "encoding=utf_8". It is kept, because every row already written has one and because
+    it is what anyone reading this table directly wants to see. `detail_json` carries the
+    same thing as a key and its values, which is the only form the interface can say in
+    the reader's language. A row from before this column simply has none, and falls back
+    to the sentence.
+    """
+    existing = {r[0] for r in conn.execute("DESCRIBE activity_log").fetchall()}
+    if "detail_json" not in existing:
+        conn.execute("ALTER TABLE activity_log ADD COLUMN detail_json VARCHAR")
 
 
 def _migrate_datasets(conn: duckdb.DuckDBPyConnection) -> None:

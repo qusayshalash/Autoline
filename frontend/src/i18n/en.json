@@ -264,7 +264,8 @@
     "go_to_available_area": "Go to an available page",
     "copy": "Copy",
     "copied": "Copied",
-    "confirm_title": "Are you sure?"
+    "confirm_title": "Are you sure?",
+    "list_separator": ", "
   },
   "theme": {
     "label": "Theme",
@@ -600,6 +601,40 @@
       "sweep_now": "Sweep now",
       "swept": "Removed {{count}} rows.",
       "nothing_due": "Nothing is due."
+    },
+    "details": {
+      "backup_databases_only": "databases only",
+      "backup_with_originals": "with the original files",
+      "backups_removed": "{{removed}} backups removed",
+      "blocked_from": "from {{address}} · retry in {{seconds}}s",
+      "changed_fields": "changed: {{fields}}",
+      "files_freed": "{{files}} files · {{bytes}}",
+      "import_config": "encoding {{encoding}} · delimiter {{delimiter}}",
+      "languages_enabled": "enabled: {{codes}}",
+      "login_failed": "from {{address}} · attempt {{attempt}}",
+      "login_failed_locked": "from {{address}} · attempt {{attempt}} · locked for {{seconds}}s",
+      "permission_count": "{{count}} permissions",
+      "purged": "removed {{removed}} entries older than {{days}} days",
+      "retention_both": "jobs {{jobs}} days · cleaning {{cleaning}} days",
+      "retention_cleaning": "cleaning {{cleaning}} days",
+      "retention_hours": "{{hours}} hours",
+      "retention_jobs": "jobs {{jobs}} days",
+      "rows_change": "{{before}} → {{after}} rows",
+      "schedule_every": "every {{hours}} hours",
+      "schedule_off": "off",
+      "swept": "{{jobs}} jobs · {{cleaning}} cleaning records",
+      "was_named": "was: {{name}}",
+      "with_role": "role: {{role}}"
+    },
+    "fields": {
+      "description": "description",
+      "email": "email",
+      "full_name": "name",
+      "name": "name",
+      "password_hash": "password",
+      "permissions": "permissions",
+      "role": "role",
+      "status": "status"
     }
   },
   "statistics": {

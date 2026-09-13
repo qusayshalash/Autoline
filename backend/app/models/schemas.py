@@ -117,7 +117,12 @@ class ActivityItem(BaseModel):
     target_type: str = ""
     target_id: str = ""
     target_label: str = ""
+    # The English sentence, as it has always been - shown when there is no code, which
+    # is every entry written before detail_code existed.
     detail: str = ""
+    # The same thing the interface can translate: a key and the values it interpolates.
+    detail_code: str = ""
+    detail_params: dict[str, Any] = {}
 
 
 class ActivityPage(BaseModel):

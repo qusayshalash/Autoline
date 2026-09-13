@@ -49,6 +49,9 @@ def login(body: LoginRequest, request: Request, response: Response) -> MeOut:
             "",
             body.username,
             f"from {address}, retry in {verdict.retry_after_s}s",
+            detail_code="blocked_from",
+            address=address,
+            seconds=verdict.retry_after_s,
         )
         raise ApiError(
             429,
@@ -78,6 +81,10 @@ def login(body: LoginRequest, request: Request, response: Response) -> MeOut:
             body.username,
             f"from {address}, attempt {after.failures}"
             + ("" if after.allowed else f", locked for {after.retry_after_s}s"),
+            detail_code="login_failed" if after.allowed else "login_failed_locked",
+            address=address,
+            attempt=after.failures,
+            seconds=after.retry_after_s,
         )
         raise ApiError(401, "invalid_credentials", "Invalid username or password")
 

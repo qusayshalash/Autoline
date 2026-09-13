@@ -152,6 +152,9 @@ def start_import(
     admin_db.log_activity(
         user, "dataset.imported", "dataset", dataset_id, row.get("original_filename") or "",
         f"encoding={config.encoding}, delimiter={config.delimiter!r}",
+        detail_code="import_config",
+        encoding=config.encoding,
+        delimiter=config.delimiter,
     )
     job_id = catalog.create_job(dataset_id, "import")
     submit(
@@ -224,7 +227,16 @@ def rename_dataset(
         raise ApiError(400, "name_empty", "Name cannot be empty")
     old_name = row.get("original_filename") or ""
     catalog.update_dataset(dataset_id, original_filename=name)
-    admin_db.log_activity(user, "dataset.renamed", "dataset", dataset_id, name, f"was: {old_name}")
+    admin_db.log_activity(
+        user,
+        "dataset.renamed",
+        "dataset",
+        dataset_id,
+        name,
+        f"was: {old_name}",
+        detail_code="was_named",
+        name=old_name,
+    )
     return _dataset_out(catalog.get_dataset(dataset_id))
 
 

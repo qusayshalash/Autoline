@@ -13,6 +13,7 @@ because the list it has to check against only exists here.
 import ast
 import io
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -113,3 +114,85 @@ def test_no_label_describes_an_action_that_is_never_recorded():
     found = logged_actions()
     orphans = sorted(k for k in action_labels("ar") if k not in found)
     assert not orphans, f"labels with no matching action: {', '.join(orphans)}"
+
+
+# ---- the detail line under the action -------------------------------------------------
+
+def detail_codes() -> set[str]:
+    """Every detail_code passed to log_activity, read from the source.
+
+    Several call sites choose between two codes on the spot - a backup taken with or
+    without the originals, a schedule turned off or set - so both branches count.
+    """
+    found: set[str] = set()
+    for path in (BACKEND / "app").rglob("*.py"):
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            # detail_code="..." passed straight in, either branch of a conditional
+            if isinstance(node, ast.Call):
+                func = node.func
+                name = func.attr if isinstance(func, ast.Attribute) else getattr(func, "id", "")
+                if name == "log_activity":
+                    for keyword in node.keywords:
+                        if keyword.arg == "detail_code":
+                            found |= _string_literals(keyword.value)
+            # the housekeeping call settles on `code` over an if/elif first
+            elif isinstance(node, ast.Assign):
+                for target in node.targets:
+                    if isinstance(target, ast.Name) and target.id == "code":
+                        found |= _string_literals(node.value)
+    return found
+
+
+def detail_messages(language: str) -> dict:
+    data = json.load(io.open(LOCALES / f"{language}.json", encoding="utf-8"))
+    return data["admin"].get("details", {})
+
+
+def test_the_scan_finds_the_detail_codes():
+    codes = detail_codes()
+    assert len(codes) >= 15, codes
+    for expected in ("rows_change", "import_config", "was_named", "schedule_off", "retention_both"):
+        assert expected in codes, f"the scan missed {expected}"
+
+
+@pytest.mark.parametrize("language", LANGUAGES)
+def test_every_detail_code_has_a_sentence(language):
+    messages = detail_messages(language)
+    missing = sorted(c for c in detail_codes() if c not in messages)
+    assert not missing, (
+        f"{language}.json has no admin.details entry for: {', '.join(missing)} - "
+        "the log will fall back to the English sentence"
+    )
+
+
+def test_the_languages_agree_on_which_details_they_name():
+    sets = {lang: set(detail_messages(lang)) for lang in LANGUAGES}
+    everything = set().union(*sets.values())
+    for lang, present in sets.items():
+        assert not (everything - present), (
+            f"{lang}.json is missing: {', '.join(sorted(everything - present))}"
+        )
+
+
+@pytest.mark.parametrize("language", LANGUAGES)
+def test_the_placeholders_match_across_languages(language):
+    """A translation that drops a placeholder silently loses the number it was carrying,
+    and one that invents a placeholder renders it raw."""
+    reference = detail_messages("en")
+    messages = detail_messages(language)
+    for code, text in messages.items():
+        expected = set(re.findall(r"{{(\w+)}}", reference.get(code, "")))
+        actual = set(re.findall(r"{{(\w+)}}", text))
+        assert actual == expected, (
+            f"{language}.json '{code}' uses {sorted(actual)}, English uses {sorted(expected)}"
+        )
+
+
+def test_the_field_names_inside_a_change_list_are_named():
+    """`changed_fields` interpolates a list of column names, each shown to the reader."""
+    for language in LANGUAGES:
+        data = json.load(io.open(LOCALES / f"{language}.json", encoding="utf-8"))
+        fields = data["admin"].get("fields", {})
+        for expected in ("role", "status", "permissions", "password_hash"):
+            assert expected in fields, f"{language}.json has no admin.fields.{expected}"

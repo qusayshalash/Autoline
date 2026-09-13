@@ -63,7 +63,14 @@ def create_user(body: CreateUserRequest, actor: dict = Depends(require_permissio
         raise ApiError(409, "username_taken", "Username already exists") from exc
 
     admin_db.log_activity(
-        actor, "user.created", "user", user_id, body.username, f"role={body.role}"
+        actor,
+        "user.created",
+        "user",
+        user_id,
+        body.username,
+        f"role={body.role}",
+        detail_code="with_role",
+        role=body.role,
     )
     return _user_out(catalog.get_user_by_id(user_id))
 
@@ -107,7 +114,14 @@ def update_user(
     changed = [k for k in fields if k not in ("updated_at", "is_active")]
     action = "user.password_reset" if changed == ["password_hash"] else "user.updated"
     admin_db.log_activity(
-        actor, action, "user", user_id, row["username"], ", ".join(changed)
+        actor,
+        action,
+        "user",
+        user_id,
+        row["username"],
+        ", ".join(changed),
+        detail_code="changed_fields",
+        fields=changed,
     )
     return _user_out(catalog.get_user_by_id(user_id))
 

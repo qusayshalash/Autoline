@@ -264,7 +264,8 @@
     "go_to_available_area": "מעבר לדף זמין",
     "copy": "העתק",
     "copied": "הועתק",
-    "confirm_title": "לאשר?"
+    "confirm_title": "לאשר?",
+    "list_separator": ", "
   },
   "theme": {
     "label": "ערכת נושא",
@@ -600,6 +601,40 @@
       "sweep_now": "נקה עכשיו",
       "swept": "הוסרו {{count}} שורות.",
       "nothing_due": "אין מה להסיר."
+    },
+    "details": {
+      "backup_databases_only": "מסדי נתונים בלבד",
+      "backup_with_originals": "כולל הקבצים המקוריים",
+      "backups_removed": "{{removed}} גיבויים נמחקו",
+      "blocked_from": "מ-{{address}} · ניסיון חוזר בעוד {{seconds}} שניות",
+      "changed_fields": "השתנה: {{fields}}",
+      "files_freed": "{{files}} קבצים · {{bytes}}",
+      "import_config": "קידוד {{encoding}} · מפריד {{delimiter}}",
+      "languages_enabled": "מופעלות: {{codes}}",
+      "login_failed": "מ-{{address}} · ניסיון {{attempt}}",
+      "login_failed_locked": "מ-{{address}} · ניסיון {{attempt}} · ננעל ל-{{seconds}} שניות",
+      "permission_count": "{{count}} הרשאות",
+      "purged": "נמחקו {{removed}} רשומות ישנות מ-{{days}} ימים",
+      "retention_both": "משימות {{jobs}} ימים · ניקוי {{cleaning}} ימים",
+      "retention_cleaning": "ניקוי {{cleaning}} ימים",
+      "retention_hours": "{{hours}} שעות",
+      "retention_jobs": "משימות {{jobs}} ימים",
+      "rows_change": "{{before}} ← {{after}} שורות",
+      "schedule_every": "כל {{hours}} שעות",
+      "schedule_off": "מושבת",
+      "swept": "{{jobs}} משימות · {{cleaning}} רשומות ניקוי",
+      "was_named": "היה: {{name}}",
+      "with_role": "תפקיד: {{role}}"
+    },
+    "fields": {
+      "description": "תיאור",
+      "email": "דוא\"ל",
+      "full_name": "שם",
+      "name": "שם",
+      "password_hash": "סיסמה",
+      "permissions": "הרשאות",
+      "role": "תפקיד",
+      "status": "סטטוס"
     }
   },
   "statistics": {

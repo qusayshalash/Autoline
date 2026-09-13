@@ -46,7 +46,11 @@ export interface ActivityItem {
   target_type: string;
   target_id: string;
   target_label: string;
+  /** The English sentence the server composed. Shown when there is no code. */
   detail: string;
+  /** The same detail as a translatable key, absent on entries written before it existed. */
+  detail_code: string;
+  detail_params: Record<string, unknown>;
 }
 
 export interface Overview {

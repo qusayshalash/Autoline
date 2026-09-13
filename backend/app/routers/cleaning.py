@@ -27,6 +27,9 @@ def clean_dataset(
     admin_db.log_activity(
         user, "dataset.cleaned", "dataset", dataset_id, row.get("original_filename") or "",
         f"{result.rows_before:,} -> {result.rows_after:,} rows",
+        detail_code="rows_change",
+        before=result.rows_before,
+        after=result.rows_after,
     )
     return result
 

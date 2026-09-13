@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { fetchActivity, fetchUsers } from "../../api/admin";
+import i18n from "../../i18n";
 import { IconActivity } from "../../components/admin/AdminIcons";
 import { AdminPanel } from "../../components/admin/AdminUI";
 import QueryState from "../../components/QueryState";
@@ -10,26 +11,39 @@ import ActivityRow from "./ActivityRow";
 
 const PAGE_SIZE = 50;
 
-/** Action values the log can hold, grouped for the filter. Kept in one place so the
- *  filter never offers something the backend cannot produce. */
-const ACTIONS = [
-  "auth.login",
-  "user.created",
-  "user.updated",
-  "user.password_reset",
-  "user.deleted",
-  "role.created",
-  "role.updated",
-  "role.deleted",
-  "dataset.imported",
-  "dataset.cleaned",
-  "dataset.deleted",
-  "language.updated",
-  "language.default_changed",
-];
+/**
+ * Every action the filter can offer, taken from the labels rather than listed again.
+ *
+ * It used to be a second hand-written list, and it drifted: fourteen entries against the
+ * twenty-seven the server records, so a backup, a trim or a rename could not be filtered
+ * for at all. The labels are the better source because they are already held to the
+ * server's list by a test - see backend/tests/test_activity_translations.py - so an
+ * action that exists has a name here, and one with a name can be filtered.
+ */
+function knownActions(): string[] {
+  const candidates = [i18n.language, i18n.options.fallbackLng, "ar"].flat();
+  for (const language of candidates) {
+    if (!language) continue;
+    const bundle = i18n.getResourceBundle(String(language), "translation");
+    const actions = bundle?.admin?.actions;
+    if (actions) return Object.keys(actions);
+  }
+  return [];
+}
 
 export default function ActivityPage() {
-  const { t } = useTranslation();
+  const { t, i18n: active } = useTranslation();
+  // sorted by what the reader sees, not by the key behind it
+  const actions = useMemo(
+    () =>
+      knownActions().sort((a, b) =>
+        t(`admin.actions.${a}`, { defaultValue: a }).localeCompare(
+          t(`admin.actions.${b}`, { defaultValue: b }),
+          active.language
+        )
+      ),
+    [t, active.language]
+  );
   const [action, setAction] = useState("");
   const [actor, setActor] = useState("");
   const [page, setPage] = useState(0);
@@ -58,7 +72,7 @@ export default function ActivityPage() {
               }}
             >
               <option value="">{t("admin.activity.all_actions")}</option>
-              {ACTIONS.map((a) => (
+              {actions.map((a) => (
                 <option key={a} value={a}>
                   {t(`admin.actions.${a}`, { defaultValue: a })}
                 </option>

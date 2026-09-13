@@ -308,18 +308,34 @@ def log_activity(
     target_id: str = "",
     target_label: str = "",
     detail: str = "",
+    detail_code: str = "",
+    **detail_params: Any,
 ) -> None:
     """Records one administrative event. Never raises: a failure to log must not fail
-    the operation the user actually asked for."""
+    the operation the user actually asked for.
+
+    `detail` is the English sentence - "9 -> 8 rows" - and stays, both for the rows
+    already written and for anyone reading this table with SQL. `detail_code` plus its
+    parameters are the same information in a form the interface can translate; without
+    one the entry simply shows the sentence, which is what every older row does.
+
+    The two are written from the same call on purpose. Composing the sentence in one
+    place and the key in another is how they drift.
+    """
     try:
+        envelope = (
+            json.dumps({"code": detail_code, "params": detail_params}, ensure_ascii=False)
+            if detail_code
+            else None
+        )
         conn = get_connection()
         with db_lock:
             conn.execute(
                 """
                 INSERT INTO activity_log
                     (id, occurred_at, actor_id, actor_username, action, target_type, target_id,
-                     target_label, detail)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                     target_label, detail, detail_json)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 [
                     new_id(),
@@ -331,6 +347,7 @@ def log_activity(
                     target_id,
                     target_label,
                     detail,
+                    envelope,
                 ],
             )
     except Exception:  # noqa: BLE001 - logging is best-effort by design

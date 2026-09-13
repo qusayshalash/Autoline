@@ -1,6 +1,7 @@
 """Admin control-panel endpoints: overview KPIs, activity feed, language settings and
 system status. Everything here reports real state - nothing is stubbed."""
 
+import json
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -74,6 +75,15 @@ def _default_language() -> str:
 
 
 def _activity_item(row: dict) -> ActivityItem:
+    envelope = {}
+    raw = row.get("detail_json")
+    if raw:
+        try:
+            envelope = json.loads(raw) or {}
+        except (TypeError, ValueError):
+            # a hand-edited or truncated row: fall back to the sentence rather than
+            # dropping the entry out of the log
+            envelope = {}
     return ActivityItem(
         id=row["id"],
         at=clocks.iso(row.get("occurred_at")),
@@ -84,6 +94,8 @@ def _activity_item(row: dict) -> ActivityItem:
         target_id=row.get("target_id") or "",
         target_label=row.get("target_label") or "",
         detail=row.get("detail") or "",
+        detail_code=envelope.get("code") or "",
+        detail_params=envelope.get("params") or {},
     )
 
 
@@ -170,6 +182,9 @@ def activity_purge(
         "activity",
         "",
         f"{removed} entr(ies) older than {body.older_than_days} day(s)",
+        detail_code="purged",
+        removed=removed,
+        days=body.older_than_days,
     )
     _, total = admin_db.list_activity(limit=1)
     return ActivityPurgeResult(removed=removed, remaining=total, cutoff=cutoff.isoformat())
@@ -200,7 +215,14 @@ def update_languages(
             raise ApiError(400, "language_last_enabled", "At least one language must stay enabled")
         admin_db.set_setting(LANGUAGES_ENABLED_KEY, body.enabled)
         admin_db.log_activity(
-            actor, "language.updated", "language", "", "", f"enabled={','.join(body.enabled)}"
+            actor,
+        "language.updated",
+        "language",
+        "",
+        "",
+        f"enabled={','.join(body.enabled)}",
+        detail_code="languages_enabled",
+        codes=", ".join(body.enabled),
         )
 
     if body.default is not None:
@@ -283,6 +305,9 @@ def storage_cleanup(
         "storage",
         "",
         f"{result['removed_files']} file(s), {result['freed_bytes']} bytes",
+        detail_code="files_freed",
+        files=result["removed_files"],
+        bytes=result["freed_bytes"],
     )
     return StorageCleanupResult(**result)
 
@@ -294,7 +319,14 @@ def set_retention(
 ) -> StorageOverview:
     hours = storage_service.set_retention_hours(body.hours)
     admin_db.log_activity(
-        actor, "storage.retention_changed", "system", "storage", "", f"{hours}h"
+        actor,
+        "storage.retention_changed",
+        "system",
+        "storage",
+        "",
+        f"{hours}h",
+        detail_code="retention_hours",
+        hours=hours,
     )
     return storage_overview()
 
@@ -319,16 +351,35 @@ def set_housekeeping(
     actor: dict = Depends(require_permission("system.manage")),
 ) -> HousekeepingStatus:
     changed = []
+    jobs_days = cleaning_days = None
     if body.jobs_retention_days is not None:
-        days = housekeeping_service.set_jobs_retention_days(body.jobs_retention_days)
-        changed.append(f"jobs={days}d")
+        # the service clamps to its floor, so what is recorded is what was actually set
+        jobs_days = housekeeping_service.set_jobs_retention_days(body.jobs_retention_days)
+        changed.append(f"jobs={jobs_days}d")
     if body.cleaning_retention_days is not None:
-        days = housekeeping_service.set_cleaning_retention_days(body.cleaning_retention_days)
-        changed.append(f"cleaning={days}d")
+        cleaning_days = housekeeping_service.set_cleaning_retention_days(
+            body.cleaning_retention_days
+        )
+        changed.append(f"cleaning={cleaning_days}d")
     if changed:
+        # Which of the two was touched decides the sentence, so it decides the key too -
+        # i18next has no way to leave half a sentence out.
+        if body.jobs_retention_days is not None and body.cleaning_retention_days is not None:
+            code = "retention_both"
+        elif body.jobs_retention_days is not None:
+            code = "retention_jobs"
+        else:
+            code = "retention_cleaning"
         admin_db.log_activity(
-            actor, "housekeeping.retention_changed", "system", "housekeeping", "",
+            actor,
+            "housekeeping.retention_changed",
+            "system",
+            "housekeeping",
+            "",
             ", ".join(changed),
+            detail_code=code,
+            jobs=jobs_days,
+            cleaning=cleaning_days,
         )
     return HousekeepingStatus(**housekeeping_service.status())
 
@@ -343,6 +394,9 @@ def run_housekeeping(
     admin_db.log_activity(
         actor, "housekeeping.swept", "system", "housekeeping", "",
         f"{result['jobs_removed']} job(s), {result['cleaning_removed']} cleaning record(s)",
+        detail_code="swept",
+        jobs=result["jobs_removed"],
+        cleaning=result["cleaning_removed"],
     )
     return HousekeepingSweepResult(**result)
 
@@ -378,6 +432,7 @@ def start_backup(
     admin_db.log_activity(
         actor, "backup.started", "system", "backup", "",
         "with originals" if body.include_originals else "databases only",
+        detail_code="backup_with_originals" if body.include_originals else "backup_databases_only",
     )
     submit(_run_backup_job, job_id, body.include_originals)
     return JobOut(id=job_id, dataset_id="", kind="backup", status="pending", progress="")
@@ -418,7 +473,14 @@ def _run_backup_job(job_id: str, include_originals: bool) -> None:
 def prune_backups(actor: dict = Depends(require_permission("system.manage"))) -> BackupPruneResult:
     result = backup_service.prune()
     admin_db.log_activity(
-        actor, "backup.pruned", "system", "backup", "", f"{result['removed']} removed"
+        actor,
+        "backup.pruned",
+        "system",
+        "backup",
+        "",
+        f"{result['removed']} removed",
+        detail_code="backups_removed",
+        removed=result["removed"],
     )
     return BackupPruneResult(**result)
 
@@ -515,5 +577,7 @@ def set_backup_schedule(
     admin_db.log_activity(
         actor, "backup.schedule_changed", "system", "backup", "",
         "off" if hours == 0 else f"every {hours}h",
+        detail_code="schedule_off" if hours == 0 else "schedule_every",
+        hours=hours,
     )
     return BackupSummary(**backup_service.summary(admin_db.get_setting))
