@@ -163,3 +163,65 @@ def test_a_hebrew_column_costs_far_more_bytes_than_characters(real):
     ).fetchone()
     assert bytes_ > chars
     assert 1.5 < bytes_ / chars <= 2.0, f"ratio {bytes_ / chars:.4f}"
+
+
+def test_a_numeric_column_orders_by_value_at_full_scale(real):
+    """Sorting that is right on 489 synthetic rows and wrong on four million.
+
+    horaat_rishum is a registration code held, like every column, as text. Its values run
+    from 13 to 999999, so they are not all the same width - and that is the only condition
+    under which a text comparison and a numeric one disagree. Ordered as text the column
+    opens on 100000; the smallest value in the file is 13.
+
+    The figures are properties of the file, read from it independently of the app.
+    """
+    from app.services import sql_utils
+
+    column = "horaat_rishum"
+    present = f'"{column}" IS NOT NULL AND "{column}" <> \'\''
+
+    low, high, filled = real.execute(
+        f'SELECT MIN(TRY_CAST("{column}" AS DOUBLE)), MAX(TRY_CAST("{column}" AS DOUBLE)), '
+        f"COUNT(*) FILTER (WHERE {present}) FROM raw_data"
+    ).fetchone()
+    assert (low, high, filled) == (13.0, 999999.0, 3_349_413)
+
+    order = sql_utils.build_order_sql(column, "asc", {column}, numeric=True)
+    first = real.execute(
+        f'SELECT "{column}" FROM raw_data WHERE {present} ORDER BY {order} LIMIT 1'
+    ).fetchone()[0]
+    assert int(first) == 13, f"ascending opened on {first!r}, not the smallest value"
+
+    order = sql_utils.build_order_sql(column, "desc", {column}, numeric=True)
+    last = real.execute(
+        f'SELECT "{column}" FROM raw_data WHERE {present} ORDER BY {order} LIMIT 1'
+    ).fetchone()[0]
+    assert int(last) == 999999
+
+    # and the reason it needed fixing: uncast, the same query disagrees
+    as_text = real.execute(
+        f'SELECT "{column}" FROM raw_data WHERE {present} ORDER BY "{column}" ASC LIMIT 1'
+    ).fetchone()[0]
+    assert int(as_text) != 13
+
+
+def test_blank_numbers_do_not_crowd_the_first_page_at_full_scale(real):
+    """765,074 rows have no registration code. Sorted descending they must not be what
+    the first page shows."""
+    column = "horaat_rishum"
+    from app.services import sql_utils
+
+    blanks = real.execute(
+        f'SELECT COUNT(*) FROM raw_data WHERE "{column}" IS NULL OR "{column}" = \'\''
+    ).fetchone()[0]
+    assert blanks > 0, "this test proves nothing without blanks in the column"
+
+    for direction in ("asc", "desc"):
+        order = sql_utils.build_order_sql(column, direction, {column}, numeric=True)
+        top = [
+            r[0]
+            for r in real.execute(
+                f'SELECT "{column}" FROM raw_data ORDER BY {order} LIMIT 50'
+            ).fetchall()
+        ]
+        assert all(v not in (None, "") for v in top), direction

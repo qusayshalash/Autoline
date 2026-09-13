@@ -191,6 +191,51 @@ def test_order_direction_defaults_to_ascending(given, expected):
     assert sql_utils.build_order_sql("tozeret_nm", given, VALID) == f'"tozeret_nm" {expected}'
 
 
+def test_a_numeric_column_is_ordered_on_its_cast_value():
+    """Stored as text, so an uncast ORDER BY would put 100446 before 10099."""
+    sql = sql_utils.build_order_sql("shnat_yitzur", "asc", VALID, numeric=True)
+    assert sql == 'TRY_CAST("shnat_yitzur" AS DOUBLE) ASC NULLS LAST, "shnat_yitzur" ASC'
+
+
+def test_a_numeric_column_sends_unparseable_values_last_in_both_directions():
+    """Blanks and stray text cast to NULL. Sending them last whichever way the column is
+    sorted keeps them out of the first page either way, rather than making descending
+    open on a screen of empties."""
+    for direction in ("asc", "desc"):
+        sql = sql_utils.build_order_sql("shnat_yitzur", direction, VALID, numeric=True)
+        assert "NULLS LAST" in sql
+
+
+def test_a_numeric_column_keeps_a_stable_tiebreak():
+    """Equal numbers written differently - 7 and 007 - must not swap places between one
+    page request and the next, or paging repeats a row and skips another."""
+    sql = sql_utils.build_order_sql("shnat_yitzur", "desc", VALID, numeric=True)
+    assert sql.endswith('"shnat_yitzur" ASC')
+
+
+def test_ordering_is_textual_unless_the_column_is_numeric():
+    """The default stays text, which is what a zero-padded id column needs: as numbers
+    00000001 and 00000010 are 1 and 10, but the point of the padding is that they sort
+    as written."""
+    assert sql_utils.build_order_sql("tozeret_nm", "asc", VALID) == '"tozeret_nm" ASC'
+    assert (
+        sql_utils.build_order_sql("tozeret_nm", "asc", VALID, numeric=False)
+        == '"tozeret_nm" ASC'
+    )
+
+
+def test_a_numeric_order_still_quotes_a_hostile_column_name():
+    sql = sql_utils.build_order_sql('weird"name', "asc", VALID, numeric=True)
+    assert sql == 'TRY_CAST("weird""name" AS DOUBLE) ASC NULLS LAST, "weird""name" ASC'
+
+
+def test_numeric_ordering_rejects_an_unknown_column_too():
+    """The whitelist check must come before the cast, or the cast would be the thing
+    interpolating an unvalidated name into SQL."""
+    with pytest.raises(ValueError, match="Unknown column"):
+        sql_utils.build_order_sql("no_such_column", "asc", VALID, numeric=True)
+
+
 def test_a_column_whose_name_contains_a_quote_survives_every_builder():
     """This column exists in VALID on purpose. A real CSV header can contain anything."""
     sql, _ = sql_utils.build_filter_sql(

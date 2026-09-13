@@ -19,6 +19,7 @@ from app.jobs import JobCancelled, check_cancelled, submit
 from app.models.schemas import ExportRequest
 from app.services import sql_utils
 from app.services.pdf_fonts import data_font
+from app.services.query import sorts_numerically
 
 
 def build_export_query(dataset_id: str, req: ExportRequest) -> tuple[str, list, list[str]]:
@@ -45,7 +46,11 @@ def build_export_query(dataset_id: str, req: ExportRequest) -> tuple[str, list, 
 
     order_sql = ""
     if req.scope == "current_view" and req.sort_by:
-        order_sql = " ORDER BY " + sql_utils.build_order_sql(req.sort_by, req.sort_dir, valid)
+        # validated before the kind lookup, for the reason given in query.fetch_page
+        numeric = req.sort_by in valid and sorts_numerically(dataset_id, table, req.sort_by)
+        order_sql = " ORDER BY " + sql_utils.build_order_sql(
+            req.sort_by, req.sort_dir, valid, numeric=numeric
+        )
 
     cols_sql = ", ".join(sql_utils.quote_ident(c) for c in columns)
     sql = (

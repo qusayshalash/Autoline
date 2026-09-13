@@ -153,8 +153,32 @@ def build_search_sql(search: str, columns: list[str]) -> tuple[str, list[Any]]:
     return f"({clause})", [pattern] * len(columns)
 
 
-def build_order_sql(sort_by: str, sort_dir: str, valid_columns: set[str]) -> str:
+def build_order_sql(
+    sort_by: str, sort_dir: str, valid_columns: set[str], numeric: bool = False
+) -> str:
+    """ORDER BY for a single column.
+
+    Every column of an imported table is stored as text - the import keeps the file's
+    own bytes rather than committing to a type per column. So a plain `ORDER BY "price"`
+    compares strings, and 100446 comes before 10099 because '0' sorts under '9' at the
+    third character.
+
+    What makes that worth guarding rather than merely fixing is where it hides: the
+    comparison is only wrong when the values differ in width. A column of four-digit
+    years sorts correctly as text and looks like proof the ordering works, while the
+    price column beside it is quietly wrong.
+
+    So for a column the profiler calls a number, sort on the cast value - the same
+    TRY_CAST the numeric filters already use, so ordering and filtering agree about what
+    the column holds. Values that will not parse (blanks, stray text) become NULL and go
+    last in both directions rather than bunching at one end, and the raw text breaks ties
+    so that equal numbers written differently - "7" and "007" - keep a stable order from
+    one page to the next.
+    """
     if sort_by not in valid_columns:
         raise ValueError(f"Unknown column: {sort_by}")
     direction = "DESC" if sort_dir == "desc" else "ASC"
-    return f"{quote_ident(sort_by)} {direction}"
+    col = quote_ident(sort_by)
+    if not numeric:
+        return f"{col} {direction}"
+    return f"TRY_CAST({col} AS DOUBLE) {direction} NULLS LAST, {col} ASC"
