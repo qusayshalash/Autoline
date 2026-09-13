@@ -1,6 +1,6 @@
 from typing import Any, Literal, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 # Roles are rows in the database now, so the slug is a free-form string validated
 # against the roles table rather than a fixed literal.
@@ -8,7 +8,28 @@ Role = str
 UserStatus = Literal["active", "inactive", "suspended", "pending"]
 
 
-class LoginRequest(BaseModel):
+class Incoming(BaseModel):
+    """Base for anything a client sends us.
+
+    Pydantic ignores fields it does not recognise by default, which reads as tolerant
+    and behaves as the opposite. A cleaning request naming only fields that do not
+    exist - a typo, an old client, a hand-written script - parsed into a config of all
+    defaults and came back 200, having rebuilt the cleaned table with no cleaning in
+    it. The caller was told the operation succeeded. It had silently undone the last
+    one.
+
+    So an unknown field is a 422 here, which is what "I do not understand this request"
+    should look like. Responses keep the default: they are built in this codebase, not
+    parsed from anyone.
+
+    Nested models a request contains - a filter rule, an export row - inherit this too.
+    A typo buried three levels down is exactly as quiet as one at the top.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class LoginRequest(Incoming):
     username: str = Field(min_length=1)
     password: str = Field(min_length=1)
 
@@ -33,7 +54,7 @@ class MeOut(UserOut):
     permissions: list[str] = []
 
 
-class CreateUserRequest(BaseModel):
+class CreateUserRequest(Incoming):
     username: str = Field(min_length=3, max_length=64)
     password: str = Field(min_length=6, max_length=256)
     role: Role
@@ -42,7 +63,7 @@ class CreateUserRequest(BaseModel):
     status: UserStatus = "active"
 
 
-class UpdateUserRequest(BaseModel):
+class UpdateUserRequest(Incoming):
     role: Optional[Role] = None
     status: Optional[UserStatus] = None
     full_name: Optional[str] = Field(default=None, max_length=120)
@@ -73,13 +94,13 @@ class RoleDetail(RoleSummary):
     permissions: list[str] = []
 
 
-class CreateRoleRequest(BaseModel):
+class CreateRoleRequest(Incoming):
     name: str = Field(min_length=2, max_length=60)
     description: str = Field(default="", max_length=240)
     permissions: list[str] = []
 
 
-class UpdateRoleRequest(BaseModel):
+class UpdateRoleRequest(Incoming):
     name: Optional[str] = Field(default=None, min_length=2, max_length=60)
     description: Optional[str] = Field(default=None, max_length=240)
     permissions: Optional[list[str]] = None
@@ -104,7 +125,7 @@ class ActivityPage(BaseModel):
     total: int
 
 
-class ActivityPurgeRequest(BaseModel):
+class ActivityPurgeRequest(Incoming):
     """How far back to keep. Age is the only filter offered: see purge_activity_before."""
 
     # A floor of a week, so a slip in the box cannot wipe this morning's trail. The
@@ -140,7 +161,7 @@ class LanguageOut(BaseModel):
     is_default: bool
 
 
-class UpdateLanguagesRequest(BaseModel):
+class UpdateLanguagesRequest(Incoming):
     enabled: Optional[list[str]] = None
     default: Optional[str] = None
 
@@ -236,7 +257,7 @@ class StorageOverview(BaseModel):
     disk_free_bytes: int
 
 
-class StorageCleanupRequest(BaseModel):
+class StorageCleanupRequest(Incoming):
     """What to remove. Originals and databases are never eligible, whatever is set."""
 
     expired_exports: bool = True
@@ -408,12 +429,12 @@ class BackupSummary(BaseModel):
     stale: bool = True
 
 
-class BackupScheduleRequest(BaseModel):
+class BackupScheduleRequest(Incoming):
     # 0 disables the schedule entirely
     hours: int = Field(ge=0, le=24 * 90)
 
 
-class BackupRequest(BaseModel):
+class BackupRequest(Incoming):
     # the originals are large and usually still on the machine they were uploaded from,
     # so they are opt-in rather than assumed
     include_originals: bool = False
@@ -424,7 +445,7 @@ class BackupPruneResult(BaseModel):
     freed_bytes: int
 
 
-class RetentionRequest(BaseModel):
+class RetentionRequest(Incoming):
     # 0 disables expiry entirely
     hours: int = Field(ge=0, le=24 * 365)
 
@@ -443,7 +464,7 @@ class HousekeepingStatus(BaseModel):
     cleaning_due: int
 
 
-class HousekeepingRequest(BaseModel):
+class HousekeepingRequest(Incoming):
     # 0 turns that sweep off; anything positive is clamped up to a week
     jobs_retention_days: Optional[int] = Field(default=None, ge=0, le=3650)
     cleaning_retention_days: Optional[int] = Field(default=None, ge=0, le=3650)
@@ -466,13 +487,13 @@ class UploadResponse(BaseModel):
     raw_file_bytes: int
 
 
-class ImportConfig(BaseModel):
+class ImportConfig(Incoming):
     encoding: str
     delimiter: str
     has_header: bool = True
 
 
-class DatasetRenameRequest(BaseModel):
+class DatasetRenameRequest(Incoming):
     name: str = Field(min_length=1, max_length=255)
 
 
@@ -522,7 +543,7 @@ FilterOp = Literal[
 ]
 
 
-class FilterRule(BaseModel):
+class FilterRule(Incoming):
     column: str
     op: FilterOp
     value: Optional[Any] = None
@@ -541,7 +562,7 @@ class DistinctValuesOut(BaseModel):
     truncated: bool
 
 
-class CleaningConfig(BaseModel):
+class CleaningConfig(Incoming):
     keep_columns: Optional[list[str]] = None  # None = keep all
     dedupe: bool = False
     dedupe_key_columns: Optional[list[str]] = None  # None with dedupe=True = full-row distinct
@@ -559,7 +580,7 @@ class CleaningResult(BaseModel):
     reduction_pct: float
 
 
-class DataQuery(BaseModel):
+class DataQuery(Incoming):
     page: int = 1
     page_size: int = 100
     sort_by: Optional[str] = None
@@ -583,7 +604,7 @@ class DataPage(BaseModel):
     duration_ms: float = 0.0
 
 
-class GroupQuery(BaseModel):
+class GroupQuery(Incoming):
     """One level of a group-by tree. `filters` carries both the view's own filters and
     the parent groups' values when drilling into a nested level."""
 
@@ -633,7 +654,7 @@ class StatsOut(BaseModel):
     columns: list[str]
 
 
-class StatisticsQuery(BaseModel):
+class StatisticsQuery(Incoming):
     """One breakdown request: which column to split by, over which subset."""
 
     group_by: str
@@ -696,7 +717,7 @@ class ColumnSuggestion(BaseModel):
 
 # ---- cross-tab ----
 
-class PivotQuery(BaseModel):
+class PivotQuery(Incoming):
     """A two-dimensional breakdown: one column down the side, one across the top."""
 
     row_column: str
@@ -743,13 +764,13 @@ class PivotOut(BaseModel):
     execution_ms: float = 0.0
 
 
-class StatisticsExportRow(BaseModel):
+class StatisticsExportRow(Incoming):
     label: str
     count: int
     percentage: float
 
 
-class StatisticsExportRequest(BaseModel):
+class StatisticsExportRequest(Incoming):
     """A finished breakdown, ready to be written to a file.
 
     The rows come from the client rather than being recomputed here so the export is
@@ -767,7 +788,7 @@ class StatisticsExportRequest(BaseModel):
     total: int = 0
 
 
-class ExportRequest(BaseModel):
+class ExportRequest(Incoming):
     format: Literal["csv", "xlsx", "pdf"]
     scope: Literal["all", "current_view"] = "all"
     source: Literal["raw", "cleaned"] = "cleaned"
