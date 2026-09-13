@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 
+from app.errors import ApiError
 from app.auth import require_permission
 from app.db import admin as admin_db
 from app.db import catalog
@@ -15,7 +16,7 @@ def clean_dataset(
 ) -> CleaningResult:
     row = catalog.get_dataset(dataset_id)
     if row is None:
-        raise HTTPException(404, "Dataset not found")
+        raise ApiError(404, "dataset_not_found", "Dataset not found")
     if row["status"] not in ("ready",):
         raise HTTPException(409, f"Dataset is not ready for cleaning (status={row['status']})")
     try:
@@ -34,5 +35,5 @@ def clean_dataset(
 def get_cleaning_history(dataset_id: str, user: dict = Depends(require_permission("datasets.view"))) -> list[dict]:
     row = catalog.get_dataset(dataset_id)
     if row is None:
-        raise HTTPException(404, "Dataset not found")
+        raise ApiError(404, "dataset_not_found", "Dataset not found")
     return catalog.list_cleaning_operations(dataset_id)

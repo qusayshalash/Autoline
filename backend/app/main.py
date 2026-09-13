@@ -2,12 +2,14 @@ import os
 import threading
 import time
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.config import settings
 from app.db import admin as admin_db
 from app.db import timestamp_migration
+from app.errors import ApiError
 from app.routers import (
     admin,
     auth,
@@ -26,6 +28,21 @@ from app.services import storage
 from app.services.security import bootstrap_admin
 
 app = FastAPI(title="CSV Analyzer API", version="0.1.0")
+
+
+@app.exception_handler(ApiError)
+async def _api_error(_request: Request, exc: ApiError) -> JSONResponse:
+    """Adds the code beside the sentence, without moving the sentence.
+
+    `detail` stays a string holding exactly what it held before, so anything already
+    reading it - including an interface that does not know about codes yet - is
+    unaffected. `code` is the part the interface translates.
+    """
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail, "code": exc.code},
+        headers=exc.headers,
+    )
 
 # The dev server, plus wherever the app is actually served from once it is deployed.
 # PUBLIC_ORIGIN has to appear here as well as driving the cookie's Secure flag: with

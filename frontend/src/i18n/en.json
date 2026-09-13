@@ -872,5 +872,34 @@
       "empty_desc": "No accounts or addresses are currently being held off.",
       "unlocked": "Lock lifted."
     }
+  },
+  "errors": {
+    "account_inactive": "This account is no longer active.",
+    "backup_not_found": "That backup could not be found.",
+    "dataset_busy": "The file is still being processed - try again once it is ready.",
+    "dataset_not_found": "That file could not be found.",
+    "export_file_gone": "The export file is no longer available.",
+    "export_job_not_found": "That export could not be found.",
+    "filters_not_a_list": "Filters must be a list of rules.",
+    "forbidden": "You do not have permission to perform this action.",
+    "invalid_credentials": "Incorrect username or password.",
+    "job_not_found": "That job could not be found.",
+    "language_default_disabled": "The default language must be enabled.",
+    "language_last_enabled": "At least one language must stay enabled.",
+    "last_user_manager_delete": "The last account that can manage users cannot be deleted.",
+    "last_user_manager_disable": "The last account that can manage users cannot be disabled.",
+    "lockout_not_found": "There is no lockout with that key.",
+    "name_empty": "The name cannot be empty.",
+    "not_authenticated": "You are not signed in.",
+    "quality_report_missing": "There is no quality report yet.",
+    "role_builtin_delete": "Built-in roles cannot be deleted.",
+    "role_builtin_rename": "Built-in roles cannot be renamed.",
+    "role_name_taken": "A role with a similar name already exists.",
+    "role_not_found": "That role could not be found.",
+    "role_super_admin_locked": "The Super Admin role always holds every permission.",
+    "session_expired": "Your session has expired. Sign in again.",
+    "too_many_attempts": "Too many attempts. Try again shortly.",
+    "user_not_found": "That account could not be found.",
+    "username_taken": "That username is already taken."
   }
 }

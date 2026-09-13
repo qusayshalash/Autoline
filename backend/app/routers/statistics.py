@@ -13,6 +13,7 @@ from urllib.parse import quote
 from fastapi import APIRouter, Depends, HTTPException, Response
 from pydantic import ValidationError
 
+from app.errors import ApiError
 from app.auth import require_permission
 from app.db import catalog
 from app.models.schemas import (
@@ -31,7 +32,7 @@ router = APIRouter(prefix="/api/datasets", tags=["statistics"])
 def _require_ready(dataset_id: str) -> dict:
     row = catalog.get_dataset(dataset_id)
     if row is None:
-        raise HTTPException(404, "Dataset not found")
+        raise ApiError(404, "dataset_not_found", "Dataset not found")
     if row["status"] != "ready":
         raise HTTPException(409, f"Dataset is not ready (status={row['status']})")
     return row
@@ -76,7 +77,7 @@ def get_statistics(
         except json.JSONDecodeError as exc:
             raise HTTPException(400, f"filters is not valid JSON: {exc}") from exc
         if not isinstance(parsed, list):
-            raise HTTPException(400, "filters must be a JSON array of rules")
+            raise ApiError(400, "filters_not_a_list", "filters must be a JSON array of rules")
 
     try:
         q = StatisticsQuery(

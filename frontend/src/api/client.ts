@@ -1,5 +1,7 @@
 import axios from "axios";
 
+import i18n from "../i18n";
+
 export const api = axios.create({
   baseURL: "http://localhost:8000/api",
   withCredentials: true,
@@ -22,12 +24,29 @@ api.interceptors.response.use(
   }
 );
 
-/** Extracts the backend's `{"detail": "..."}` message from a failed request, falling
- * back to a generic message when the error didn't come from our API (network failure,
- * validation error shape, etc). Use this instead of `(err as Error).message`, which
- * only ever shows a generic "Request failed with status code 400" type string. */
+/** Turns a failed request into something worth showing somebody.
+ *
+ * Three sources, in order. The error's `code` if we have a translation for it - that is
+ * the only one that comes out in the reader's language, and it is why the API sends a
+ * code beside the sentence at all. Then the backend's own `detail`, which is English and
+ * is what the errors carrying a column name or a parser's complaint still fall back to.
+ * Then the caller's generic line, for failures that never reached the API: a dropped
+ * connection, a validation error's list-shaped detail.
+ *
+ * Use this rather than `(err as Error).message`, which only ever yields "Request failed
+ * with status code 400".
+ */
 export function apiErrorMessage(err: unknown, fallback: string): string {
-  const detail = (err as { response?: { data?: { detail?: unknown } } })?.response?.data?.detail;
+  const data = (err as { response?: { data?: { detail?: unknown; code?: unknown } } })
+    ?.response?.data;
+
+  const code = data?.code;
+  if (typeof code === "string" && code) {
+    const translated = i18n.t(`errors.${code}`, { defaultValue: "" });
+    if (translated) return translated;
+  }
+
+  const detail = data?.detail;
   if (typeof detail === "string" && detail) return detail;
   return fallback;
 }

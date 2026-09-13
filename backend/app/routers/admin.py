@@ -8,6 +8,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 
+from app.errors import ApiError
 from app.auth import require_permission
 from app.services import clocks
 from app.config import settings
@@ -196,7 +197,7 @@ def update_languages(
         if unknown:
             raise HTTPException(400, f"Unknown language(s): {', '.join(unknown)}")
         if not body.enabled:
-            raise HTTPException(400, "At least one language must stay enabled")
+            raise ApiError(400, "language_last_enabled", "At least one language must stay enabled")
         admin_db.set_setting(LANGUAGES_ENABLED_KEY, body.enabled)
         admin_db.log_activity(
             actor, "language.updated", "language", "", "", f"enabled={','.join(body.enabled)}"
@@ -207,7 +208,7 @@ def update_languages(
             raise HTTPException(400, f"Unknown language: {body.default}")
         # a disabled default would leave the app with no usable language on first load
         if body.default not in set(_enabled_languages()):
-            raise HTTPException(400, "The default language must be enabled")
+            raise ApiError(400, "language_default_disabled", "The default language must be enabled")
         admin_db.set_setting(LANGUAGES_DEFAULT_KEY, body.default)
         admin_db.log_activity(actor, "language.default_changed", "language", body.default, body.default)
 
@@ -427,7 +428,7 @@ def delete_backup(
     name: str, actor: dict = Depends(require_permission("system.manage"))
 ) -> dict:
     if not backup_service.delete(name):
-        raise HTTPException(404, "Backup not found")
+        raise ApiError(404, "backup_not_found", "Backup not found")
     admin_db.log_activity(actor, "backup.deleted", "system", "backup", name, "")
     return {"deleted": name}
 
@@ -448,7 +449,7 @@ def list_lockouts() -> list[LockoutOut]:
 @router.delete("/lockouts/{key:path}")
 def clear_lockout(key: str, actor: dict = Depends(require_permission("users.update"))) -> dict:
     if not login_guard.clear(key):
-        raise HTTPException(404, "No such lockout")
+        raise ApiError(404, "lockout_not_found", "No such lockout")
     admin_db.log_activity(actor, "auth.lockout_cleared", "user", "", key, "")
     return {"cleared": key}
 
@@ -465,7 +466,7 @@ def clear_lockout(key: str, actor: dict = Depends(require_permission("users.upda
             dependencies=[Depends(require_permission("system.view"))])
 def compaction_estimate(dataset_id: str) -> CompactionEstimate:
     if catalog.get_dataset(dataset_id) is None:
-        raise HTTPException(404, "Dataset not found")
+        raise ApiError(404, "dataset_not_found", "Dataset not found")
     return CompactionEstimate(**compaction_service.estimate(dataset_id))
 
 
@@ -475,9 +476,9 @@ def start_compaction(
 ) -> JobOut:
     row = catalog.get_dataset(dataset_id)
     if row is None:
-        raise HTTPException(404, "Dataset not found")
+        raise ApiError(404, "dataset_not_found", "Dataset not found")
     if row.get("status") not in ("ready", "error"):
-        raise HTTPException(409, "The dataset is busy; try again when it is ready")
+        raise ApiError(409, "dataset_busy", "The dataset is busy; try again when it is ready")
 
     job_id = catalog.create_job(dataset_id, "compact")
     admin_db.log_activity(

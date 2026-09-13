@@ -2,6 +2,7 @@ from typing import Literal, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 
+from app.errors import ApiError
 from app.auth import require_permission
 from app.db import catalog
 from app.models.schemas import (
@@ -30,7 +31,7 @@ router = APIRouter(prefix="/api/datasets", tags=["data"])
 def _require_ready(dataset_id: str) -> dict:
     row = catalog.get_dataset(dataset_id)
     if row is None:
-        raise HTTPException(404, "Dataset not found")
+        raise ApiError(404, "dataset_not_found", "Dataset not found")
     if row["status"] not in ("ready",):
         raise HTTPException(409, f"Dataset is not ready (status={row['status']})")
     return row

@@ -872,5 +872,34 @@
       "empty_desc": "אין כרגע חשבונות או כתובות חסומים.",
       "unlocked": "החסימה הוסרה."
     }
+  },
+  "errors": {
+    "account_inactive": "החשבון הזה אינו פעיל עוד.",
+    "backup_not_found": "הגיבוי לא נמצא.",
+    "dataset_busy": "הקובץ עדיין בעיבוד — נסה שוב כשיהיה מוכן.",
+    "dataset_not_found": "הקובץ לא נמצא.",
+    "export_file_gone": "קובץ הייצוא אינו זמין עוד.",
+    "export_job_not_found": "הייצוא לא נמצא.",
+    "filters_not_a_list": "המסננים צריכים להיות רשימת כללים.",
+    "forbidden": "אין לך הרשאה לפעולה הזו.",
+    "invalid_credentials": "שם המשתמש או הסיסמה שגויים.",
+    "job_not_found": "המשימה לא נמצאה.",
+    "language_default_disabled": "שפת ברירת המחדל חייבת להיות מופעלת.",
+    "language_last_enabled": "לפחות שפה אחת חייבת להישאר מופעלת.",
+    "last_user_manager_delete": "אי אפשר למחוק את החשבון האחרון שיכול לנהל משתמשים.",
+    "last_user_manager_disable": "אי אפשר להשבית את החשבון האחרון שיכול לנהל משתמשים.",
+    "lockout_not_found": "אין נעילה עם המזהה הזה.",
+    "name_empty": "השם לא יכול להיות ריק.",
+    "not_authenticated": "לא התחברת.",
+    "quality_report_missing": "אין עדיין דוח בדיקה.",
+    "role_builtin_delete": "אי אפשר למחוק תפקידים מובנים.",
+    "role_builtin_rename": "אי אפשר לשנות שם של תפקידים מובנים.",
+    "role_name_taken": "כבר קיים תפקיד בשם דומה.",
+    "role_not_found": "התפקיד לא נמצא.",
+    "role_super_admin_locked": "תפקיד מנהל העל מחזיק תמיד בכל ההרשאות.",
+    "session_expired": "תוקף ההתחברות פג. התחבר מחדש.",
+    "too_many_attempts": "יותר מדי ניסיונות. נסה שוב בעוד מעט.",
+    "user_not_found": "המשתמש לא נמצא.",
+    "username_taken": "שם המשתמש כבר תפוס."
   }
 }

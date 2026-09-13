@@ -4,6 +4,7 @@ import json
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from fastapi import File as FastAPIFile
 
+from app.errors import ApiError
 from app.auth import require_permission
 from app.services import clocks
 from app.config import settings
@@ -113,7 +114,7 @@ def repreview_dataset(
     """Re-run the preview after the user overrides encoding/delimiter/header in the wizard."""
     row = catalog.get_dataset(dataset_id)
     if row is None:
-        raise HTTPException(404, "Dataset not found")
+        raise ApiError(404, "dataset_not_found", "Dataset not found")
     try:
         src = ingestion.find_raw_path(dataset_id)
         columns, preview_rows = ingestion.read_preview(
@@ -146,7 +147,7 @@ def start_import(
 ) -> JobOut:
     row = catalog.get_dataset(dataset_id)
     if row is None:
-        raise HTTPException(404, "Dataset not found")
+        raise ApiError(404, "dataset_not_found", "Dataset not found")
 
     admin_db.log_activity(
         user, "dataset.imported", "dataset", dataset_id, row.get("original_filename") or "",
@@ -173,7 +174,7 @@ def list_datasets(user: dict = Depends(require_permission("datasets.view"))) -> 
 def get_dataset(dataset_id: str, user: dict = Depends(require_permission("datasets.view"))) -> DatasetOut:
     row = catalog.get_dataset(dataset_id)
     if row is None:
-        raise HTTPException(404, "Dataset not found")
+        raise ApiError(404, "dataset_not_found", "Dataset not found")
     return _dataset_out(row)
 
 
@@ -183,10 +184,10 @@ def get_quality(dataset_id: str, user: dict = Depends(require_permission("datase
     this existed have none until the report is requested."""
     row = catalog.get_dataset(dataset_id)
     if row is None:
-        raise HTTPException(404, "Dataset not found")
+        raise ApiError(404, "dataset_not_found", "Dataset not found")
     raw = row.get("quality_json")
     if not raw:
-        raise HTTPException(404, "No quality report yet")
+        raise ApiError(404, "quality_report_missing", "No quality report yet")
     try:
         return QualityReport(**json.loads(raw))
     except (TypeError, ValueError) as exc:
@@ -200,7 +201,7 @@ def start_quality(
     """Re-runs the analysis. It reads the whole original file, so it runs as a job."""
     row = catalog.get_dataset(dataset_id)
     if row is None:
-        raise HTTPException(404, "Dataset not found")
+        raise ApiError(404, "dataset_not_found", "Dataset not found")
     if row["status"] != "ready":
         raise HTTPException(409, f"Dataset is not ready (status={row['status']})")
 
@@ -217,10 +218,10 @@ def rename_dataset(
     are keyed off the id precisely so a rename can be this cheap and this safe."""
     row = catalog.get_dataset(dataset_id)
     if row is None:
-        raise HTTPException(404, "Dataset not found")
+        raise ApiError(404, "dataset_not_found", "Dataset not found")
     name = body.name.strip()
     if not name:
-        raise HTTPException(400, "Name cannot be empty")
+        raise ApiError(400, "name_empty", "Name cannot be empty")
     old_name = row.get("original_filename") or ""
     catalog.update_dataset(dataset_id, original_filename=name)
     admin_db.log_activity(user, "dataset.renamed", "dataset", dataset_id, name, f"was: {old_name}")
@@ -231,7 +232,7 @@ def rename_dataset(
 def delete_dataset(dataset_id: str, user: dict = Depends(require_permission("datasets.delete"))) -> dict:
     row = catalog.get_dataset(dataset_id)
     if row is None:
-        raise HTTPException(404, "Dataset not found")
+        raise ApiError(404, "dataset_not_found", "Dataset not found")
     dataset_connections.delete(dataset_id)
     catalog.delete_dataset(dataset_id)
     upload_dir = ingestion.dataset_upload_dir(dataset_id)

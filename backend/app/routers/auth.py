@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 
+from app.errors import ApiError
 from app.auth import COOKIE_NAME, get_current_user
 from app.config import settings
 from app.services import clocks
@@ -49,8 +50,9 @@ def login(body: LoginRequest, request: Request, response: Response) -> MeOut:
             body.username,
             f"from {address}, retry in {verdict.retry_after_s}s",
         )
-        raise HTTPException(
+        raise ApiError(
             429,
+            "too_many_attempts",
             "Too many attempts. Try again later.",
             headers={"Retry-After": str(verdict.retry_after_s)},
         )
@@ -77,7 +79,7 @@ def login(body: LoginRequest, request: Request, response: Response) -> MeOut:
             f"from {address}, attempt {after.failures}"
             + ("" if after.allowed else f", locked for {after.retry_after_s}s"),
         )
-        raise HTTPException(401, "Invalid username or password")
+        raise ApiError(401, "invalid_credentials", "Invalid username or password")
 
     login_guard.record_success(body.username)
 

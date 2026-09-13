@@ -3,6 +3,7 @@ import json
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import FileResponse
 
+from app.errors import ApiError
 from app.auth import require_permission
 from app.config import settings
 from app.db import catalog
@@ -22,7 +23,7 @@ _MEDIA_TYPES = {
 def request_export(dataset_id: str, req: ExportRequest, user: dict = Depends(require_permission("datasets.view", "datasets.export"))) -> JobOut:
     row = catalog.get_dataset(dataset_id)
     if row is None:
-        raise HTTPException(404, "Dataset not found")
+        raise ApiError(404, "dataset_not_found", "Dataset not found")
     if row["status"] != "ready":
         raise HTTPException(409, f"Dataset is not ready (status={row['status']})")
     try:
@@ -36,7 +37,7 @@ def request_export(dataset_id: str, req: ExportRequest, user: dict = Depends(req
 def download_export(dataset_id: str, job_id: str, user: dict = Depends(require_permission("datasets.view", "datasets.export"))) -> FileResponse:
     job = catalog.get_job(job_id)
     if job is None or job["dataset_id"] != dataset_id:
-        raise HTTPException(404, "Export job not found")
+        raise ApiError(404, "export_job_not_found", "Export job not found")
     if job["status"] != "done":
         raise HTTPException(409, f"Export not ready (status={job['status']})")
 
@@ -44,5 +45,5 @@ def download_export(dataset_id: str, job_id: str, user: dict = Depends(require_p
     fmt = result.get("format", "csv")
     path = settings.exports_dir / dataset_id / f"{job_id}.{fmt}"
     if not path.exists():
-        raise HTTPException(410, "Export file no longer available")
+        raise ApiError(410, "export_file_gone", "Export file no longer available")
     return FileResponse(path, media_type=_MEDIA_TYPES.get(fmt, "application/octet-stream"), filename=path.name)

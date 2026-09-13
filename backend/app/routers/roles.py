@@ -2,6 +2,7 @@ import re
 
 from fastapi import APIRouter, Depends, HTTPException
 
+from app.errors import ApiError
 from app.auth import require_permission
 from app.services import clocks
 from app.db import admin as admin_db
@@ -51,7 +52,7 @@ def list_roles() -> list[RoleSummary]:
 def get_role(slug: str) -> RoleDetail:
     role = admin_db.get_role(slug)
     if role is None:
-        raise HTTPException(404, "Role not found")
+        raise ApiError(404, "role_not_found", "Role not found")
     return RoleDetail(
         slug=role["slug"],
         name=role["name"],
@@ -76,7 +77,7 @@ def create_role(body: CreateRoleRequest, actor: dict = Depends(require_permissio
     _validate_permissions(body.permissions)
     slug = _slugify(body.name)
     if admin_db.get_role(slug) is not None:
-        raise HTTPException(409, "A role with a similar name already exists")
+        raise ApiError(409, "role_name_taken", "A role with a similar name already exists")
     admin_db.create_role(slug, body.name, body.description, body.permissions)
     admin_db.log_activity(
         actor, "role.created", "role", slug, body.name, f"{len(body.permissions)} permissions"
@@ -90,11 +91,11 @@ def update_role(
 ) -> RoleDetail:
     role = admin_db.get_role(slug)
     if role is None:
-        raise HTTPException(404, "Role not found")
+        raise ApiError(404, "role_not_found", "Role not found")
     if slug == admin_db.PROTECTED_ROLE and body.permissions is not None:
-        raise HTTPException(409, "The Super Admin role always holds every permission")
+        raise ApiError(409, "role_super_admin_locked", "The Super Admin role always holds every permission")
     if role.get("is_system") and body.name is not None:
-        raise HTTPException(409, "Built-in roles cannot be renamed")
+        raise ApiError(409, "role_builtin_rename", "Built-in roles cannot be renamed")
     if body.permissions is not None:
         _validate_permissions(body.permissions)
 
@@ -108,9 +109,9 @@ def update_role(
 def delete_role(slug: str, actor: dict = Depends(require_permission("roles.manage"))) -> dict:
     role = admin_db.get_role(slug)
     if role is None:
-        raise HTTPException(404, "Role not found")
+        raise ApiError(404, "role_not_found", "Role not found")
     if role.get("is_system"):
-        raise HTTPException(409, "Built-in roles cannot be deleted")
+        raise ApiError(409, "role_builtin_delete", "Built-in roles cannot be deleted")
     in_use = admin_db.count_users_with_role(slug)
     if in_use:
         raise HTTPException(409, f"{in_use} user(s) still have this role")

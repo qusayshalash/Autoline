@@ -1,6 +1,7 @@
 import duckdb
 from fastapi import APIRouter, Depends, HTTPException
 
+from app.errors import ApiError
 from app.auth import require_permission
 from app.services import clocks
 from app.db import admin as admin_db
@@ -44,7 +45,7 @@ def create_user(body: CreateUserRequest, actor: dict = Depends(require_permissio
     if body.status not in VALID_STATUSES:
         raise HTTPException(400, f"Unknown status: {body.status}")
     if catalog.get_user_by_username(body.username) is not None:
-        raise HTTPException(409, "Username already exists")
+        raise ApiError(409, "username_taken", "Username already exists")
 
     user_id = catalog.new_id()
     try:
@@ -59,7 +60,7 @@ def create_user(body: CreateUserRequest, actor: dict = Depends(require_permissio
         )
     except duckdb.Error as exc:
         # a concurrent request created the same username between our check and the insert
-        raise HTTPException(409, "Username already exists") from exc
+        raise ApiError(409, "username_taken", "Username already exists") from exc
 
     admin_db.log_activity(
         actor, "user.created", "user", user_id, body.username, f"role={body.role}"
@@ -73,7 +74,7 @@ def update_user(
 ) -> UserOut:
     row = catalog.get_user_by_id(user_id)
     if row is None:
-        raise HTTPException(404, "User not found")
+        raise ApiError(404, "user_not_found", "User not found")
 
     current_status = row.get("status") or ("active" if row.get("is_active") else "inactive")
     next_status = body.status if body.status is not None else current_status
@@ -87,7 +88,7 @@ def update_user(
     # Guard the ability to administer users at all, rather than a specific role name.
     would_lose_management = next_status != "active" or "users.update" not in admin_db.permissions_for_role(next_role)
     if would_lose_management and admin_db.count_active_user_managers(exclude_user_id=user_id) == 0:
-        raise HTTPException(409, "Cannot remove the last account that can manage users")
+        raise ApiError(409, "last_user_manager_disable", "Cannot remove the last account that can manage users")
 
     fields: dict = {}
     if body.role is not None:
@@ -115,9 +116,9 @@ def update_user(
 def delete_user(user_id: str, actor: dict = Depends(require_permission("users.delete"))) -> dict:
     row = catalog.get_user_by_id(user_id)
     if row is None:
-        raise HTTPException(404, "User not found")
+        raise ApiError(404, "user_not_found", "User not found")
     if admin_db.count_active_user_managers(exclude_user_id=user_id) == 0:
-        raise HTTPException(409, "Cannot delete the last account that can manage users")
+        raise ApiError(409, "last_user_manager_delete", "Cannot delete the last account that can manage users")
     catalog.delete_user(user_id)
     admin_db.log_activity(actor, "user.deleted", "user", user_id, row["username"])
     return {"deleted": True}
