@@ -80,7 +80,11 @@ export default function FilterBuilder({
               onChange={(c) => update(i, { column: c })}
             />
           ) : (
-            <select value={f.column} onChange={(e) => update(i, { column: e.target.value })}>
+            <select
+              aria-label={t("cleaning.column") ?? ""}
+              value={f.column}
+              onChange={(e) => update(i, { column: e.target.value })}
+            >
               {columns.map((c) => (
                 // the option's value stays the real column name - only the text is localised
                 <option key={c} value={c}>
@@ -89,7 +93,11 @@ export default function FilterBuilder({
               ))}
             </select>
           )}
-          <select value={f.op} onChange={(e) => update(i, { op: e.target.value as FilterOp })}>
+          <select
+            aria-label={t("cleaning.operator") ?? ""}
+            value={f.op}
+            onChange={(e) => update(i, { op: e.target.value as FilterOp })}
+          >
             {OPS.map((op) => (
               <option key={op} value={op}>
                 {t(`cleaning.op_${op}`)}
@@ -109,6 +117,7 @@ export default function FilterBuilder({
             ) : (
               <input
                 type="text"
+                aria-label={t("cleaning.value") ?? ""}
                 placeholder={t("cleaning.value") ?? ""}
                 value={f.value ?? ""}
                 onChange={(e) => update(i, { value: e.target.value })}

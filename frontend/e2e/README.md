@@ -38,6 +38,7 @@ permission tests assert it is refused everywhere else.
 | `dataset-lifecycle.spec.ts` | upload → import → read → rename → export (csv/xlsx/pdf) → delete, de-duplication, odd files |
 | `data-grid.spec.ts` | pagination, page-size cap, search (Arabic/partial/case/wildcards), filters, numeric sort, injection probes, group-by totals, stored-XSS rendering |
 | `admin.spec.ts` | user create/read/delete through the UI, duplicate conflict, every admin page loads clean, linkable settings sections, activity-log translations, trim floor |
+| `accessibility.spec.ts` | every control has an accessible name, no name is a paragraph, the drawer's close button is translated, the permission grid names its checkboxes |
 
 ## Test data
 
@@ -45,10 +46,18 @@ Everything the suite creates is prefixed `QA_TEST_`, and each test removes what 
 made. If a run is interrupted, delete any leftover `QA_TEST_*` datasets and accounts
 before the next one.
 
-## Two tests are written to fail until a defect is fixed
+## The account the suite signs in as
+
+`QA_ADMIN_*` has to hold **every** permission. The built-in **Administrator** role does
+not: `activity.purge` belongs to Super Administrator alone, so an Administrator account
+gets a 403 where `admin.spec.ts › the activity trim refuses a horizon below the
+one-week floor` expects a 422. That is the role working as intended, not a defect - but
+it fails the run, so sign in as the bootstrap super administrator.
+
+## Two tests were written to fail until a defect was fixed
 
 - `data-grid.spec.ts › sorts a numeric column by value, not alphabetically`
 - `admin.spec.ts › the activity log renders translated action names, not raw keys`
 
-Both are deliberate regression guards, not flaky tests. They are described in the QA
-report; when the underlying issues are fixed, these turn green and keep them fixed.
+Both were deliberate regression guards rather than flaky tests. Both issues are now
+fixed and both tests pass; they stay here to keep them fixed.

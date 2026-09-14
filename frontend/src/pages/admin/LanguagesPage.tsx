@@ -77,6 +77,7 @@ export default function LanguagesPage() {
                       <input
                         type="checkbox"
                         checked={l.enabled}
+                        aria-label={t("admin.languages.enable", { language: l.native_name }) ?? ""}
                         // the default language and the last remaining one cannot be turned
                         // off - either would leave the app with no usable language
                         disabled={!editable || l.is_default || lastEnabled}
@@ -100,6 +101,7 @@ export default function LanguagesPage() {
                       <input
                         type="radio"
                         name="default-language"
+                        aria-label={t("admin.languages.make_default", { language: l.native_name }) ?? ""}
                         checked={l.is_default}
                         disabled={!editable || !l.enabled}
                         onChange={() => save.mutate({ default: l.code })}

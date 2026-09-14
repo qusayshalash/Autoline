@@ -160,6 +160,10 @@ function PermissionMatrix({
           {modules.map((m) => {
             const keys = permissions.filter((p) => p.module === m).map((p) => p.key);
             const allOn = keys.every((k) => selected.has(k));
+            // A checkbox in a grid has nothing beside it to read: its row and column
+            // headings name it on screen, but a screen reader announces only the name
+            // it carries. Built from the same two translations the headings use.
+            const moduleName = t(`admin.modules.${m}`, { defaultValue: m });
             return (
               <tr key={m}>
                 <th scope="row">{t(`admin.modules.${m}`, { defaultValue: m })}</th>
@@ -173,7 +177,10 @@ function PermissionMatrix({
                           checked={selected.has(key)}
                           disabled={disabled}
                           onChange={() => onToggle(key)}
-                          aria-label={key}
+                          aria-label={t("admin.roles.toggle_permission", {
+                            module: moduleName,
+                            action: t(`admin.permission_actions.${a}`, { defaultValue: a }),
+                          })}
                         />
                       ) : (
                         <span className="matrix-na">—</span>
@@ -187,7 +194,7 @@ function PermissionMatrix({
                     checked={allOn}
                     disabled={disabled}
                     onChange={() => onToggleModule(keys, !allOn)}
-                    aria-label={`${m} all`}
+                    aria-label={t("admin.roles.toggle_module", { module: moduleName })}
                   />
                 </td>
               </tr>

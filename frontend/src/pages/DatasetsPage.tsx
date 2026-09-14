@@ -134,6 +134,7 @@ export default function DatasetsPage() {
                   <div style={{ display: "flex", gap: "0.4rem", alignItems: "center" }}>
                     <input
                       type="text"
+                      aria-label={t("datasets.rename") ?? ""}
                       autoFocus
                       value={renameValue}
                       onChange={(e) => setRenameValue(e.target.value)}

@@ -117,12 +117,21 @@ export default function ImportWizardPage() {
       <div className="card">
         <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" }}>
           <div className="field">
-            <label>{t("import_wizard.detected_encoding")}</label>
-            <input type="text" value={encoding} onChange={(e) => setEncoding(e.target.value)} />
+            <label htmlFor="import-encoding">{t("import_wizard.detected_encoding")}</label>
+            <input
+              id="import-encoding"
+              type="text"
+              value={encoding}
+              onChange={(e) => setEncoding(e.target.value)}
+            />
           </div>
           <div className="field">
-            <label>{t("import_wizard.detected_delimiter")}</label>
-            <select value={delimiter} onChange={(e) => setDelimiter(e.target.value)}>
+            <label htmlFor="import-delimiter">{t("import_wizard.detected_delimiter")}</label>
+            <select
+              id="import-delimiter"
+              value={delimiter}
+              onChange={(e) => setDelimiter(e.target.value)}
+            >
               {DELIMITERS.map((d) => (
                 <option key={d.value} value={d.value}>
                   {t(d.labelKey)}
@@ -131,8 +140,13 @@ export default function ImportWizardPage() {
             </select>
           </div>
           <div className="field">
-            <label>{t("import_wizard.has_header")}</label>
-            <input type="checkbox" checked={hasHeader} onChange={(e) => setHasHeader(e.target.checked)} />
+            <label htmlFor="import-has-header">{t("import_wizard.has_header")}</label>
+            <input
+              id="import-has-header"
+              type="checkbox"
+              checked={hasHeader}
+              onChange={(e) => setHasHeader(e.target.checked)}
+            />
           </div>
         </div>
         <button className="btn secondary" onClick={() => previewMutation.mutate()} disabled={previewMutation.isPending}>

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
 export interface BreadcrumbItem {
@@ -6,8 +7,9 @@ export interface BreadcrumbItem {
 }
 
 export default function Breadcrumb({ items }: { items: BreadcrumbItem[] }) {
+  const { t } = useTranslation();
   return (
-    <nav className="breadcrumb" aria-label="breadcrumb">
+    <nav className="breadcrumb" aria-label={t("nav.breadcrumb") ?? ""}>
       {items.map((item, i) => (
         <span key={i} className="breadcrumb-item">
           {item.to ? (

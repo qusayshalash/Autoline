@@ -472,6 +472,7 @@ export default function ExplorerPage() {
         <span className="sheet-source">
           <select
             value={source}
+            aria-label={t("explorer.source_label") ?? ""}
             onChange={(e) => {
               setSource(e.target.value as "raw" | "cleaned");
               setPage(1);
@@ -597,6 +598,7 @@ export default function ExplorerPage() {
           <>
             <select
               value={exportFormat}
+              aria-label={t("explorer.export_format") ?? ""}
               onChange={(e) => {
                 setExportFormat(e.target.value as ExportRequest["format"]);
                 resetExport();
@@ -608,6 +610,7 @@ export default function ExplorerPage() {
             </select>
             <select
               value={exportScope}
+              aria-label={t("explorer.export_scope_label") ?? ""}
               onChange={(e) => {
                 setExportScope(e.target.value as ExportRequest["scope"]);
                 resetExport();
@@ -866,6 +869,7 @@ export default function ExplorerPage() {
           {t("sheet.view")}
           <select
             value={pageSize}
+            aria-label={t("sheet.rows_per_page") ?? ""}
             onChange={(e) => {
               setPageSize(Number(e.target.value));
               setPage(1);

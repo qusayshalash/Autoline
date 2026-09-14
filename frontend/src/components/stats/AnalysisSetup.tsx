@@ -214,6 +214,7 @@ export default function AnalysisSetup({
         <div className="stats-draft">
           <select
             value={draft.column}
+            aria-label={t("cleaning.column") ?? ""}
             onChange={(e) => {
               const column = e.target.value;
               setDraft({ column, op: defaultOp(kinds[column]), value: "" });
@@ -228,6 +229,7 @@ export default function AnalysisSetup({
 
           <select
             value={draft.op}
+            aria-label={t("cleaning.operator") ?? ""}
             onChange={(e) => setDraft({ ...draft, op: e.target.value as FilterOp })}
           >
             {(OPS_BY_KIND[kinds[draft.column]] ?? OPS_BY_KIND.text).map((op) => (

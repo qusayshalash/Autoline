@@ -144,7 +144,11 @@ export default function AdminUsersPage() {
               onChange={(e) => setSearch(e.target.value)}
             />
           </span>
-          <select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)}>
+          <select
+            value={roleFilter}
+            aria-label={t("admin.users.filter_by_role") ?? ""}
+            onChange={(e) => setRoleFilter(e.target.value)}
+          >
             <option value="">{t("admin.users.all_roles")}</option>
             {(roles ?? []).map((r) => (
               <option key={r.slug} value={r.slug}>
@@ -152,7 +156,11 @@ export default function AdminUsersPage() {
               </option>
             ))}
           </select>
-          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+          <select
+            value={statusFilter}
+            aria-label={t("admin.users.filter_by_status") ?? ""}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
             <option value="">{t("admin.users.all_statuses")}</option>
             {STATUSES.map((s) => (
               <option key={s} value={s}>
@@ -199,7 +207,12 @@ export default function AdminUsersPage() {
             <thead>
               <tr>
                 <th className="tick">
-                  <input type="checkbox" checked={allSelected} onChange={toggleAll} aria-label="select all" />
+                  <input
+                    type="checkbox"
+                    checked={allSelected}
+                    onChange={toggleAll}
+                    aria-label={t("admin.users.select_all") ?? ""}
+                  />
                 </th>
                 <th>{t("admin.users.name")}</th>
                 <th>{t("admin.users.email")}</th>
@@ -340,7 +353,11 @@ function UserDrawer({
           <dt>{t("admin.users.status")}</dt>
           <dd>
             {can("users.update") ? (
-              <select value={user.status} onChange={(e) => onPatch({ status: e.target.value as UserStatus })}>
+              <select
+                aria-label={t("admin.users.status") ?? ""}
+                value={user.status}
+                onChange={(e) => onPatch({ status: e.target.value as UserStatus })}
+              >
                 {STATUSES.map((s) => (
                   <option key={s} value={s}>
                     {t(`admin.status.${s}`)}
@@ -356,7 +373,11 @@ function UserDrawer({
           <dt>{t("admin.users.role")}</dt>
           <dd>
             {can("users.update") ? (
-              <select value={user.role} onChange={(e) => onPatch({ role: e.target.value })}>
+              <select
+                aria-label={t("admin.users.role") ?? ""}
+                value={user.role}
+                onChange={(e) => onPatch({ role: e.target.value })}
+              >
                 {roles.map((r) => (
                   <option key={r.slug} value={r.slug}>
                     {r.name}

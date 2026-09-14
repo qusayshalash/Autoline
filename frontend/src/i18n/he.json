@@ -8,7 +8,8 @@
     "stats": "סטטיסטיקה",
     "users": "משתמשים",
     "collapse_sidebar": "כיווץ הסרגל הצדי",
-    "expand_sidebar": "הרחבת הסרגל הצדי"
+    "expand_sidebar": "הרחבת הסרגל הצדי",
+    "breadcrumb": "נתיב ניווט"
   },
   "auth": {
     "login_title": "התחברות",
@@ -167,7 +168,6 @@
     "apply": "החל",
     "cancel": "ביטול",
     "reset": "איפוס",
-    "close": "סגור",
     "empty": "אין מסננים עדיין. הוסף תנאי כדי לצמצם את הנתונים.",
     "value_filters": "מסנני ערכים",
     "n_values_one": "ערך אחד נבחר",
@@ -209,7 +209,8 @@
     "showing_range": "מוצג {{from}}–{{to}} מתוך {{total}} רשומות",
     "resize_column": "שינוי רוחב העמודה",
     "records": "רשומות",
-    "timing_detail": "שאילתה בשרת: {{server}} · סה\"כ: {{total}}"
+    "timing_detail": "שאילתה בשרת: {{server}} · סה\"כ: {{total}}",
+    "rows_per_page": "שורות בעמוד"
   },
   "explorer": {
     "title": "סייר הנתונים",
@@ -237,7 +238,10 @@
     "no_data": "אין נתונים",
     "search_scope": "מחפש ב־{{count}} מתוך {{total}} עמודות",
     "search_scope_hint": "כל עמודה נוספת היא מעבר נוסף על כל שורה. צמצום החיפוש לעמודות שבהן אתם באמת מחפשים מאיץ אותו פי כמה — ובעמודות שאינן מסומנות לא מתבצע חיפוש כלל.",
-    "search_scope_all": "כל העמודות"
+    "search_scope_all": "כל העמודות",
+    "source_label": "גרסת הנתונים",
+    "export_format": "תבנית הייצוא",
+    "export_scope_label": "היקף הייצוא"
   },
   "stats": {
     "title": "סטטיסטיקה",
@@ -269,7 +273,9 @@
     "copy": "העתק",
     "copied": "הועתק",
     "confirm_title": "לאשר?",
-    "list_separator": ", "
+    "list_separator": ", ",
+    "close": "סגור",
+    "help": "הסבר"
   },
   "theme": {
     "label": "ערכת נושא",
@@ -418,7 +424,10 @@
       "selected_other": "{{count}} נבחרו",
       "confirm_bulk_delete_one": "למחוק לצמיתות משתמש אחד?",
       "confirm_bulk_delete_two": "למחוק לצמיתות שני משתמשים?",
-      "confirm_bulk_delete_other": "למחוק לצמיתות {{count}} משתמשים?"
+      "confirm_bulk_delete_other": "למחוק לצמיתות {{count}} משתמשים?",
+      "select_all": "בחירת כל המשתמשים",
+      "filter_by_role": "סינון לפי תפקיד",
+      "filter_by_status": "סינון לפי מצב"
     },
     "roles": {
       "title": "תפקידים ({{count}})",
@@ -442,7 +451,9 @@
       "permissions_one": "הרשאה אחת",
       "permissions_two": "שתי הרשאות",
       "permissions_other": "{{count}} הרשאות",
-      "users_label": "משתמשים"
+      "users_label": "משתמשים",
+      "toggle_permission": "הרשאת {{action}} עבור {{module}}",
+      "toggle_module": "כל ההרשאות של {{module}}"
     },
     "languages": {
       "title": "שפות",
@@ -453,7 +464,9 @@
       "default": "ברירת מחדל",
       "note": "ניתן להפעיל רק שפות שהמערכת נשלחת עבורן עם תרגום מלא.",
       "cannot_disable_default": "לא ניתן לכבות את שפת ברירת המחדל",
-      "cannot_disable_last": "לא ניתן לכבות את השפה הפעילה האחרונה"
+      "cannot_disable_last": "לא ניתן לכבות את השפה הפעילה האחרונה",
+      "enable": "הפעלת {{language}}",
+      "make_default": "הגדרת {{language}} כברירת מחדל"
     },
     "files": {
       "title": "קבצים ({{count}})",
@@ -468,7 +481,9 @@
     "activity": {
       "title": "יומן פעילות ({{count}})",
       "all_actions": "כל הפעולות",
-      "all_actors": "כל המשתמשים"
+      "all_actors": "כל המשתמשים",
+      "filter_by_action": "סינון לפי פעולה",
+      "filter_by_actor": "סינון לפי משתמש"
     },
     "settings": {
       "storage": "אחסון",

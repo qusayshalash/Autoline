@@ -108,6 +108,8 @@ export function Drawer({
   children: ReactNode;
   footer?: ReactNode;
 }) {
+  const { t } = useTranslation();
+
   useEffect(() => {
     if (!open) return;
     function onKey(e: KeyboardEvent) {
@@ -129,7 +131,7 @@ export function Drawer({
       <aside className="drawer" role="dialog" aria-modal="true">
         <header className="drawer-head">
           <h2>{title}</h2>
-          <button type="button" className="icon-btn" onClick={onClose} aria-label="Close">
+          <button type="button" className="icon-btn" onClick={onClose} aria-label={t("common.close") ?? ""}>
             <IconClose />
           </button>
         </header>

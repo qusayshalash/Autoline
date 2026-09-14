@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -96,12 +96,20 @@ export function SettingRow({
 /* --- help bubble ----------------------------------------------------------- */
 
 export function HelpHint({ text }: { text: string }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const bubbleId = useId();
+  // The button is named for what it does and *described* by what it says. Naming it
+  // with the paragraph made a screen reader read three sentences of explanation where
+  // it should have read one word, on every row of every settings page - and then read
+  // the same three sentences again when the bubble opened.
   return (
     <button
       type="button"
       className="set-hint"
-      aria-label={text}
+      aria-label={t("common.help") ?? ""}
+      aria-expanded={open}
+      aria-describedby={open ? bubbleId : undefined}
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
       onFocus={() => setOpen(true)}
@@ -112,7 +120,11 @@ export function HelpHint({ text }: { text: string }) {
       }}
     >
       <IconInfo />
-      {open && <span className="set-hint-bubble">{text}</span>}
+      {open && (
+        <span className="set-hint-bubble" id={bubbleId} role="tooltip">
+          {text}
+        </span>
+      )}
     </button>
   );
 }

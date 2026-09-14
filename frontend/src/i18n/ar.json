@@ -8,7 +8,8 @@
     "stats": "الإحصائيات",
     "users": "المستخدمون",
     "collapse_sidebar": "طيّ اللوحة الجانبية",
-    "expand_sidebar": "توسيع اللوحة الجانبية"
+    "expand_sidebar": "توسيع اللوحة الجانبية",
+    "breadcrumb": "مسار التصفح"
   },
   "auth": {
     "login_title": "تسجيل الدخول",
@@ -167,7 +168,6 @@
     "apply": "تطبيق",
     "cancel": "إلغاء",
     "reset": "إعادة تعيين",
-    "close": "إغلاق",
     "empty": "لا توجد فلاتر بعد. أضف شرطًا لتضييق نطاق البيانات.",
     "value_filters": "فلاتر القيم",
     "n_values_zero": "لا قيم محددة",
@@ -215,7 +215,8 @@
     "showing_range": "عرض {{from}}–{{to}} من {{total}} سجل",
     "resize_column": "تغيير عرض العمود",
     "records": "سجل",
-    "timing_detail": "زمن الاستعلام على الخادم: {{server}} · الزمن الكلي: {{total}}"
+    "timing_detail": "زمن الاستعلام على الخادم: {{server}} · الزمن الكلي: {{total}}",
+    "rows_per_page": "عدد الصفوف في الصفحة"
   },
   "explorer": {
     "title": "استكشاف البيانات",
@@ -243,7 +244,10 @@
     "no_data": "لا توجد بيانات",
     "search_scope": "يبحث في {{count}} من {{total}} عمودًا",
     "search_scope_hint": "كل عمود إضافي تمريرة أخرى على كل صف. تضييق البحث على الأعمدة التي تبحث بها فعلًا يسرّعه أضعافًا — والأعمدة غير المحدَّدة لا يُبحث فيها إطلاقًا.",
-    "search_scope_all": "كل الأعمدة"
+    "search_scope_all": "كل الأعمدة",
+    "source_label": "نسخة البيانات",
+    "export_format": "صيغة التصدير",
+    "export_scope_label": "نطاق التصدير"
   },
   "stats": {
     "title": "الإحصائيات",
@@ -275,7 +279,9 @@
     "copy": "نسخ",
     "copied": "نُسخ",
     "confirm_title": "تأكيد",
-    "list_separator": "، "
+    "list_separator": "، ",
+    "close": "إغلاق",
+    "help": "شرح"
   },
   "theme": {
     "label": "المظهر",
@@ -439,7 +445,10 @@
       "confirm_bulk_delete_two": "حذف مستخدمَين نهائيًا؟",
       "confirm_bulk_delete_few": "حذف {{count}} مستخدمين نهائيًا؟",
       "confirm_bulk_delete_many": "حذف {{count}} مستخدمًا نهائيًا؟",
-      "confirm_bulk_delete_other": "حذف {{count}} مستخدم نهائيًا؟"
+      "confirm_bulk_delete_other": "حذف {{count}} مستخدم نهائيًا؟",
+      "select_all": "تحديد كل المستخدمين",
+      "filter_by_role": "تصفية حسب الدور",
+      "filter_by_status": "تصفية حسب الحالة"
     },
     "roles": {
       "title": "الأدوار ({{count}})",
@@ -469,7 +478,9 @@
       "permissions_few": "{{count}} صلاحيات",
       "permissions_many": "{{count}} صلاحية",
       "permissions_other": "{{count}} صلاحية",
-      "users_label": "المستخدمون"
+      "users_label": "المستخدمون",
+      "toggle_permission": "صلاحية {{action}} في {{module}}",
+      "toggle_module": "كل صلاحيات {{module}}"
     },
     "languages": {
       "title": "اللغات",
@@ -480,7 +491,9 @@
       "default": "الافتراضية",
       "note": "اللغات المتاحة هي التي يشحن معها البرنامج ترجمات كاملة. تفعيل لغة بلا ترجمة سيعرض مفاتيح غير مترجمة.",
       "cannot_disable_default": "لا يمكن تعطيل اللغة الافتراضية",
-      "cannot_disable_last": "لا يمكن تعطيل آخر لغة مفعّلة"
+      "cannot_disable_last": "لا يمكن تعطيل آخر لغة مفعّلة",
+      "enable": "تفعيل {{language}}",
+      "make_default": "جعل {{language}} اللغة الافتراضية"
     },
     "files": {
       "title": "الملفات ({{count}})",
@@ -495,7 +508,9 @@
     "activity": {
       "title": "سجل النشاط ({{count}})",
       "all_actions": "كل الإجراءات",
-      "all_actors": "كل المستخدمين"
+      "all_actors": "كل المستخدمين",
+      "filter_by_action": "تصفية حسب الإجراء",
+      "filter_by_actor": "تصفية حسب المستخدم"
     },
     "settings": {
       "storage": "التخزين",

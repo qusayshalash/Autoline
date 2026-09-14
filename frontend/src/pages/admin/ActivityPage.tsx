@@ -66,6 +66,7 @@ export default function ActivityPage() {
           <div className="admin-toolbar tight">
             <select
               value={action}
+              aria-label={t("admin.activity.filter_by_action") ?? ""}
               onChange={(e) => {
                 setAction(e.target.value);
                 setPage(0);
@@ -80,6 +81,7 @@ export default function ActivityPage() {
             </select>
             <select
               value={actor}
+              aria-label={t("admin.activity.filter_by_actor") ?? ""}
               onChange={(e) => {
                 setActor(e.target.value);
                 setPage(0);

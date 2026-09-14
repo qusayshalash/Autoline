@@ -8,7 +8,8 @@
     "stats": "Statistics",
     "users": "Users",
     "collapse_sidebar": "Collapse sidebar",
-    "expand_sidebar": "Expand sidebar"
+    "expand_sidebar": "Expand sidebar",
+    "breadcrumb": "Breadcrumb"
   },
   "auth": {
     "login_title": "Login",
@@ -167,7 +168,6 @@
     "apply": "Apply",
     "cancel": "Cancel",
     "reset": "Reset",
-    "close": "Close",
     "empty": "No filters yet. Add a rule to narrow the data down.",
     "value_filters": "Value filters",
     "n_values_one": "1 selected value",
@@ -207,7 +207,8 @@
     "showing_range": "Showing {{from}}–{{to}} of {{total}} records",
     "resize_column": "Resize column",
     "records": "records",
-    "timing_detail": "Server query: {{server}} · Total: {{total}}"
+    "timing_detail": "Server query: {{server}} · Total: {{total}}",
+    "rows_per_page": "Rows per page"
   },
   "explorer": {
     "title": "Data Explorer",
@@ -235,7 +236,10 @@
     "no_data": "No data",
     "search_scope": "searching {{count}} of {{total}} columns",
     "search_scope_hint": "Every extra column is another pass over every row. Narrowing the search to the columns you actually search by makes it many times faster - and columns left unticked are not searched at all.",
-    "search_scope_all": "All columns"
+    "search_scope_all": "All columns",
+    "source_label": "Data version",
+    "export_format": "Export format",
+    "export_scope_label": "Export scope"
   },
   "stats": {
     "title": "Statistics",
@@ -267,7 +271,9 @@
     "copy": "Copy",
     "copied": "Copied",
     "confirm_title": "Are you sure?",
-    "list_separator": ", "
+    "list_separator": ", ",
+    "close": "Close",
+    "help": "Help"
   },
   "theme": {
     "label": "Theme",
@@ -411,7 +417,10 @@
       "selected_one": "1 selected",
       "selected_other": "{{count}} selected",
       "confirm_bulk_delete_one": "Permanently delete 1 user?",
-      "confirm_bulk_delete_other": "Permanently delete {{count}} users?"
+      "confirm_bulk_delete_other": "Permanently delete {{count}} users?",
+      "select_all": "Select all users",
+      "filter_by_role": "Filter by role",
+      "filter_by_status": "Filter by status"
     },
     "roles": {
       "title": "Roles ({{count}})",
@@ -433,7 +442,9 @@
       "users_other": "{{count}} users",
       "permissions_one": "1 permission",
       "permissions_other": "{{count}} permissions",
-      "users_label": "Users"
+      "users_label": "Users",
+      "toggle_permission": "{{action}} permission for {{module}}",
+      "toggle_module": "All {{module}} permissions"
     },
     "languages": {
       "title": "Languages",
@@ -444,7 +455,9 @@
       "default": "Default",
       "note": "Only languages the build ships full translations for can be enabled. Enabling one without a bundle would show untranslated keys.",
       "cannot_disable_default": "The default language cannot be disabled",
-      "cannot_disable_last": "The last enabled language cannot be disabled"
+      "cannot_disable_last": "The last enabled language cannot be disabled",
+      "enable": "Enable {{language}}",
+      "make_default": "Make {{language}} the default"
     },
     "files": {
       "title": "Files ({{count}})",
@@ -459,7 +472,9 @@
     "activity": {
       "title": "Activity log ({{count}})",
       "all_actions": "All actions",
-      "all_actors": "All users"
+      "all_actors": "All users",
+      "filter_by_action": "Filter by action",
+      "filter_by_actor": "Filter by user"
     },
     "settings": {
       "storage": "Storage",

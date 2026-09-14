@@ -94,7 +94,7 @@ export default function FilterDialog({
             <IconFilter />
             {t("filter.title")}
           </span>
-          <button type="button" className="icon-btn" onClick={onClose} aria-label={t("filter.close")}>
+          <button type="button" className="icon-btn" onClick={onClose} aria-label={t("common.close")}>
             <IconClose />
           </button>
         </header>
