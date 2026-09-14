@@ -4,6 +4,7 @@ Every stage that touches the file body works on bounded chunks/lines, never the 
 file at once, so a multi-hundred-MB / multi-million-row CSV never has to fit in memory.
 """
 
+import codecs
 import csv
 import shutil
 from pathlib import Path
@@ -18,6 +19,29 @@ from app.db.connection import datasets
 from app.jobs import JobCancelled, check_cancelled
 
 ALLOWED_DELIMITERS = [",", ";", "|", "\t"]
+
+
+# What a byte-order mark at the start of a file says the file is, and the codec that
+# reads it *and eats the mark*. charset-normalizer reports a UTF-8-with-BOM file as plain
+# "utf_8", and Python's utf_8 codec has no reason to treat EF BB BF as anything but a
+# character - so the mark survived into the first field, and the first column of every
+# such preview was named "﻿plate" instead of "plate".
+#
+# The four-byte marks come first on purpose: FF FE 00 00 is UTF-32-LE and it begins with
+# FF FE, which is UTF-16-LE. Testing the short ones first reads every UTF-32-LE file as
+# UTF-16 and turns the whole file into mojibake.
+_BYTE_ORDER_MARKS = (
+    (codecs.BOM_UTF32_LE, "utf_32"),
+    (codecs.BOM_UTF32_BE, "utf_32"),
+    (codecs.BOM_UTF8, "utf_8_sig"),
+    (codecs.BOM_UTF16_LE, "utf_16"),
+    (codecs.BOM_UTF16_BE, "utf_16"),
+)
+
+# The same mark as text, for the one case a codec cannot cover: the wizard lets the
+# reader override the encoding, and choosing plain "utf-8" for a file that carries a BOM
+# is a thing a person may reasonably do.
+BOM_CHARACTER = "﻿"
 
 
 class InsufficientDiskSpace(Exception):
@@ -77,10 +101,28 @@ def detect_encoding(path: Path) -> str:
         sample = f.read(settings.detection_sample_bytes)
     if not sample:
         return "utf-8"
+    # A byte-order mark is a statement, not a guess: if one is there the file has said
+    # what it is, and there is nothing left to detect. Naming the BOM-aware codec is
+    # also what removes the mark, since these codecs consume it on the way in.
+    for mark, encoding in _BYTE_ORDER_MARKS:
+        if sample.startswith(mark):
+            return encoding
     match = from_bytes(sample).best()
     if match is None:
         return "utf-8"
     return match.encoding
+
+
+def _without_bom(row: list[str]) -> list[str]:
+    """The first record, with any leading byte-order mark taken off its first field.
+
+    Belt as well as braces. detect_encoding names a codec that eats the mark, but the
+    reader can override the encoding in the wizard, and a file carrying a BOM read as
+    plain utf-8 puts it straight back at the front of the first column name.
+    """
+    if row and row[0].startswith(BOM_CHARACTER):
+        return [row[0].lstrip(BOM_CHARACTER), *row[1:]]
+    return row
 
 
 def detect_delimiter(path: Path, encoding: str) -> str:
@@ -113,7 +155,7 @@ def read_preview(
 ) -> tuple[list[str], list[list[str]]]:
     with open(path, encoding=encoding, errors="replace", newline="") as f:
         reader = csv.reader(f, delimiter=delimiter)
-        first = next(reader, [])
+        first = _without_bom(next(reader, []))
         if has_header:
             columns = first
             rows: list[list[str]] = []
@@ -147,6 +189,8 @@ def normalize_to_utf8(
         reader = csv.reader(fin, delimiter=delimiter)
         writer = csv.writer(fout, delimiter=delimiter, quoting=csv.QUOTE_MINIMAL)
         for row in reader:
+            if lines_done == 0:
+                row = _without_bom(row)
             writer.writerow(row)
             lines_done += 1
             if on_progress and lines_done % report_every == 0:

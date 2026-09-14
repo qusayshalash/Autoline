@@ -1,5 +1,12 @@
 import { expect, test } from "@playwright/test";
-import { ADMIN, API, CSV_FIXTURE, requireCredentials, signIn } from "./helpers";
+import {
+  ADMIN,
+  API,
+  BOM_CSV_FIXTURE,
+  CSV_FIXTURE,
+  requireCredentials,
+  signIn,
+} from "./helpers";
 
 test.beforeAll(() => requireCredentials(ADMIN, "admin"));
 
@@ -153,5 +160,51 @@ test.describe("Dataset lifecycle", () => {
         await request.delete(`${API}/datasets/${(await res.json()).dataset_id}`);
       }
     }
+  });
+});
+
+test.describe("Byte-order marks", () => {
+  test("a file saved by Excel keeps its first column's real name", async ({ page, request }) => {
+    await signIn(page, ADMIN);
+    await request.post(`${API}/auth/login`, {
+      data: { username: ADMIN.user, password: ADMIN.pass },
+    });
+
+    const upload = await request.post(`${API}/datasets/upload`, {
+      multipart: { file: BOM_CSV_FIXTURE },
+    });
+    expect(upload.status()).toBe(200);
+    const meta = await upload.json();
+    const id: string = meta.dataset_id;
+
+    // the file said what it was, so detection stops guessing and names the codec that
+    // removes the mark
+    expect(meta.detected_encoding).toBe("utf_8_sig");
+    expect(meta.columns).toEqual(["اللوحة", "الماركة", "السنة"]);
+
+    // the wizard is where this was visible: an invisible character in front of the
+    // first heading, and a name that did not match the one the table would get
+    await page.goto(`/datasets/${id}/import`);
+    const headings = page.locator("table thead th");
+    await expect(headings.first()).toBeVisible();
+    const first = await headings.first().innerText();
+    expect(first.codePointAt(0), "U+FEFF in front of the heading").not.toBe(0xfeff);
+    expect(first.trim()).toBe("اللوحة");
+
+    // and it holds all the way to the table
+    const started = await request.post(`${API}/datasets/${id}/import`, {
+      data: { encoding: meta.detected_encoding, delimiter: ",", has_header: true },
+    });
+    await expect
+      .poll(async () => (await (await request.get(`${API}/jobs/${(await started.json()).id}`)).json()).status,
+        { timeout: 60_000 })
+      .toBe("done");
+
+    const row = await (await request.get(`${API}/datasets/${id}`)).json();
+    expect(row.columns, "the preview's names and the table's must be the same names").toEqual(
+      meta.columns
+    );
+
+    await request.delete(`${API}/datasets/${id}`);
   });
 });

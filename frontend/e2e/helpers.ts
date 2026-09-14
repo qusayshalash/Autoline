@@ -77,6 +77,25 @@ export async function apiLogin(
  */
 const PRICE_WIDTHS = [99, 850, 7300, 64000, 250000];
 
+/**
+ * What Excel writes: UTF-8 with a byte-order mark in front of it.
+ *
+ * The first column's name is Arabic on purpose. The mark is one character and the fix
+ * removes one character, so a fix that reaches one too far takes the alef with it - and
+ * with an ASCII header that mistake is much harder to see.
+ */
+export const BOM_CSV_FIXTURE = {
+  name: "QA_TEST_bom.csv",
+  mimeType: "text/csv",
+  buffer: Buffer.concat([
+    Buffer.from([0xef, 0xbb, 0xbf]),
+    Buffer.from(
+      ["اللوحة,الماركة,السنة", "1234,تويوتا,2019", "5678,كيا,2021"].join("\n") + "\n",
+      "utf-8"
+    ),
+  ]),
+};
+
 export const CSV_FIXTURE = {
   name: "QA_TEST_e2e.csv",
   mimeType: "text/csv",
