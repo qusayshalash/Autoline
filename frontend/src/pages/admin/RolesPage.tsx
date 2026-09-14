@@ -77,13 +77,13 @@ export default function RolesPage() {
                 {r.is_system && <span className="role-badge">{t("admin.roles.system")}</span>}
               </span>
               <span className="role-desc">{r.description || "—"}</span>
+              {/* The number goes through the translation rather than sitting beside it:
+                  Arabic agreement depends on the count, so "2 مستخدم" has to become
+                  "مستخدمان" and "4 صلاحية" has to become "صلاحيات". A number rendered
+                  outside the string cannot reach the rule that decides its noun. */}
               <span className="role-stats">
-                <span>
-                  <strong>{r.user_count}</strong> {t("admin.roles.users")}
-                </span>
-                <span>
-                  <strong>{r.permission_count}</strong> {t("admin.roles.permissions")}
-                </span>
+                <span>{t("admin.roles.users", { count: r.user_count })}</span>
+                <span>{t("admin.roles.permissions", { count: r.permission_count })}</span>
               </span>
               <span className="role-updated">
                 {t("admin.roles.updated")}: {formatDateTime(r.updated_at)}
@@ -276,7 +276,7 @@ function RoleDrawer({
               <dd className="mono">{role.slug}</dd>
             </div>
             <div>
-              <dt>{t("admin.roles.users")}</dt>
+              <dt>{t("admin.roles.users_label")}</dt>
               <dd>{role.user_count}</dd>
             </div>
             <div>

@@ -102,7 +102,9 @@ export default function OverviewSection({
           icon={<IconDatabase />}
           label={t("settings.overview.database")}
           value={storage.data ? formatBytes(dbBytes) : "—"}
-          sub={t("settings.overview.database_sub", { count: n(overview.files_total) })}
+          // a number, not n()'s formatted string - i18next picks the plural form from
+          // the value itself, and a string makes the lookup fail outright
+          sub={t("settings.overview.database_sub", { count: overview.files_total })}
         />
         <MetricCard
           icon={<IconArchive />}

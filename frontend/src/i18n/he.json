@@ -170,7 +170,9 @@
     "close": "סגור",
     "empty": "אין מסננים עדיין. הוסף תנאי כדי לצמצם את הנתונים.",
     "value_filters": "מסנני ערכים",
-    "n_values": "{{count}} ערכים נבחרו"
+    "n_values_one": "ערך אחד נבחר",
+    "n_values_two": "שני ערכים נבחרו",
+    "n_values_other": "{{count}} ערכים נבחרו"
   },
   "group": {
     "title": "קיבוץ",
@@ -181,9 +183,11 @@
     "empty": "אין קיבוץ עדיין. בחר עמודה לקיבוץ הנתונים לפיה.",
     "grouped_by": "מקובץ לפי {{count}}",
     "column_header": "קבוצה",
-    "groups_count": "{{count}} קבוצות",
     "more_groups": "מוצגות {{shown}} מתוך {{total}} קבוצות",
-    "more_rows": "מוצגות {{shown}} מתוך {{total}} שורות בקבוצה זו"
+    "more_rows": "מוצגות {{shown}} מתוך {{total}} שורות בקבוצה זו",
+    "groups_count_one": "קבוצה אחת",
+    "groups_count_two": "שתי קבוצות",
+    "groups_count_other": "{{count}} קבוצות"
   },
   "sheet": {
     "reset": "איפוס",
@@ -348,9 +352,15 @@
     },
     "time": {
       "just_now": "עכשיו",
-      "minutes": "לפני {{count}} דק'",
-      "hours": "לפני {{count}} שע'",
-      "days": "לפני {{count}} ימים"
+      "minutes_one": "לפני דקה",
+      "minutes_two": "לפני שתי דקות",
+      "minutes_other": "לפני {{count}} דקות",
+      "hours_one": "לפני שעה",
+      "hours_two": "לפני שעתיים",
+      "hours_other": "לפני {{count}} שעות",
+      "days_one": "לפני יום",
+      "days_two": "לפני יומיים",
+      "days_other": "לפני {{count}} ימים"
     },
     "overview": {
       "users_total": "סה\"כ משתמשים",
@@ -395,7 +405,6 @@
       "created": "נוצר",
       "view": "הצג",
       "none": "אין משתמשים תואמים",
-      "selected": "{{count}} נבחרו",
       "activate": "הפעלה",
       "suspend": "השהיה",
       "delete": "מחיקה",
@@ -404,15 +413,18 @@
       "recent_activity": "פעילות אחרונה",
       "reset_password": "איפוס סיסמה",
       "confirm_delete": "למחוק לצמיתות את המשתמש \"{{name}}\"?",
-      "confirm_bulk_delete": "למחוק לצמיתות {{count}} משתמשים?"
+      "selected_one": "אחד נבחר",
+      "selected_two": "שניים נבחרו",
+      "selected_other": "{{count}} נבחרו",
+      "confirm_bulk_delete_one": "למחוק לצמיתות משתמש אחד?",
+      "confirm_bulk_delete_two": "למחוק לצמיתות שני משתמשים?",
+      "confirm_bulk_delete_other": "למחוק לצמיתות {{count}} משתמשים?"
     },
     "roles": {
       "title": "תפקידים ({{count}})",
       "add": "תפקיד חדש",
       "create": "יצירת תפקיד",
       "system": "מובנה",
-      "users": "משתמשים",
-      "permissions": "הרשאות",
       "updated": "עודכן",
       "name": "שם",
       "description": "תיאור",
@@ -423,7 +435,14 @@
       "save": "שמירת שינויים",
       "delete": "מחיקת תפקיד",
       "confirm_delete": "למחוק את התפקיד הזה?",
-      "super_admin_note": "מנהל-על מחזיק תמיד בכל ההרשאות ולא ניתן לערוך אותו - זהו חשבון המוצא האחרון."
+      "super_admin_note": "מנהל-על מחזיק תמיד בכל ההרשאות ולא ניתן לערוך אותו - זהו חשבון המוצא האחרון.",
+      "users_one": "משתמש אחד",
+      "users_two": "שני משתמשים",
+      "users_other": "{{count}} משתמשים",
+      "permissions_one": "הרשאה אחת",
+      "permissions_two": "שתי הרשאות",
+      "permissions_other": "{{count}} הרשאות",
+      "users_label": "משתמשים"
     },
     "languages": {
       "title": "שפות",
@@ -499,7 +518,6 @@
     },
     "backup": {
       "title": "גיבויים",
-      "verified_count": "{{count}} מאומתים",
       "none_yet": "אין גיבויים עדיין",
       "no_backup_warning": "אין שום גיבוי. הנתונים קיימים על דיסק אחד בלבד.",
       "same_disk_warning": "הגיבויים נמצאים על אותו דיסק כמו הנתונים. זה שורד ניקוי שגוי או מחיקת קובץ, אך לא תקלת דיסק — הפנו את BACKUP_DIR לכונן אחר.",
@@ -543,11 +561,13 @@
       "schedule_weekly": "שבועי",
       "stale_never": "לא נלקח גיבוי מעולם",
       "stale_since": "הגיבוי האחרון לפני {{hours}} שעות",
-      "fresh_since": "הגיבוי האחרון לפני {{hours}} שעות"
+      "fresh_since": "הגיבוי האחרון לפני {{hours}} שעות",
+      "verified_count_one": "גיבוי אחד מאומת",
+      "verified_count_two": "שני גיבויים מאומתים",
+      "verified_count_other": "{{count}} מאומתים"
     },
     "lockouts": {
       "title": "נעולים זמנית",
-      "count": "{{count}} נעולים כעת",
       "none": "אין נעילות",
       "hint": "לאחר ניסיונות התחברות כושלים חוזרים, הניסיונות נחסמים לזמן מה, וההמתנה מוכפלת בכל כישלון נוסף. הנעילה תמיד זמנית — נעילה קבועה הייתה מאפשרת לכל מי שמכיר שם משתמש לשלול ממנו גישה. כל נעילה פעילה מופיעה כאן וניתן להסירה ידנית.",
       "subject": "שם / כתובת",
@@ -557,7 +577,10 @@
       "failures": "ניסיונות",
       "unlocks_in": "נפתח בעוד",
       "minutes": "{{minutes}} דק׳",
-      "unlock": "הסר נעילה"
+      "unlock": "הסר נעילה",
+      "count_one": "חשבון אחד נעול",
+      "count_two": "שני חשבונות נעולים",
+      "count_other": "{{count}} חשבונות נעולים"
     },
     "compaction": {
       "title": "כיווץ מסדי נתונים",
@@ -613,7 +636,6 @@
       "languages_enabled": "מופעלות: {{codes}}",
       "login_failed": "מ-{{address}} · ניסיון {{attempt}}",
       "login_failed_locked": "מ-{{address}} · ניסיון {{attempt}} · ננעל ל-{{seconds}} שניות",
-      "permission_count": "{{count}} הרשאות",
       "purged": "נמחקו {{removed}} רשומות ישנות מ-{{days}} ימים",
       "retention_both": "משימות {{jobs}} ימים · ניקוי {{cleaning}} ימים",
       "retention_cleaning": "ניקוי {{cleaning}} ימים",
@@ -624,7 +646,10 @@
       "schedule_off": "מושבת",
       "swept": "{{jobs}} משימות · {{cleaning}} רשומות ניקוי",
       "was_named": "היה: {{name}}",
-      "with_role": "תפקיד: {{role}}"
+      "with_role": "תפקיד: {{role}}",
+      "permission_count_one": "הרשאה אחת",
+      "permission_count_two": "שתי הרשאות",
+      "permission_count_other": "{{count}} הרשאות"
     },
     "fields": {
       "description": "תיאור",
@@ -830,7 +855,6 @@
       "storage": "שטח פנוי",
       "storage_sub": "בשימוש: {{used}}",
       "database": "מסד הנתונים",
-      "database_sub": "{{count}} קבצים",
       "backups": "גיבויים מאומתים",
       "backups_sub": "אחרון {{when}}",
       "records": "רשומות פעולות",
@@ -841,7 +865,10 @@
       "used_pct": "{{pct}}% בשימוש",
       "of_capacity": "מתוך {{total}}",
       "quick_title": "פעולות מהירות",
-      "quick_desc": "ישירות אל הפקדים הנפוצים ביותר."
+      "quick_desc": "ישירות אל הפקדים הנפוצים ביותר.",
+      "database_sub_one": "קובץ אחד",
+      "database_sub_two": "שני קבצים",
+      "database_sub_other": "{{count}} קבצים"
     },
     "storage": {
       "title": "אחסון",

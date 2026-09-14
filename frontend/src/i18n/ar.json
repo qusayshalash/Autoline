@@ -170,7 +170,12 @@
     "close": "إغلاق",
     "empty": "لا توجد فلاتر بعد. أضف شرطًا لتضييق نطاق البيانات.",
     "value_filters": "فلاتر القيم",
-    "n_values": "{{count}} قيمة محددة"
+    "n_values_zero": "لا قيم محددة",
+    "n_values_one": "قيمة واحدة محددة",
+    "n_values_two": "قيمتان محددتان",
+    "n_values_few": "{{count}} قيم محددة",
+    "n_values_many": "{{count}} قيمة محددة",
+    "n_values_other": "{{count}} قيمة محددة"
   },
   "group": {
     "title": "تجميع",
@@ -181,9 +186,14 @@
     "empty": "لا يوجد تجميع بعد. اختر عمودًا لتجميع البيانات حسبه.",
     "grouped_by": "مُجمّع حسب {{count}}",
     "column_header": "المجموعة",
-    "groups_count": "{{count}} مجموعة",
     "more_groups": "عرض {{shown}} من {{total}} مجموعة",
-    "more_rows": "عرض {{shown}} من {{total}} صف في هذه المجموعة"
+    "more_rows": "عرض {{shown}} من {{total}} صف في هذه المجموعة",
+    "groups_count_zero": "لا مجموعات",
+    "groups_count_one": "مجموعة واحدة",
+    "groups_count_two": "مجموعتان",
+    "groups_count_few": "{{count}} مجموعات",
+    "groups_count_many": "{{count}} مجموعة",
+    "groups_count_other": "{{count}} مجموعة"
   },
   "sheet": {
     "reset": "إعادة تعيين",
@@ -348,9 +358,24 @@
     },
     "time": {
       "just_now": "الآن",
-      "minutes": "قبل {{count}} دقيقة",
-      "hours": "قبل {{count}} ساعة",
-      "days": "قبل {{count}} يوم"
+      "minutes_zero": "قبل أقل من دقيقة",
+      "minutes_one": "قبل دقيقة",
+      "minutes_two": "قبل دقيقتين",
+      "minutes_few": "قبل {{count}} دقائق",
+      "minutes_many": "قبل {{count}} دقيقة",
+      "minutes_other": "قبل {{count}} دقيقة",
+      "hours_zero": "قبل أقل من ساعة",
+      "hours_one": "قبل ساعة",
+      "hours_two": "قبل ساعتين",
+      "hours_few": "قبل {{count}} ساعات",
+      "hours_many": "قبل {{count}} ساعة",
+      "hours_other": "قبل {{count}} ساعة",
+      "days_zero": "اليوم",
+      "days_one": "قبل يوم",
+      "days_two": "قبل يومين",
+      "days_few": "قبل {{count}} أيام",
+      "days_many": "قبل {{count}} يومًا",
+      "days_other": "قبل {{count}} يوم"
     },
     "overview": {
       "users_total": "إجمالي المستخدمين",
@@ -395,7 +420,6 @@
       "created": "تاريخ الإنشاء",
       "view": "عرض",
       "none": "لا يوجد مستخدمون مطابقون",
-      "selected": "{{count}} محدد",
       "activate": "تفعيل",
       "suspend": "إيقاف",
       "delete": "حذف",
@@ -404,15 +428,24 @@
       "recent_activity": "النشاط الأخير",
       "reset_password": "إعادة تعيين كلمة المرور",
       "confirm_delete": "حذف المستخدم \"{{name}}\" نهائيًا؟",
-      "confirm_bulk_delete": "حذف {{count}} مستخدم نهائيًا؟"
+      "selected_zero": "لا شيء محدد",
+      "selected_one": "واحد محدد",
+      "selected_two": "اثنان محددان",
+      "selected_few": "{{count}} محددين",
+      "selected_many": "{{count}} محددًا",
+      "selected_other": "{{count}} محدد",
+      "confirm_bulk_delete_zero": "لم تحدد أحدًا.",
+      "confirm_bulk_delete_one": "حذف مستخدم واحد نهائيًا؟",
+      "confirm_bulk_delete_two": "حذف مستخدمَين نهائيًا؟",
+      "confirm_bulk_delete_few": "حذف {{count}} مستخدمين نهائيًا؟",
+      "confirm_bulk_delete_many": "حذف {{count}} مستخدمًا نهائيًا؟",
+      "confirm_bulk_delete_other": "حذف {{count}} مستخدم نهائيًا؟"
     },
     "roles": {
       "title": "الأدوار ({{count}})",
       "add": "دور جديد",
       "create": "إنشاء الدور",
       "system": "مدمج",
-      "users": "مستخدم",
-      "permissions": "صلاحية",
       "updated": "آخر تعديل",
       "name": "الاسم",
       "description": "الوصف",
@@ -423,7 +456,20 @@
       "save": "حفظ التغييرات",
       "delete": "حذف الدور",
       "confirm_delete": "حذف هذا الدور؟",
-      "super_admin_note": "دور المدير الأعلى يحتفظ بكل الصلاحيات دائمًا ولا يمكن تعديله — هو حساب الملاذ الأخير."
+      "super_admin_note": "دور المدير الأعلى يحتفظ بكل الصلاحيات دائمًا ولا يمكن تعديله — هو حساب الملاذ الأخير.",
+      "users_zero": "لا مستخدمين",
+      "users_one": "مستخدم واحد",
+      "users_two": "مستخدمان",
+      "users_few": "{{count}} مستخدمين",
+      "users_many": "{{count}} مستخدمًا",
+      "users_other": "{{count}} مستخدم",
+      "permissions_zero": "لا صلاحيات",
+      "permissions_one": "صلاحية واحدة",
+      "permissions_two": "صلاحيتان",
+      "permissions_few": "{{count}} صلاحيات",
+      "permissions_many": "{{count}} صلاحية",
+      "permissions_other": "{{count}} صلاحية",
+      "users_label": "المستخدمون"
     },
     "languages": {
       "title": "اللغات",
@@ -499,7 +545,6 @@
     },
     "backup": {
       "title": "النسخ الاحتياطي",
-      "verified_count": "{{count}} نسخة موثّقة",
       "none_yet": "لا توجد نسخ بعد",
       "no_backup_warning": "لا توجد أي نسخة احتياطية. البيانات موجودة على قرص واحد فقط.",
       "same_disk_warning": "النسخ على القرص نفسه الذي يحمل البيانات. هذا يحميك من خطأ في التنظيف أو حذف ملف، لكنه لا ينجو من عطب القرص — وجّه BACKUP_DIR إلى قرص آخر.",
@@ -543,11 +588,16 @@
       "schedule_weekly": "أسبوعيًا",
       "stale_never": "لم تُؤخذ أي نسخة بعد",
       "stale_since": "آخر نسخة منذ {{hours}} ساعة",
-      "fresh_since": "آخر نسخة منذ {{hours}} ساعة"
+      "fresh_since": "آخر نسخة منذ {{hours}} ساعة",
+      "verified_count_zero": "لا نسخ موثّقة",
+      "verified_count_one": "نسخة واحدة موثّقة",
+      "verified_count_two": "نسختان موثّقتان",
+      "verified_count_few": "{{count}} نسخ موثّقة",
+      "verified_count_many": "{{count}} نسخة موثّقة",
+      "verified_count_other": "{{count}} نسخة موثّقة"
     },
     "lockouts": {
       "title": "الحسابات المقفلة مؤقتًا",
-      "count": "{{count}} مقفل حاليًا",
       "none": "لا شيء مقفل",
       "hint": "بعد محاولات دخول فاشلة متتالية تُمنَع المحاولات مؤقتًا، وتتضاعف مدة الانتظار مع كل فشل لاحق. القفل مؤقّت دائمًا — قفل دائم يعني أن من يعرف اسم المستخدم يستطيع حرمان صاحبه من الوصول. يظهر هنا كل قفل فعّال ويمكن رفعه يدويًا.",
       "subject": "الاسم / العنوان",
@@ -557,7 +607,13 @@
       "failures": "المحاولات",
       "unlocks_in": "يُفتَح خلال",
       "minutes": "{{minutes}} دقيقة",
-      "unlock": "رفع القفل"
+      "unlock": "رفع القفل",
+      "count_zero": "لا أقفال",
+      "count_one": "حساب واحد مقفل",
+      "count_two": "حسابان مقفلان",
+      "count_few": "{{count}} حسابات مقفلة",
+      "count_many": "{{count}} حسابًا مقفلًا",
+      "count_other": "{{count}} حساب مقفل"
     },
     "compaction": {
       "title": "ضغط قواعد البيانات",
@@ -613,7 +669,6 @@
       "languages_enabled": "المفعّلة: {{codes}}",
       "login_failed": "من {{address}} · المحاولة {{attempt}}",
       "login_failed_locked": "من {{address}} · المحاولة {{attempt}} · قُفل {{seconds}} ثانية",
-      "permission_count": "{{count}} صلاحية",
       "purged": "حُذف {{removed}} سجلًا أقدم من {{days}} يومًا",
       "retention_both": "المهام {{jobs}} يومًا · التنظيف {{cleaning}} يومًا",
       "retention_cleaning": "التنظيف {{cleaning}} يومًا",
@@ -624,7 +679,13 @@
       "schedule_off": "معطّلة",
       "swept": "{{jobs}} مهمة · {{cleaning}} سجل تنظيف",
       "was_named": "كان: {{name}}",
-      "with_role": "الدور: {{role}}"
+      "with_role": "الدور: {{role}}",
+      "permission_count_zero": "بلا صلاحيات",
+      "permission_count_one": "صلاحية واحدة",
+      "permission_count_two": "صلاحيتان",
+      "permission_count_few": "{{count}} صلاحيات",
+      "permission_count_many": "{{count}} صلاحية",
+      "permission_count_other": "{{count}} صلاحية"
     },
     "fields": {
       "description": "الوصف",
@@ -830,7 +891,6 @@
       "storage": "المساحة المتاحة",
       "storage_sub": "مستخدَم: {{used}}",
       "database": "قاعدة البيانات",
-      "database_sub": "{{count}} ملف",
       "backups": "نسخ موثّقة",
       "backups_sub": "آخر نسخة {{when}}",
       "records": "سجلات العمليات",
@@ -841,7 +901,13 @@
       "used_pct": "{{pct}}% مستخدم",
       "of_capacity": "من {{total}}",
       "quick_title": "إجراءات سريعة",
-      "quick_desc": "انتقال مباشر إلى الأدوات الأكثر استخدامًا."
+      "quick_desc": "انتقال مباشر إلى الأدوات الأكثر استخدامًا.",
+      "database_sub_zero": "لا ملفات",
+      "database_sub_one": "ملف واحد",
+      "database_sub_two": "ملفان",
+      "database_sub_few": "{{count}} ملفات",
+      "database_sub_many": "{{count}} ملفًا",
+      "database_sub_other": "{{count}} ملف"
     },
     "storage": {
       "title": "المساحة",

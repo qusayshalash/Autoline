@@ -170,7 +170,8 @@
     "close": "Close",
     "empty": "No filters yet. Add a rule to narrow the data down.",
     "value_filters": "Value filters",
-    "n_values": "{{count}} selected values"
+    "n_values_one": "1 selected value",
+    "n_values_other": "{{count}} selected values"
   },
   "group": {
     "title": "Group",
@@ -181,9 +182,10 @@
     "empty": "No grouping yet. Pick a column to roll the data up by.",
     "grouped_by": "Grouped by {{count}}",
     "column_header": "Group",
-    "groups_count": "{{count}} groups",
     "more_groups": "Showing {{shown}} of {{total}} groups",
-    "more_rows": "Showing {{shown}} of {{total}} rows in this group"
+    "more_rows": "Showing {{shown}} of {{total}} rows in this group",
+    "groups_count_one": "1 group",
+    "groups_count_other": "{{count}} groups"
   },
   "sheet": {
     "reset": "Reset",
@@ -348,9 +350,12 @@
     },
     "time": {
       "just_now": "just now",
-      "minutes": "{{count}}m ago",
-      "hours": "{{count}}h ago",
-      "days": "{{count}}d ago"
+      "minutes_one": "1m ago",
+      "minutes_other": "{{count}}m ago",
+      "hours_one": "1h ago",
+      "hours_other": "{{count}}h ago",
+      "days_one": "1d ago",
+      "days_other": "{{count}}d ago"
     },
     "overview": {
       "users_total": "Total users",
@@ -395,7 +400,6 @@
       "created": "Created",
       "view": "View",
       "none": "No matching users",
-      "selected": "{{count}} selected",
       "activate": "Activate",
       "suspend": "Suspend",
       "delete": "Delete",
@@ -404,15 +408,16 @@
       "recent_activity": "Recent activity",
       "reset_password": "Reset password",
       "confirm_delete": "Permanently delete user \"{{name}}\"?",
-      "confirm_bulk_delete": "Permanently delete {{count}} user(s)?"
+      "selected_one": "1 selected",
+      "selected_other": "{{count}} selected",
+      "confirm_bulk_delete_one": "Permanently delete 1 user?",
+      "confirm_bulk_delete_other": "Permanently delete {{count}} users?"
     },
     "roles": {
       "title": "Roles ({{count}})",
       "add": "New role",
       "create": "Create role",
       "system": "Built-in",
-      "users": "users",
-      "permissions": "permissions",
       "updated": "Updated",
       "name": "Name",
       "description": "Description",
@@ -423,7 +428,12 @@
       "save": "Save changes",
       "delete": "Delete role",
       "confirm_delete": "Delete this role?",
-      "super_admin_note": "Super Admin always holds every permission and cannot be edited - it is the account of last resort."
+      "super_admin_note": "Super Admin always holds every permission and cannot be edited - it is the account of last resort.",
+      "users_one": "1 user",
+      "users_other": "{{count}} users",
+      "permissions_one": "1 permission",
+      "permissions_other": "{{count}} permissions",
+      "users_label": "Users"
     },
     "languages": {
       "title": "Languages",
@@ -499,7 +509,6 @@
     },
     "backup": {
       "title": "Backups",
-      "verified_count": "{{count}} verified",
       "none_yet": "No backups yet",
       "no_backup_warning": "There is no backup. The data exists on one disk only.",
       "same_disk_warning": "Backups are on the same disk as the data. That survives a bad cleaning run or a deleted file, but not the disk failing - point BACKUP_DIR at another drive.",
@@ -543,11 +552,12 @@
       "schedule_weekly": "Weekly",
       "stale_never": "No backup has ever been taken",
       "stale_since": "Last backup {{hours}}h ago",
-      "fresh_since": "Last backup {{hours}}h ago"
+      "fresh_since": "Last backup {{hours}}h ago",
+      "verified_count_one": "1 verified",
+      "verified_count_other": "{{count}} verified"
     },
     "lockouts": {
       "title": "Temporarily locked",
-      "count": "{{count}} locked now",
       "none": "Nothing locked",
       "hint": "After repeated failed logins, attempts are held off for a while, and the wait doubles with each further failure. The lock is always temporary - a permanent one would let anyone who knows a username take that person's access away. Every active lock is listed here and can be lifted by hand.",
       "subject": "Name / address",
@@ -557,7 +567,9 @@
       "failures": "Attempts",
       "unlocks_in": "Unlocks in",
       "minutes": "{{minutes}} min",
-      "unlock": "Unlock"
+      "unlock": "Unlock",
+      "count_one": "1 locked now",
+      "count_other": "{{count}} locked now"
     },
     "compaction": {
       "title": "Compact databases",
@@ -613,7 +625,6 @@
       "languages_enabled": "enabled: {{codes}}",
       "login_failed": "from {{address}} · attempt {{attempt}}",
       "login_failed_locked": "from {{address}} · attempt {{attempt}} · locked for {{seconds}}s",
-      "permission_count": "{{count}} permissions",
       "purged": "removed {{removed}} entries older than {{days}} days",
       "retention_both": "jobs {{jobs}} days · cleaning {{cleaning}} days",
       "retention_cleaning": "cleaning {{cleaning}} days",
@@ -624,7 +635,9 @@
       "schedule_off": "off",
       "swept": "{{jobs}} jobs · {{cleaning}} cleaning records",
       "was_named": "was: {{name}}",
-      "with_role": "role: {{role}}"
+      "with_role": "role: {{role}}",
+      "permission_count_one": "1 permission",
+      "permission_count_other": "{{count}} permissions"
     },
     "fields": {
       "description": "description",
@@ -830,7 +843,6 @@
       "storage": "Available space",
       "storage_sub": "Used: {{used}}",
       "database": "Database",
-      "database_sub": "{{count}} datasets",
       "backups": "Verified backups",
       "backups_sub": "Latest {{when}}",
       "records": "Operation records",
@@ -841,7 +853,9 @@
       "used_pct": "{{pct}}% used",
       "of_capacity": "of {{total}}",
       "quick_title": "Quick actions",
-      "quick_desc": "Straight to the controls people reach for most."
+      "quick_desc": "Straight to the controls people reach for most.",
+      "database_sub_one": "1 dataset",
+      "database_sub_other": "{{count}} datasets"
     },
     "storage": {
       "title": "Storage",

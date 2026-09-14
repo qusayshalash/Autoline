@@ -144,9 +144,26 @@ def detail_codes() -> set[str]:
     return found
 
 
+# i18next appends one of these to a key that varies with a number. Arabic uses all six,
+# Hebrew three, English two - so the three files legitimately hold different key counts
+# for the same sentence, and every comparison here works on the base name.
+PLURAL_SUFFIXES = ("_zero", "_one", "_two", "_few", "_many", "_other")
+
+
+def base_key(key: str) -> str:
+    for suffix in PLURAL_SUFFIXES:
+        if key.endswith(suffix):
+            return key[: -len(suffix)]
+    return key
+
+
 def detail_messages(language: str) -> dict:
     data = json.load(io.open(LOCALES / f"{language}.json", encoding="utf-8"))
     return data["admin"].get("details", {})
+
+
+def detail_base_names(language: str) -> set[str]:
+    return {base_key(k) for k in detail_messages(language)}
 
 
 def test_the_scan_finds_the_detail_codes():
@@ -158,8 +175,8 @@ def test_the_scan_finds_the_detail_codes():
 
 @pytest.mark.parametrize("language", LANGUAGES)
 def test_every_detail_code_has_a_sentence(language):
-    messages = detail_messages(language)
-    missing = sorted(c for c in detail_codes() if c not in messages)
+    names = detail_base_names(language)
+    missing = sorted(c for c in detail_codes() if c not in names)
     assert not missing, (
         f"{language}.json has no admin.details entry for: {', '.join(missing)} - "
         "the log will fall back to the English sentence"
@@ -167,7 +184,7 @@ def test_every_detail_code_has_a_sentence(language):
 
 
 def test_the_languages_agree_on_which_details_they_name():
-    sets = {lang: set(detail_messages(lang)) for lang in LANGUAGES}
+    sets = {lang: detail_base_names(lang) for lang in LANGUAGES}
     everything = set().union(*sets.values())
     for lang, present in sets.items():
         assert not (everything - present), (
@@ -175,18 +192,46 @@ def test_the_languages_agree_on_which_details_they_name():
         )
 
 
+def _placeholders_by_base(language: str) -> dict[str, set[str]]:
+    """What each sentence interpolates, pooled over its plural forms.
+
+    Pooled because the forms legitimately differ: Arabic's "one" reads "صلاحية واحدة"
+    and carries no number at all, while its "few" reads "{{count}} صلاحيات".
+    """
+    out: dict[str, set[str]] = {}
+    for key, text in detail_messages(language).items():
+        out.setdefault(base_key(key), set()).update(re.findall(r"{{(\w+)}}", text))
+    return out
+
+
 @pytest.mark.parametrize("language", LANGUAGES)
 def test_the_placeholders_match_across_languages(language):
-    """A translation that drops a placeholder silently loses the number it was carrying,
-    and one that invents a placeholder renders it raw."""
-    reference = detail_messages("en")
-    messages = detail_messages(language)
-    for code, text in messages.items():
-        expected = set(re.findall(r"{{(\w+)}}", reference.get(code, "")))
-        actual = set(re.findall(r"{{(\w+)}}", text))
-        assert actual == expected, (
-            f"{language}.json '{code}' uses {sorted(actual)}, English uses {sorted(expected)}"
+    """A translation that drops a placeholder silently loses the value it carried, and
+    one that invents a placeholder renders it raw.
+
+    `count` is excluded because a plural form may spell the number out instead of
+    printing it; the form-by-form check below covers what it leaves.
+    """
+    reference = _placeholders_by_base("en")
+    for code, actual in _placeholders_by_base(language).items():
+        expected = reference.get(code, set()) - {"count"}
+        assert (actual - {"count"}) == expected, (
+            f"{language}.json '{code}' uses {sorted(actual)}, English uses "
+            f"{sorted(reference.get(code, set()))}"
         )
+
+
+@pytest.mark.parametrize("language", LANGUAGES)
+def test_a_plural_sentence_still_prints_its_number_where_english_does(language):
+    """The form used for larger counts has to show the figure. Dropping {{count}} from
+    "_other" turns "11 files" into "files"."""
+    english = detail_messages("en")
+    for key, text in detail_messages(language).items():
+        if not key.endswith("_other"):
+            continue
+        reference = english.get(key) or english.get(base_key(key)) or ""
+        if "{{count}}" in reference:
+            assert "{{count}}" in text, f"{language}.json '{key}' lost its number"
 
 
 def test_the_field_names_inside_a_change_list_are_named():
