@@ -253,7 +253,11 @@ def system_status() -> SystemStatusOut:
         datasets_bytes=datasets_bytes,
         exports_bytes=exports,
         dataset_count=len(catalog.list_datasets()),
-        started_at=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(_STARTED_AT)),
+        # An instant, like every other timestamp the API sends. It used to go out as
+        # the server's own wall clock with nothing to say which clock that was, so the
+        # screen printed it verbatim - the one date in the app that was not in the
+        # reader's language or their timezone.
+        started_at=clocks.iso(datetime.fromtimestamp(_STARTED_AT, timezone.utc)),
         uptime_seconds=int(time.time() - _STARTED_AT),
     )
 

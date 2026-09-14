@@ -2,7 +2,8 @@ import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 
 import type { ActivityItem } from "../../api/admin";
-import { formatBytes, formatDateTime, formatRelative } from "../../components/admin/AdminUI";
+import { formatBytes } from "../../components/admin/AdminUI";
+import { formatInstant, formatRelative } from "../../data/datetime";
 
 /** Colour family per action group, so a log skimmed at speed still reads. */
 function toneFor(action: string): string {
@@ -45,7 +46,7 @@ function detailFor(item: ActivityItem, t: TFunction): string {
 }
 
 export default function ActivityRow({ item }: { item: ActivityItem }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const label = t(`admin.actions.${item.action}`, { defaultValue: item.action });
   const detail = detailFor(item, t);
 
@@ -59,8 +60,8 @@ export default function ActivityRow({ item }: { item: ActivityItem }) {
         </span>
         {detail && <span className="activity-detail">{detail}</span>}
       </span>
-      <time className="activity-time" title={formatDateTime(item.at)}>
-        {formatRelative(item.at, t)}
+      <time className="activity-time" title={formatInstant(item.at, i18n.language)}>
+        {formatRelative(item.at, t, i18n.language)}
       </time>
     </li>
   );

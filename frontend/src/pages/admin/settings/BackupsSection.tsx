@@ -28,6 +28,7 @@ import {
 import { useToast } from "../../../components/admin/Toaster";
 import ErrorBanner from "../../../components/ErrorBanner";
 import QueryState from "../../../components/QueryState";
+import { formatDate, formatDateTime } from "../../../data/datetime";
 
 const POLL_MS = 700;
 
@@ -218,7 +219,7 @@ export default function BackupsSection() {
             <dt>{t("admin.backup.latest")}</dt>
             <dd>
               {summary.latest_at
-                ? new Date(summary.latest_at).toLocaleDateString(i18n.language)
+                ? formatDate(summary.latest_at, i18n.language)
                 : t("admin.backup.never")}
             </dd>
           </div>
@@ -360,7 +361,7 @@ export default function BackupsSection() {
         title={t("settings.backups.confirm_delete_title")}
         body={t("settings.backups.confirm_delete_body", {
           date: pendingDelete?.created_at
-            ? new Date(pendingDelete.created_at).toLocaleString(i18n.language)
+            ? formatDateTime(pendingDelete.created_at, i18n.language)
             : (pendingDelete?.name ?? ""),
         })}
         confirmLabel={t("common.delete")}
@@ -394,7 +395,7 @@ function BackupRow({
         <td>
           <button type="button" className="set-table-linkish" onClick={onToggle}>
             {backup.created_at
-              ? new Date(backup.created_at).toLocaleString(i18n.language)
+              ? formatDateTime(backup.created_at, i18n.language)
               : backup.name}
           </button>
         </td>

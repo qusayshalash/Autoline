@@ -15,6 +15,7 @@ import {
 } from "../../../components/admin/SettingsKit";
 import { useToast } from "../../../components/admin/Toaster";
 import ErrorBanner from "../../../components/ErrorBanner";
+import { formatDateTime } from "../../../data/datetime";
 
 /** Offered cutoffs. Nothing shorter than a quarter: the trail's value is that it reaches
  *  back further than the memory of whatever is being investigated. */
@@ -144,7 +145,7 @@ export default function LogsSection() {
           control={
             <span className="set-row-desc" style={{ margin: 0 }}>
               {lastTrim.data?.items?.[0]?.at
-                ? new Date(lastTrim.data.items[0].at as string).toLocaleString(i18n.language)
+                ? formatDateTime(lastTrim.data.items[0].at as string, i18n.language)
                 : t("settings.logs.never_trimmed")}
             </span>
           }

@@ -15,14 +15,15 @@ import {
 import { apiErrorMessage } from "../../api/client";
 import { useAuth } from "../../auth/AuthContext";
 import { IconPlus, IconShield, IconTrash } from "../../components/admin/AdminIcons";
-import { AdminPanel, Drawer, formatDateTime } from "../../components/admin/AdminUI";
+import { AdminPanel, Drawer } from "../../components/admin/AdminUI";
+import { formatDateTime } from "../../data/datetime";
 import ErrorBanner from "../../components/ErrorBanner";
 import LoadingState from "../../components/LoadingState";
 
 const ACTION_ORDER = ["view", "create", "update", "delete", "export", "manage"];
 
 export default function RolesPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const confirm = useConfirm();
   const { can } = useAuth();
   const qc = useQueryClient();
@@ -86,7 +87,7 @@ export default function RolesPage() {
                 <span>{t("admin.roles.permissions", { count: r.permission_count })}</span>
               </span>
               <span className="role-updated">
-                {t("admin.roles.updated")}: {formatDateTime(r.updated_at)}
+                {t("admin.roles.updated")}: {formatDateTime(r.updated_at, i18n.language)}
               </span>
             </button>
           ))}
@@ -219,7 +220,7 @@ function RoleDrawer({
   onSaved: () => void;
   onDelete: (slug: string) => void;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { can } = useAuth();
   const { data: role } = useQuery({ queryKey: ["admin-role", slug], queryFn: () => fetchRole(slug) });
 
@@ -288,7 +289,7 @@ function RoleDrawer({
             </div>
             <div>
               <dt>{t("admin.roles.updated")}</dt>
-              <dd>{formatDateTime(role.updated_at)}</dd>
+              <dd>{formatDateTime(role.updated_at, i18n.language)}</dd>
             </div>
           </dl>
 

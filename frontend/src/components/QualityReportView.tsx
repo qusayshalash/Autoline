@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import type { QualityFinding, QualityReport } from "../api/client";
 import { fetchQualityReport, getJob, startQualityReport } from "../api/client";
+import { formatDateTime } from "../data/datetime";
 
 interface Props {
   datasetId: string;
@@ -89,7 +90,7 @@ export default function QualityReportView({ datasetId, canRun }: Props) {
         {report && !running && (
           <span className="muted quality-generated">
             {t("quality.generated", {
-              when: new Date(report.generated_at).toLocaleString(lang),
+              when: formatDateTime(report.generated_at, lang),
               seconds: (report.duration_ms / 1000).toFixed(1),
             })}
           </span>

@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import type { Overview, SystemStatus } from "../../../api/admin";
 import { IconInfo } from "../../../components/admin/AdminIcons";
 import { SettingsCard, StatusBadge } from "../../../components/admin/SettingsKit";
+import { formatDateTime } from "../../../data/datetime";
 
 /**
  * What the server is, rather than anything you can change here.
@@ -39,7 +40,7 @@ export default function SystemInfoSection({
         </div>
         <div className="set-fact">
           <dt>{t("admin.system.started_at")}</dt>
-          <dd>{system.started_at}</dd>
+          <dd>{formatDateTime(system.started_at, i18n.language)}</dd>
         </div>
         <div className="set-fact">
           <dt>{t("admin.overview.files")}</dt>

@@ -17,13 +17,8 @@ import {
 import { apiErrorMessage } from "../../api/client";
 import { useAuth } from "../../auth/AuthContext";
 import { IconPlus, IconSearch, IconTrash, IconUsers } from "../../components/admin/AdminIcons";
-import {
-  AdminPanel,
-  Drawer,
-  StatusPill,
-  formatDateTime,
-  formatRelative,
-} from "../../components/admin/AdminUI";
+import { AdminPanel, Drawer, StatusPill } from "../../components/admin/AdminUI";
+import { formatDateTime, formatRelative } from "../../data/datetime";
 import ErrorBanner from "../../components/ErrorBanner";
 import LoadingState from "../../components/LoadingState";
 import ActivityRow from "./ActivityRow";
@@ -31,7 +26,7 @@ import ActivityRow from "./ActivityRow";
 const STATUSES: UserStatus[] = ["active", "inactive", "suspended", "pending"];
 
 export default function AdminUsersPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const confirm = useConfirm();
   const { user: me, can } = useAuth();
   const qc = useQueryClient();
@@ -246,8 +241,10 @@ export default function AdminUsersPage() {
                   <td>
                     <StatusPill status={u.status} />
                   </td>
-                  <td>{u.last_login_at ? formatRelative(u.last_login_at, t) : "—"}</td>
-                  <td>{formatDateTime(u.created_at)}</td>
+                  <td title={formatDateTime(u.last_login_at, i18n.language)}>
+                    {u.last_login_at ? formatRelative(u.last_login_at, t, i18n.language) : "—"}
+                  </td>
+                  <td>{formatDateTime(u.created_at, i18n.language)}</td>
                   <td className="row-actions">
                     <button className="link-btn" onClick={() => setDetailId(u.id)}>
                       {t("admin.users.view")}
@@ -308,7 +305,7 @@ function UserDrawer({
   onPatch: (body: Parameters<typeof updateUser>[1]) => void;
   onDelete: () => void;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { can } = useAuth();
   const [newPassword, setNewPassword] = useState("");
 
@@ -391,11 +388,11 @@ function UserDrawer({
         </div>
         <div>
           <dt>{t("admin.users.last_login")}</dt>
-          <dd>{formatDateTime(user.last_login_at)}</dd>
+          <dd>{formatDateTime(user.last_login_at, i18n.language)}</dd>
         </div>
         <div>
           <dt>{t("admin.users.created")}</dt>
-          <dd>{formatDateTime(user.created_at)}</dd>
+          <dd>{formatDateTime(user.created_at, i18n.language)}</dd>
         </div>
       </dl>
 

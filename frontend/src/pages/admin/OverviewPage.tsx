@@ -12,19 +12,14 @@ import {
   IconShield,
   IconUsers,
 } from "../../components/admin/AdminIcons";
-import {
-  AdminPanel,
-  KpiCard,
-  formatBytes,
-  formatDateTime,
-  formatRelative,
-} from "../../components/admin/AdminUI";
+import { AdminPanel, KpiCard, formatBytes } from "../../components/admin/AdminUI";
+import { formatDateTime, formatRelative } from "../../data/datetime";
 import QueryState from "../../components/QueryState";
 import LoadingState from "../../components/LoadingState";
 import ActivityRow from "./ActivityRow";
 
 export default function OverviewPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const { data: overview, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["admin-overview"],
@@ -113,7 +108,11 @@ export default function OverviewPage() {
                 })
               : "—"
           }
-          hint={overview.last_activity ? formatRelative(overview.last_activity.at, t) : undefined}
+          hint={
+            overview.last_activity
+              ? formatRelative(overview.last_activity.at, t, i18n.language)
+              : undefined
+          }
         />
       </div>
 
@@ -165,7 +164,7 @@ export default function OverviewPage() {
               </div>
               <div>
                 <dt>{t("admin.system.started_at")}</dt>
-                <dd>{system.started_at}</dd>
+                <dd>{formatDateTime(system.started_at, i18n.language)}</dd>
               </div>
               <div>
                 <dt>{t("admin.system.uptime")}</dt>
@@ -183,7 +182,7 @@ export default function OverviewPage() {
         <p className="muted admin-footnote">
           {t("admin.overview.last_admin_action", {
             actor: overview.last_activity.actor_username,
-            when: formatDateTime(overview.last_activity.at),
+            when: formatDateTime(overview.last_activity.at, i18n.language),
           })}
         </p>
       )}

@@ -1,4 +1,3 @@
-import type { TFunction } from "i18next";
 import { useEffect, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
@@ -155,23 +154,3 @@ export function formatBytes(bytes: number | null | undefined): string {
   return `${n.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
 }
 
-/** Timestamps arrive as UTC strings from DuckDB; show them in the viewer's locale. */
-export function formatDateTime(value: string | null | undefined): string {
-  if (!value) return "—";
-  const iso = value.includes("T") ? value : value.replace(" ", "T") + "Z";
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return value;
-  return d.toLocaleString();
-}
-
-export function formatRelative(value: string | null | undefined, t: TFunction): string {
-  if (!value) return "—";
-  const iso = value.includes("T") ? value : value.replace(" ", "T") + "Z";
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return value;
-  const secs = Math.round((Date.now() - d.getTime()) / 1000);
-  if (secs < 60) return t("admin.time.just_now");
-  if (secs < 3600) return t("admin.time.minutes", { count: Math.floor(secs / 60) });
-  if (secs < 86400) return t("admin.time.hours", { count: Math.floor(secs / 3600) });
-  return t("admin.time.days", { count: Math.floor(secs / 86400) });
-}

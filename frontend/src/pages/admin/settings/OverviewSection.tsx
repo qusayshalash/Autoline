@@ -21,6 +21,7 @@ import {
   StatusBadge,
 } from "../../../components/admin/SettingsKit";
 import type { SectionId } from "./sections";
+import { formatDate, formatDateTime } from "../../../data/datetime";
 
 /**
  * What is worth knowing before opening anything else.
@@ -113,7 +114,7 @@ export default function OverviewSection({
           sub={
             backups.data?.latest_at
               ? t("settings.overview.backups_sub", {
-                  when: new Date(backups.data.latest_at).toLocaleDateString(i18n.language),
+                  when: formatDate(backups.data.latest_at, i18n.language),
                 })
               : t("admin.backup.never")
           }
@@ -194,7 +195,7 @@ export default function OverviewSection({
           <dl className="set-kv">
             <div>
               <dt>{t("admin.system.started_at")}</dt>
-              <dd>{system.started_at}</dd>
+              <dd>{formatDateTime(system.started_at, i18n.language)}</dd>
             </div>
             <div>
               <dt>{t("admin.overview.users_total")}</dt>

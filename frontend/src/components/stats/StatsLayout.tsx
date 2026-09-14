@@ -7,6 +7,7 @@ import { listDatasets } from "../../api/client";
 import { useAuth } from "../../auth/AuthContext";
 import ThemeToggle from "../ThemeToggle";
 import { IconBack, IconChart, IconFile, IconPanel } from "./StatsIcons";
+import { formatDateTime } from "../../data/datetime";
 
 const COLLAPSED_KEY = "stats-sidebar-collapsed";
 
@@ -154,9 +155,7 @@ export default function StatsLayout() {
                   <>
                     <span className="dot" />
                     {t("statistics.updated_at", {
-                      when: new Date(current.updated_at.replace(" ", "T")).toLocaleString(
-                        i18n.language
-                      ),
+                      when: formatDateTime(current.updated_at, i18n.language),
                     })}
                   </>
                 )}

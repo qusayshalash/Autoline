@@ -8,12 +8,13 @@ import { Link } from "react-router-dom";
 import { apiErrorMessage, deleteDataset, listDatasets } from "../../api/client";
 import { useAuth } from "../../auth/AuthContext";
 import { IconFiles, IconSearch, IconTrash } from "../../components/admin/AdminIcons";
-import { AdminPanel, formatBytes, formatDateTime } from "../../components/admin/AdminUI";
+import { AdminPanel, formatBytes } from "../../components/admin/AdminUI";
+import { formatDateTime } from "../../data/datetime";
 import ErrorBanner from "../../components/ErrorBanner";
 import LoadingState from "../../components/LoadingState";
 
 export default function FilesPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const confirm = useConfirm();
   const { can } = useAuth();
   const qc = useQueryClient();
@@ -94,7 +95,7 @@ export default function FilesPage() {
                   <td className="mono">{(d.row_count_raw ?? 0).toLocaleString()}</td>
                   <td className="mono">{d.columns?.length ?? 0}</td>
                   <td className="mono">{formatBytes(d.raw_file_bytes)}</td>
-                  <td>{formatDateTime(d.created_at)}</td>
+                  <td>{formatDateTime(d.created_at, i18n.language)}</td>
                   <td className="row-actions">
                     {can("datasets.delete") && (
                       <button
