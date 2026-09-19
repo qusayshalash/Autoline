@@ -31,7 +31,7 @@ from typing import Callable, Optional
 
 from app.db import catalog
 from app.db.connection import datasets
-from app.services import corrections, ingestion, row_identity, sql_utils
+from app.services import arrivals, corrections, ingestion, row_identity, sql_utils
 
 BATCH_PREFIX = "batch-"
 _BATCH_NAME = re.compile(r"^batch-(\d{4})\.csv$")
@@ -138,7 +138,13 @@ def stage(
 
 # ---- loading a stored batch into the table ----------------------------------------
 
-def _load(dataset_id: str, path: Path, columns: list[str], key_cols: list[str]) -> dict:
+def _load(
+    dataset_id: str,
+    path: Path,
+    columns: list[str],
+    key_cols: list[str],
+    mark_arrivals: bool = True,
+) -> dict:
     """Loads one stored batch into raw_data. Caller holds the write lock.
 
     With a key, rows already present are removed first and the incoming values take
@@ -166,6 +172,10 @@ def _load(dataset_id: str, path: Path, columns: list[str], key_cols: list[str]) 
     )
     incoming = cur.execute("SELECT COUNT(*) FROM incoming_batch").fetchone()[0]
 
+    # Noted before the merge, while raw_data still holds only what was there before -
+    # which is the only moment "was this record already here" has an answer.
+    arrived = arrivals.record_batch(dataset_id, key_cols) if mark_arrivals else {}
+
     replaced = 0
     if key_cols:
         # the same expression reads correctly against either table: both carry the key
@@ -186,7 +196,7 @@ def _load(dataset_id: str, path: Path, columns: list[str], key_cols: list[str]) 
 
     cur.execute(f"INSERT INTO raw_data ({quoted}) SELECT {quoted} FROM incoming_batch")
     cur.execute("DROP TABLE IF EXISTS incoming_batch")
-    return {"incoming": incoming, "replaced": replaced}
+    return {"incoming": incoming, "replaced": replaced, **arrived}
 
 
 def apply_batch(dataset_id: str, path: Path, dataset: dict) -> dict:
@@ -194,6 +204,7 @@ def apply_batch(dataset_id: str, path: Path, dataset: dict) -> dict:
     columns = sql_utils.table_columns(dataset_id, "raw_data")
     key_cols = row_identity.key_columns(dataset)
     with datasets.write_lock(dataset_id):
+        arrivals.sweep(dataset_id)  # forget what has aged out before noting what has not
         return _load(dataset_id, path, columns, key_cols)
 
 
@@ -212,7 +223,10 @@ def replay_batches(dataset_id: str, dataset: dict) -> int:
     total = 0
     with datasets.write_lock(dataset_id):
         for path in files:
-            total += _load(dataset_id, path, columns, key_cols)["incoming"]
+            # Replaying is not arriving. These rows were noted when they were genuinely
+            # appended; re-marking them here would make a re-import look to the reader
+            # like a fresh delivery of everything the dataset has ever received.
+            total += _load(dataset_id, path, columns, key_cols, mark_arrivals=False)["incoming"]
     return total
 
 

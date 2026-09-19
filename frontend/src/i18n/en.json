@@ -358,7 +358,8 @@
       "dataset.key_set": "set the record key of",
       "dataset.key_cleared": "cleared the record key of",
       "dataset.row_corrected": "corrected a record in",
-      "dataset.row_reverted": "reverted a correction in"
+      "dataset.row_reverted": "reverted a correction in",
+      "system.arrival_window_set": "changed how long new arrivals stay marked in"
     },
     "time": {
       "just_now": "just now",
@@ -672,7 +673,13 @@
       "row_reverted_two": "{{fields}}",
       "row_reverted_few": "{{count}} fields: {{fields}}",
       "row_reverted_many": "{{count}} fields: {{fields}}",
-      "row_reverted_other": "{{count}} fields: {{fields}}"
+      "row_reverted_other": "{{count}} fields: {{fields}}",
+      "arrival_window_one": "1 day",
+      "arrival_window_two": "2 days",
+      "arrival_window_zero": "no window",
+      "arrival_window_few": "{{count}} days",
+      "arrival_window_many": "{{count}} days",
+      "arrival_window_other": "{{count}} days"
     },
     "fields": {
       "description": "description",
@@ -956,6 +963,11 @@
     "security": {
       "empty_desc": "No accounts or addresses are currently being held off.",
       "unlocked": "Lock lifted."
+    },
+    "arrivals": {
+      "title": "Marking new arrivals",
+      "desc": "How many days a record from a new batch stays marked in the table before it reads like every other row.",
+      "hint": "A badge that never fades stops being read within a week. The window exists so the mark keeps meaning something, not so it lasts."
     }
   },
   "errors": {
@@ -1068,5 +1080,21 @@
     "now_holds_few": "The dataset now holds {{count}} rows",
     "now_holds_many": "The dataset now holds {{count}} rows",
     "now_holds_other": "The dataset now holds {{count}} rows"
+  },
+  "arrivals": {
+    "new": "New",
+    "updated": "Updated",
+    "new_at": "A new record, arrived {{when}}",
+    "updated_at": "A record that was already here, updated {{when}}",
+    "only_recent": "Recently arrived",
+    "show_all": "Show everything",
+    "none": "No batch has arrived recently",
+    "summary": "{{new}} new · {{updated}} updated",
+    "within_zero": "no window",
+    "within_one": "in the last day",
+    "within_two": "in the last 2 days",
+    "within_few": "in the last {{count}} days",
+    "within_many": "in the last {{count}} days",
+    "within_other": "in the last {{count}} days"
   }
 }

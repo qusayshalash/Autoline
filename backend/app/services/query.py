@@ -1,6 +1,7 @@
 import time
 
 from app.config import settings
+from app.db import catalog
 from app.db.connection import datasets, read_locked
 from app.models.schemas import (
     ColumnInfo,
@@ -13,7 +14,7 @@ from app.models.schemas import (
     GroupPage,
     GroupQuery,
 )
-from app.services import sql_utils
+from app.services import arrivals, row_identity, sql_utils
 
 # Rows sampled when guessing a column's display type. Only affects the T/# icon in the
 # grid header, so a cheap head-of-table sample is plenty.
@@ -68,6 +69,17 @@ def fetch_page(dataset_id: str, q: DataQuery) -> DataPage:
     valid = set(columns)
 
     where_sql, params = _build_where(q.search, q.filters, columns, q.search_columns)
+
+    # "only what arrived recently" is not a statement about a column, so it joins the
+    # WHERE here rather than going through the filter builder. It costs nothing when it
+    # is not asked for, which is almost always.
+    key_cols = row_identity.key_columns(catalog.get_dataset(dataset_id) or {})
+    if q.only_recent:
+        recent = arrivals.recent_filter_sql(dataset_id, key_cols)
+        # No arrivals table and no key both mean the same thing here: nothing is known
+        # to have arrived, which is not the same as everything having arrived.
+        recent = recent or "FALSE"
+        where_sql = f"({where_sql}) AND ({recent})" if where_sql else recent
     table_sql = sql_utils.quote_ident(table)
 
     started = time.perf_counter()
@@ -101,6 +113,11 @@ def fetch_page(dataset_id: str, q: DataQuery) -> DataPage:
 
     duration_ms = (time.perf_counter() - started) * 1000
 
+    # Asked of the hundred rows in hand rather than joined into the query above: almost
+    # no row in a four-million-row table is recent, and every reader would otherwise pay
+    # on every page to find that out.
+    marks = arrivals.mark_page(dataset_id, key_cols, rows, columns)
+
     return DataPage(
         columns=columns,
         rows=[list(r) for r in rows],
@@ -108,6 +125,7 @@ def fetch_page(dataset_id: str, q: DataQuery) -> DataPage:
         page=page,
         page_size=page_size,
         duration_ms=round(duration_ms, 1),
+        arrivals=marks,
     )
 
 

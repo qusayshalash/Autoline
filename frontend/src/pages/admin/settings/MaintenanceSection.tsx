@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { fetchHousekeeping, setHousekeeping, sweepHousekeeping } from "../../../api/admin";
-import { apiErrorMessage } from "../../../api/client";
+import { apiErrorMessage, setArrivalWindow } from "../../../api/client";
 import { useAuth } from "../../../auth/AuthContext";
 import { IconBroom } from "../../../components/admin/AdminIcons";
 import {
@@ -20,6 +20,11 @@ import QueryState from "../../../components/QueryState";
 /** Offered periods, in days. 0 is off. */
 const JOB_CHOICES = [0, 30, 90, 365];
 const CLEANING_CHOICES = [0, 90, 365, 730];
+
+/** How long a record from a new batch stays marked. Nothing longer than a month: past
+ *  that the mark is no longer telling anyone anything they did not already know. */
+const ARRIVAL_CHOICES = [1, 3, 7, 14, 30];
+const DEFAULT_ARRIVAL_WINDOW = 7;
 
 /**
  * The automatic sweep over the catalog's two append-only tables.
@@ -38,6 +43,7 @@ export default function MaintenanceSection() {
   const queryClient = useQueryClient();
   const toast = useToast();
   const [error, setError] = useState<string | null>(null);
+  const [arrivalDays, setArrivalDays] = useState(DEFAULT_ARRIVAL_WINDOW);
 
   const {
     data,
@@ -62,6 +68,15 @@ export default function MaintenanceSection() {
       refresh();
       toast("success", t("settings.maintenance.saved"));
     },
+    onError: (e) => setError(apiErrorMessage(e, t("common.error_generic"))),
+  });
+
+  // Not part of the housekeeping payload: it is one setting for every dataset rather
+  // than a per-table retention, and it decides how long something is *shown*, not how
+  // long it is kept.
+  const arrivalWindow = useMutation({
+    mutationFn: (days: number) => setArrivalWindow(days),
+    onSuccess: () => toast("success", t("settings.maintenance.saved")),
     onError: (e) => setError(apiErrorMessage(e, t("common.error_generic"))),
   });
 
@@ -133,6 +148,27 @@ export default function MaintenanceSection() {
           </div>
         )}
       </SettingRow>
+
+      <SettingRow
+        title={t("settings.arrivals.title")}
+        description={t("settings.arrivals.desc")}
+        hint={t("settings.arrivals.hint")}
+        control={
+          <Choice
+            value={arrivalDays}
+            disabled={!mayManage || arrivalWindow.isPending}
+            ariaLabel={t("settings.arrivals.title")}
+            onChange={(days) => {
+              setArrivalDays(days);
+              arrivalWindow.mutate(days);
+            }}
+            options={ARRIVAL_CHOICES.map((d) => ({
+              value: d,
+              label: t("arrivals.within", { count: d }),
+            }))}
+          />
+        }
+      />
 
       <SettingRow
         title={t("admin.housekeeping.cleaning")}

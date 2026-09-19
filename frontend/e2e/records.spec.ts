@@ -165,6 +165,26 @@ test.describe("Records", () => {
     expect(await valueOf(request, id, "00060000", "year")).toBe("2025");
     expect(await valueOf(request, id, "00099001", "make")).toBe("هوندا");
 
+    // ---- what the batch brought, marked in the grid ------------------------------------
+    await page.goto(`/datasets/${id}/explore`);
+    await expect(page.getByRole("table")).toBeVisible();
+
+    // the filter is the answer to "show me the delivery" - scanning for a colour is not
+    const recent = page.getByRole("button", { name: /الوارد حديثًا/ });
+    await expect(recent).toBeVisible();
+    await recent.click();
+
+    await expect(page.locator(".arrival-mark.new")).toHaveCount(1);
+    await expect(page.locator(".arrival-mark.updated")).toHaveCount(1);
+    await expect(page.locator(".sheet-grid tbody tr")).toHaveCount(2);
+
+    // colour is not the only channel: each mark carries a sentence a reader can hear
+    await expect(page.locator(".arrival-mark.new")).toHaveAttribute("title", /جديد/);
+    await expect(page.locator(".arrival-mark.updated")).toHaveAttribute("title", /حُدِّث/);
+
+    await page.getByRole("button", { name: /أظهر الكل/ }).click();
+    await expect(page.locator(".sheet-grid tbody tr")).toHaveCount(BASE_ROWS + 1);
+
     // ---- the one that matters --------------------------------------------------------
     const reimport = await request.post(`${API}/datasets/${id}/import`, {
       data: { encoding: "utf-8", delimiter: ",", has_header: true },
@@ -192,6 +212,11 @@ test.describe("Records", () => {
 
     const final = await (await request.get(`${API}/datasets/${id}`)).json();
     expect(final.row_count_raw).toBe(BASE_ROWS + 1);
+
+    // replaying a batch is not arriving: a re-import must not look like a fresh delivery
+    const arrivals = await (await request.get(`${API}/datasets/${id}/arrivals`)).json();
+    expect(arrivals.new).toBe(1);
+    expect(arrivals.updated).toBe(1);
 
     // ---- putting the file's own value back -------------------------------------------
     await page.goto(`/datasets/${id}/explore`);

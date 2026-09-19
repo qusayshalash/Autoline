@@ -221,6 +221,13 @@ export interface DataPage {
   duration_ms: number;
   /** full round-trip measured in the browser; added by fetchData, not by the API */
   elapsed_ms?: number;
+  /**
+   * "new", "updated" or null for each row, parallel to `rows`.
+   *
+   * Only populated when the dataset has a record key and a batch arrived inside the
+   * marking window; otherwise every entry is null.
+   */
+  arrivals: (Arrival | null)[];
 }
 
 export interface StatsOut {
@@ -321,6 +328,8 @@ export async function fetchData(
     search_columns?: string[];
     filters?: FilterRule[];
     source?: "raw" | "cleaned";
+    /** keep only records a recent batch brought */
+    only_recent?: boolean;
   }
 ): Promise<DataPage> {
   // `duration_ms` from the server is the query time alone; timing the call here adds
@@ -335,6 +344,7 @@ export async function fetchData(
     search_columns: params.search_columns ?? [],
     filters: params.filters ?? [],
     source: params.source ?? "cleaned",
+    only_recent: params.only_recent ?? false,
   });
   return { ...data, elapsed_ms: Math.round(performance.now() - started) };
 }
@@ -490,6 +500,35 @@ export async function appendBatch(
       if (onProgress && evt.total) onProgress(Math.round((evt.loaded / evt.total) * 100));
     },
   });
+  return data;
+}
+
+/* --- what arrived recently ------------------------------------------------------- */
+
+/** "new" if the record was not here before the batch, "updated" if it was. */
+export type Arrival = "new" | "updated";
+
+export interface ArrivalSummary {
+  new: number;
+  updated: number;
+  latest_at?: string | null;
+  window_days: number;
+}
+
+/**
+ * What a recent batch brought, or null when none has.
+ *
+ * Null rather than zeros: the screen uses it to decide whether to offer the filter at
+ * all, and "no batch has landed here" is a different thing from "one landed and brought
+ * nothing".
+ */
+export async function fetchArrivals(datasetId: string): Promise<ArrivalSummary | null> {
+  const { data } = await api.get<ArrivalSummary | null>(`/datasets/${datasetId}/arrivals`);
+  return data;
+}
+
+export async function setArrivalWindow(days: number): Promise<{ days: number }> {
+  const { data } = await api.put<{ days: number }>("/datasets/arrivals/window", { days });
   return data;
 }
 

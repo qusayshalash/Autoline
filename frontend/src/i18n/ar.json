@@ -366,7 +366,8 @@
       "dataset.key_set": "حدّد معرّف السجلّ في",
       "dataset.key_cleared": "ألغى معرّف السجلّ في",
       "dataset.row_corrected": "صحّح سجلًّا في",
-      "dataset.row_reverted": "تراجع عن تصحيح في"
+      "dataset.row_reverted": "تراجع عن تصحيح في",
+      "system.arrival_window_set": "غيّر مدّة تمييز الوارد الجديد في"
     },
     "time": {
       "just_now": "الآن",
@@ -720,7 +721,13 @@
       "row_reverted_two": "حقلا {{fields}}",
       "row_reverted_few": "{{count}} حقول: {{fields}}",
       "row_reverted_many": "{{count}} حقلًا: {{fields}}",
-      "row_reverted_other": "{{count}} حقل: {{fields}}"
+      "row_reverted_other": "{{count}} حقل: {{fields}}",
+      "arrival_window_one": "يوم واحد",
+      "arrival_window_two": "يومان",
+      "arrival_window_zero": "بلا مدّة",
+      "arrival_window_few": "{{count}} أيام",
+      "arrival_window_many": "{{count}} يومًا",
+      "arrival_window_other": "{{count}} يوم"
     },
     "fields": {
       "description": "الوصف",
@@ -1008,6 +1015,11 @@
     "security": {
       "empty_desc": "لا توجد حسابات أو عناوين ممنوعة من المحاولة حاليًا.",
       "unlocked": "رُفع القفل."
+    },
+    "arrivals": {
+      "title": "تمييز الوارد الجديد",
+      "desc": "كم يومًا يبقى السجلّ الوارد في دفعة جديدة مميَّزًا في الجدول قبل أن يعود كبقيّة الصفوف.",
+      "hint": "علامة لا تنطفئ تتحوّل خلال أسبوع إلى خلفية لا يراها أحد. الغرض من المدّة أن تبقى العلامة ذات معنى، لا أن تدوم."
     }
   },
   "errors": {
@@ -1120,5 +1132,21 @@
     "now_holds_few": "الملف يحوي الآن {{count}} صفوف",
     "now_holds_many": "الملف يحوي الآن {{count}} صفًّا",
     "now_holds_other": "الملف يحوي الآن {{count}} صفّ"
+  },
+  "arrivals": {
+    "new": "جديد",
+    "updated": "محدَّث",
+    "new_at": "سجلّ جديد، وصل في {{when}}",
+    "updated_at": "سجلّ كان موجودًا، حُدِّث في {{when}}",
+    "only_recent": "الوارد حديثًا",
+    "show_all": "أظهر الكل",
+    "none": "لم تصل دفعة في المدّة الأخيرة",
+    "summary": "{{new}} جديد · {{updated}} محدَّث",
+    "within_zero": "بلا مدّة",
+    "within_one": "خلال يوم واحد",
+    "within_two": "خلال يومين",
+    "within_few": "خلال {{count}} أيام",
+    "within_many": "خلال {{count}} يومًا",
+    "within_other": "خلال {{count}} يوم"
   }
 }

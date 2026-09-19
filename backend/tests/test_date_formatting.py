@@ -68,6 +68,15 @@ def test_only_the_formatter_decides_how_a_date_looks(call):
     assert not offenders, f"{call} outside data/datetime.ts:\n" + "\n".join(offenders)
 
 
+# A timestamp put on the screen, rather than handed to something that formats it.
+#
+# The lookbehind is what separates the two. `<dd>{system.started_at}</dd>` renders the
+# value; `when={arrivals.latest_at}` passes it to a component whose whole job is to
+# format it, and flagging that would push callers into formatting at the call site -
+# which is the scattering this module exists to stop.
+RENDERED_TIMESTAMP = re.compile(r"(?<![=\w])\{\s*[\w.]*\b(\w*_at)\s*\}")
+
+
 def test_no_screen_prints_a_timestamp_straight_from_the_api():
     """`<dd>{system.started_at}</dd>` on three pages. The value went out as the server's
     own wall clock and arrived as "2026-09-13 23:03:16", so that is what the reader got:
@@ -75,7 +84,7 @@ def test_no_screen_prints_a_timestamp_straight_from_the_api():
     raw = []
     for path in FRONTEND.rglob("*.tsx"):
         for number, line in enumerate(path.read_text(encoding="utf-8").split("\n"), 1):
-            for match in re.finditer(r"\{\s*[\w.]*\b(\w*_at)\s*\}", line):
+            for match in RENDERED_TIMESTAMP.finditer(line):
                 raw.append(f"{relative(path)}:{number}  {match.group(0)}")
     assert not raw, "timestamps rendered without formatting:\n" + "\n".join(raw)
 
@@ -83,13 +92,16 @@ def test_no_screen_prints_a_timestamp_straight_from_the_api():
 # ---- the transport half ---------------------------------------------------------------
 
 def test_the_scan_would_notice_the_old_shape():
-    """A guard on the guards: the strings they are meant to reject, rejected."""
-    assert re.search(r"\{\s*[\w.]*\b(\w*_at)\s*\}", "<dd>{system.started_at}</dd>")
-    assert re.search(r"\{\s*[\w.]*\b(\w*_at)\s*\}", "<td>{u.created_at}</td>")
+    """A guard on the guards: the strings they are meant to reject, rejected - and the
+    ones they must not, spared."""
+    assert RENDERED_TIMESTAMP.search("<dd>{system.started_at}</dd>")
+    assert RENDERED_TIMESTAMP.search("<td>{u.created_at}</td>")
     # a formatted one is not a match
-    assert not re.search(
-        r"\{\s*[\w.]*\b(\w*_at)\s*\}", "<dd>{formatDateTime(system.started_at, lang)}</dd>"
-    )
+    assert not RENDERED_TIMESTAMP.search("<dd>{formatDateTime(system.started_at, lang)}</dd>")
+    # nor is one handed to a component that formats it - the alternative would be every
+    # caller formatting at the call site, which is the drift this file exists against
+    assert not RENDERED_TIMESTAMP.search("<ArrivalMark when={arrivals.latest_at} />")
+    assert not RENDERED_TIMESTAMP.search("title={row.created_at}")
 
 
 def test_the_uptime_clock_goes_out_as_an_instant(admin):

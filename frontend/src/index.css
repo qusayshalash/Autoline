@@ -3029,3 +3029,98 @@ td:hover > .cell-edit-wrap > .cell-revert,
 .cell-edit .chip {
   max-width: none;
 }
+
+/* --- records a recent batch brought ---
+   Two channels on purpose: the colour separates new from updated at a glance, and the
+   letter inside the dot says which for anybody the colour does not reach. The column
+   only exists while there is something in it, so a dataset that never takes a batch
+   loses no width to it. */
+.sheet-grid .arrival-col {
+  width: 30px;
+  min-width: 30px;
+  padding: 0 0.2rem;
+  text-align: center;
+}
+
+.arrival-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.arrival-dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 17px;
+  height: 17px;
+  border-radius: 999px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  line-height: 1;
+  background: var(--arrival-bg);
+  color: var(--arrival-fg);
+}
+
+.arrival-mark.new,
+.arrival-dot.new {
+  --arrival-bg: #dcfce7;
+  --arrival-fg: #15803d;
+}
+
+.arrival-mark.updated {
+  --arrival-bg: #fef3c7;
+  --arrival-fg: #b45309;
+}
+
+:root:not([data-theme="light"]) .arrival-mark.new,
+:root:not([data-theme="light"]) .arrival-dot.new {
+  --arrival-bg: #14532d;
+  --arrival-fg: #86efac;
+}
+
+:root:not([data-theme="light"]) .arrival-mark.updated {
+  --arrival-bg: #78350f;
+  --arrival-fg: #fcd34d;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .arrival-mark.new,
+  :root:not([data-theme="light"]) .arrival-dot.new {
+    --arrival-bg: #14532d;
+    --arrival-fg: #86efac;
+  }
+  :root:not([data-theme="light"]) .arrival-mark.updated {
+    --arrival-bg: #78350f;
+    --arrival-fg: #fcd34d;
+  }
+}
+
+.arrivals-tool .arrival-dot.new {
+  width: 9px;
+  height: 9px;
+}
+
+.sheet-tool-count {
+  margin-inline-start: 0.3rem;
+  padding: 0 0.35rem;
+  border-radius: 999px;
+  background: var(--border);
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Text for a screen reader only. Clipped rather than hidden: display:none and
+   visibility:hidden both take it out of the accessibility tree, which is the one place
+   it was meant to be. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}

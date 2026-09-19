@@ -1,5 +1,6 @@
 import csv
 import json
+from typing import Optional
 
 from fastapi import APIRouter, Depends, Form, HTTPException, UploadFile
 from fastapi import File as FastAPIFile
@@ -14,6 +15,8 @@ from app.db.connection import datasets as dataset_connections
 from app.jobs import submit
 from app.models.schemas import (
     AppendResult,
+    ArrivalSummary,
+    ArrivalWindowRequest,
     DatasetOut,
     DatasetRenameRequest,
     ImportConfig,
@@ -23,7 +26,7 @@ from app.models.schemas import (
     QualityReport,
     UploadResponse,
 )
-from app.services import appending, corrections, ingestion, quality, row_identity
+from app.services import appending, arrivals, corrections, ingestion, quality, row_identity
 
 router = APIRouter(prefix="/api/datasets", tags=["datasets"])
 
@@ -390,6 +393,47 @@ async def append_batch(
         row_count_raw=total,
         cleaned_rebuilt=rebuilt,
     )
+
+
+@router.get("/{dataset_id}/arrivals", response_model=Optional[ArrivalSummary])
+def get_arrivals(
+    dataset_id: str, user: dict = Depends(require_permission("datasets.view"))
+) -> Optional[ArrivalSummary]:
+    """What arrived recently, or null when nothing has.
+
+    Null rather than a row of zeros: the screen uses it to decide whether to offer the
+    filter at all, and "no batch has landed here" is a different thing from "a batch
+    landed and brought nothing".
+    """
+    row = catalog.get_dataset(dataset_id)
+    if row is None:
+        raise ApiError(404, "dataset_not_found", "Dataset not found")
+    found = arrivals.summary(dataset_id)
+    if not found:
+        return None
+    return ArrivalSummary(
+        new=found["new"],
+        updated=found["updated"],
+        latest_at=clocks.iso(found["latest_at"]),
+        window_days=found["window_days"],
+    )
+
+
+@router.put("/arrivals/window", response_model=ArrivalWindowRequest)
+def set_arrival_window(
+    body: ArrivalWindowRequest, user: dict = Depends(require_permission("system.manage"))
+) -> ArrivalWindowRequest:
+    """How long an arrival stays marked. One setting for every dataset.
+
+    Changing it does not retro-actively resurrect arrivals already swept away; it only
+    changes what the next sweep keeps.
+    """
+    days = arrivals.set_window_days(body.days)
+    admin_db.log_activity(
+        user, "system.arrival_window_set", "system", "", "",
+        f"{days} days", detail_code="arrival_window", count=days,
+    )
+    return ArrivalWindowRequest(days=days)
 
 
 @router.patch("/{dataset_id}", response_model=DatasetOut)

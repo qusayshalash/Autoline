@@ -586,6 +586,19 @@ class DatasetOut(BaseModel):
     key_columns: list[str] = []
 
 
+class ArrivalSummary(BaseModel):
+    """What arrived recently, for a screen deciding whether to offer the filter."""
+
+    new: int
+    updated: int
+    latest_at: Optional[str] = None
+    window_days: int
+
+
+class ArrivalWindowRequest(Incoming):
+    days: int = Field(ge=1, le=90)
+
+
 class JobOut(BaseModel):
     id: str
     dataset_id: str
@@ -661,6 +674,9 @@ class DataQuery(Incoming):
     search_columns: Optional[list[str]] = None
     filters: list[FilterRule] = []
     source: Literal["raw", "cleaned"] = "cleaned"
+    # Keep only records that arrived in a recent batch. Not a FilterRule because it is
+    # not a statement about a column - the arrivals live beside the data, not in it.
+    only_recent: bool = False
 
 
 class DataPage(BaseModel):
@@ -671,6 +687,9 @@ class DataPage(BaseModel):
     page_size: int
     # wall-clock time DuckDB spent on the count + page queries, in milliseconds
     duration_ms: float = 0.0
+    # "new", "updated" or null for each row of this page, when the dataset has a record
+    # key and a batch arrived recently. Parallel to `rows`.
+    arrivals: list[Optional[str]] = []
 
 
 class GroupQuery(Incoming):

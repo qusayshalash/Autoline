@@ -60,8 +60,11 @@ def key_columns(dataset: dict) -> list[str]:
     return list(value) if isinstance(value, list) else []
 
 
-def key_expression(columns: list[str]) -> str:
+def key_expression(columns: list[str], alias: str = "") -> str:
     """SQL producing one comparable value from the key columns.
+
+    `alias` qualifies the columns with a table name, for the queries that mention two
+    tables holding the same column names at once.
 
     A separator that cannot appear inside a field would be ideal and does not exist -
     any byte is legal in a CSV value. Unit separator (U+001F) is used because it is not
@@ -72,7 +75,8 @@ def key_expression(columns: list[str]) -> str:
     NULL is mapped to the empty string so a key column that is blank in one row and NULL
     in another does not produce two identities for what the file shows as one value.
     """
-    parts = [f"COALESCE({sql_utils.quote_ident(c)}, '')" for c in columns]
+    prefix = f"{sql_utils.quote_ident(alias)}." if alias else ""
+    parts = [f"COALESCE({prefix}{sql_utils.quote_ident(c)}, '')" for c in columns]
     return " || chr(31) || ".join(parts)
 
 

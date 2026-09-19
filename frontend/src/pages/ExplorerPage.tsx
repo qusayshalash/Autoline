@@ -11,6 +11,7 @@ import {
   cancelJob,
   downloadExportUrl,
   editRow,
+  fetchArrivals,
   fetchCorrections,
   fetchColumns,
   fetchData,
@@ -20,6 +21,7 @@ import {
   getStats,
   requestExport,
   revertCorrection,
+  type Arrival,
   type ColumnKind,
   type ExportRequest,
   type FilterRule,
@@ -32,6 +34,7 @@ import { hasHebrew, translateValue } from "../data/valueDictionary";
 import EmptyState from "../components/EmptyState";
 import ErrorBanner from "../components/ErrorBanner";
 import FilterDialog from "../components/FilterDialog";
+import ArrivalMark from "../components/ArrivalMark";
 import EditableCell from "../components/EditableCell";
 import RecordKeyDialog from "../components/RecordKeyDialog";
 import GroupDialog from "../components/GroupDialog";
@@ -76,6 +79,7 @@ export default function ExplorerPage() {
   const { t, i18n } = useTranslation();
   const confirm = useConfirm();
   const labelFor = (c: string) => columnLabel(c, i18n.language);
+  const n = (value: number) => value.toLocaleString(i18n.language);
   const { datasetId = "" } = useParams();
   const { can } = useAuth();
   const canExport = can("datasets.export");
@@ -119,6 +123,7 @@ export default function ExplorerPage() {
   const [dragColumn, setDragColumn] = useState<string | null>(null);
   const [dropTarget, setDropTarget] = useState<string | null>(null);
   const [translatedColumns, setTranslatedColumns] = useState<Set<string>>(new Set());
+  const [onlyRecent, setOnlyRecent] = useState(false);
   const [panel, setPanel] = useState<Panel>(null);
   const [filterOpen, setFilterOpen] = useState(false);
   const [groupBy, setGroupBy] = useState<string[]>([]);
@@ -168,7 +173,10 @@ export default function ExplorerPage() {
     isFetching,
     error: dataError,
   } = useQuery({
-    queryKey: ["data", datasetId, source, search, searchColumns, filters, sortBy, sortDir, page, pageSize],
+    queryKey: [
+      "data", datasetId, source, search, searchColumns, filters, sortBy, sortDir, page,
+      pageSize, onlyRecent,
+    ],
     queryFn: () =>
       fetchData(datasetId, {
         page,
@@ -179,9 +187,29 @@ export default function ExplorerPage() {
         search_columns: searchColumns,
         filters,
         source,
+        only_recent: onlyRecent,
       }),
     placeholderData: (prev) => prev,
   });
+
+  /* ---- what a recent batch brought ---------------------------------------------
+   *
+   * Fetched per dataset rather than per page: it is one small row, and the screen needs
+   * it to decide whether the filter is worth offering at all. Null means no batch has
+   * landed inside the window, which is not the same as one having landed empty.
+   */
+  const { data: arrivals } = useQuery({
+    queryKey: ["arrivals", datasetId],
+    queryFn: () => fetchArrivals(datasetId),
+    staleTime: 60 * 1000,
+  });
+  const hasArrivals = !!arrivals && arrivals.new + arrivals.updated > 0;
+
+  // A filter that survives the batch it was filtering to would leave somebody looking at
+  // an empty table with no way to see why.
+  useEffect(() => {
+    if (!hasArrivals && onlyRecent) setOnlyRecent(false);
+  }, [hasArrivals, onlyRecent]);
 
   const [exportError, setExportError] = useState<string | null>(null);
 
@@ -595,6 +623,25 @@ export default function ExplorerPage() {
           <IconStats />
           {t("sheet.stats")}
         </button>
+        {hasArrivals && (
+          <button
+            type="button"
+            className={`sheet-tool arrivals-tool${onlyRecent ? " active" : ""}`}
+            onClick={() => {
+              setOnlyRecent((on) => !on);
+              setPage(1);
+            }}
+            title={
+              t("arrivals.summary", { new: n(arrivals.new), updated: n(arrivals.updated) }) +
+              " · " +
+              t("arrivals.within", { count: arrivals.window_days })
+            }
+          >
+            <span className="arrival-dot new" aria-hidden="true" />
+            {onlyRecent ? t("arrivals.show_all") : t("arrivals.only_recent")}
+            <span className="sheet-tool-count">{n(arrivals.new + arrivals.updated)}</span>
+          </button>
+        )}
         {canEdit && (
           <button
             type="button"
@@ -848,6 +895,13 @@ export default function ExplorerPage() {
             <thead>
               <tr>
                 {showRowNumbers && <th className="rownum-col">#</th>}
+                {/* Appears only when it has something to say, so it costs no width on
+                    the datasets that never take a batch. */}
+                {hasArrivals && (
+                  <th className="arrival-col">
+                    <span className="sr-only">{t("arrivals.only_recent")}</span>
+                  </th>
+                )}
                 {visibleColumns.map((c) => {
                   const w = columnWidths[c];
                   const classes = [
@@ -928,6 +982,16 @@ export default function ExplorerPage() {
                 <tr key={i}>
                   {showRowNumbers && (
                     <td className="rownum-col">{(firstRowIndex + i).toLocaleString()}</td>
+                  )}
+                  {hasArrivals && (
+                    <td className="arrival-col">
+                      {page_.arrivals?.[i] && (
+                        <ArrivalMark
+                          kind={page_.arrivals[i] as Arrival}
+                          when={arrivals.latest_at}
+                        />
+                      )}
+                    </td>
                   )}
                   {visibleIndexes.map((colIdx) => {
                     const col = allColumns[colIdx];

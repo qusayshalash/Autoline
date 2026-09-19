@@ -360,7 +360,8 @@
       "dataset.key_set": "הגדיר את מפתח הרשומה של",
       "dataset.key_cleared": "ביטל את מפתח הרשומה של",
       "dataset.row_corrected": "תיקן רשומה ב",
-      "dataset.row_reverted": "ביטל תיקון ב"
+      "dataset.row_reverted": "ביטל תיקון ב",
+      "system.arrival_window_set": "שינה את משך הסימון של נתונים חדשים ב"
     },
     "time": {
       "just_now": "עכשיו",
@@ -684,7 +685,13 @@
       "row_reverted_two": "{{fields}}",
       "row_reverted_few": "{{count}} שדות: {{fields}}",
       "row_reverted_many": "{{count}} שדות: {{fields}}",
-      "row_reverted_other": "{{count}} שדות: {{fields}}"
+      "row_reverted_other": "{{count}} שדות: {{fields}}",
+      "arrival_window_one": "יום אחד",
+      "arrival_window_two": "יומיים",
+      "arrival_window_zero": "ללא חלון",
+      "arrival_window_few": "{{count}} ימים",
+      "arrival_window_many": "{{count}} ימים",
+      "arrival_window_other": "{{count}} ימים"
     },
     "fields": {
       "description": "תיאור",
@@ -969,6 +976,11 @@
     "security": {
       "empty_desc": "אין כרגע חשבונות או כתובות חסומים.",
       "unlocked": "החסימה הוסרה."
+    },
+    "arrivals": {
+      "title": "סימון נתונים חדשים",
+      "desc": "כמה ימים רשומה ממנה חדשה נשארת מסומנת בטבלה לפני שהיא נראית ככל שורה אחרת.",
+      "hint": "תג שאינו דוהה מפסיק להיקרא תוך שבוע. החלון קיים כדי שהסימון יישאר בעל משמעות, לא כדי שיימשך."
     }
   },
   "errors": {
@@ -1081,5 +1093,21 @@
     "now_holds_few": "הקובץ מכיל כעת {{count}} שורות",
     "now_holds_many": "הקובץ מכיל כעת {{count}} שורות",
     "now_holds_other": "הקובץ מכיל כעת {{count}} שורות"
+  },
+  "arrivals": {
+    "new": "חדש",
+    "updated": "עודכן",
+    "new_at": "רשומה חדשה, הגיעה ב-{{when}}",
+    "updated_at": "רשומה שכבר הייתה כאן, עודכנה ב-{{when}}",
+    "only_recent": "הגיע לאחרונה",
+    "show_all": "הצגת הכול",
+    "none": "לא הגיעה מנה לאחרונה",
+    "summary": "{{new}} חדשות · {{updated}} עודכנו",
+    "within_zero": "ללא חלון",
+    "within_one": "ביום האחרון",
+    "within_two": "ביומיים האחרונים",
+    "within_few": "ב-{{count}} הימים האחרונים",
+    "within_many": "ב-{{count}} הימים האחרונים",
+    "within_other": "ב-{{count}} הימים האחרונים"
   }
 }
