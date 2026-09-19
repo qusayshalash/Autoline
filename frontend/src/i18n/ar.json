@@ -331,7 +331,8 @@
       "update": "تعديل",
       "delete": "حذف",
       "export": "تصدير",
-      "manage": "إدارة"
+      "manage": "إدارة",
+      "edit": "تصحيح"
     },
     "actions": {
       "auth.login": "سجّل الدخول",
@@ -360,7 +361,12 @@
       "dataset.renamed": "أعاد تسمية الملف",
       "activity.purged": "قلّم سجل النشاط",
       "housekeeping.swept": "قلّم سجلات العمليات",
-      "housekeeping.retention_changed": "غيّر مدة حفظ السجلات"
+      "housekeeping.retention_changed": "غيّر مدة حفظ السجلات",
+      "dataset.appended": "أضاف دفعة إلى",
+      "dataset.key_set": "حدّد معرّف السجلّ في",
+      "dataset.key_cleared": "ألغى معرّف السجلّ في",
+      "dataset.row_corrected": "صحّح سجلًّا في",
+      "dataset.row_reverted": "تراجع عن تصحيح في"
     },
     "time": {
       "just_now": "الآن",
@@ -700,7 +706,21 @@
       "permission_count_two": "صلاحيتان",
       "permission_count_few": "{{count}} صلاحيات",
       "permission_count_many": "{{count}} صلاحية",
-      "permission_count_other": "{{count}} صلاحية"
+      "permission_count_other": "{{count}} صلاحية",
+      "rows_appended": "{{count}} صفًّا، منها {{replaced}} استبدلت سجلًّا موجودًا",
+      "key_columns": "{{columns}} — {{count}} سجلّ متمايز",
+      "row_corrected_zero": "لا حقول",
+      "row_corrected_one": "حقل {{fields}}",
+      "row_corrected_two": "حقلا {{fields}}",
+      "row_corrected_few": "{{count}} حقول: {{fields}}",
+      "row_corrected_many": "{{count}} حقلًا: {{fields}}",
+      "row_corrected_other": "{{count}} حقل: {{fields}}",
+      "row_reverted_zero": "لا حقول",
+      "row_reverted_one": "حقل {{fields}}",
+      "row_reverted_two": "حقلا {{fields}}",
+      "row_reverted_few": "{{count}} حقول: {{fields}}",
+      "row_reverted_many": "{{count}} حقلًا: {{fields}}",
+      "row_reverted_other": "{{count}} حقل: {{fields}}"
     },
     "fields": {
       "description": "الوصف",
@@ -1017,6 +1037,25 @@
     "session_expired": "انتهت صلاحية الجلسة. سجّل الدخول من جديد.",
     "too_many_attempts": "محاولات كثيرة. أعد المحاولة بعد قليل.",
     "user_not_found": "لم يُعثر على المستخدم.",
-    "username_taken": "اسم المستخدم مستخدَم بالفعل."
+    "username_taken": "اسم المستخدم مستخدَم بالفعل.",
+    "dataset_not_ready": "لم ينتهِ استيراد هذا الملف بعد",
+    "dataset_has_no_columns": "لا أعمدة في هذا الملف بعد",
+    "dataset_has_no_key": "حدّد الأعمدة التي تميّز السجلّ قبل تصحيحه",
+    "row_not_found": "لا سجلّ بهذا المعرّف",
+    "row_not_unique": "أكثر من سجلّ يحمل هذا المعرّف",
+    "correction_not_found": "لا تصحيح هنا للتراجع عنه",
+    "cannot_edit_key_column": "هذا العمود يميّز السجلّ، فلا يمكن تصحيحه",
+    "key_wrong_length": "عدد قيم المعرّف لا يطابق أعمدته",
+    "unknown_column": "لا عمود بهذا الاسم",
+    "key_empty": "اختر عمودًا واحدًا على الأقل",
+    "key_repeated": "العمود نفسه مذكور مرّتين",
+    "key_unknown_column": "لا عمود بهذا الاسم في هذا الملف",
+    "key_blank": "بعض الصفوف لا قيمة لها في أعمدة المعرّف",
+    "key_not_unique": "هذه الأعمدة لا تميّز السجلّ — صفوف تشترك في القيمة نفسها",
+    "append_columns_differ": "أعمدة الملف لا تطابق أعمدة هذا الملف",
+    "append_columns_repeated": "الملف يكرّر اسم عمود",
+    "append_width_differs": "عدد أعمدة الملف مختلف",
+    "append_unreadable": "تعذّرت قراءة الملف",
+    "key_max_columns": "المعرّف يستعمل أربعة أعمدة على الأكثر"
   }
 }

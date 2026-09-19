@@ -40,6 +40,7 @@ def _init_schema(conn: duckdb.DuckDBPyConnection) -> None:
             delimiter VARCHAR,
             has_header BOOLEAN,
             columns_json VARCHAR,
+            key_columns_json VARCHAR,     -- which columns identify a record; see row_identity.py
             row_count_raw BIGINT,
             row_count_cleaned BIGINT,
             raw_file_bytes BIGINT,
@@ -183,10 +184,18 @@ def _migrate_activity_log(conn: duckdb.DuckDBPyConnection) -> None:
 
 
 def _migrate_datasets(conn: duckdb.DuckDBPyConnection) -> None:
-    """Adds the import-quality report to an existing datasets table, in place."""
+    """Adds columns to an existing datasets table, in place.
+
+    `key_columns_json` names the columns that identify a record. NULL is the honest
+    state for every dataset imported before the column existed: nothing has been said
+    about what makes a row that row, so appending can only add and a cell cannot be
+    corrected. Both features tell the reader that, rather than guessing a key.
+    """
     existing = {r[0] for r in conn.execute("DESCRIBE datasets").fetchall()}
-    if "quality_json" not in existing:
-        conn.execute("ALTER TABLE datasets ADD COLUMN quality_json VARCHAR")
+    additions = {"quality_json": "VARCHAR", "key_columns_json": "VARCHAR"}
+    for column, sql_type in additions.items():
+        if column not in existing:
+            conn.execute(f"ALTER TABLE datasets ADD COLUMN {column} {sql_type}")
 
 
 def _migrate_users(conn: duckdb.DuckDBPyConnection) -> None:
@@ -264,7 +273,7 @@ def create_dataset(dataset_id: str, original_filename: str) -> None:
 def update_dataset(dataset_id: str, **fields: Any) -> None:
     if not fields:
         return
-    for json_field in ("columns_json", "quality_json"):
+    for json_field in ("columns_json", "quality_json", "key_columns_json"):
         if json_field in fields and not isinstance(fields[json_field], (str, type(None))):
             fields[json_field] = json.dumps(fields[json_field], ensure_ascii=False)
     fields["updated_at"] = _now()

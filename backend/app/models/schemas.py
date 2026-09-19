@@ -502,6 +502,63 @@ class DatasetRenameRequest(Incoming):
     name: str = Field(min_length=1, max_length=255)
 
 
+# ---- record identity, corrections and later batches ----
+
+class KeyColumnsRequest(Incoming):
+    """Which columns identify a record. See app/services/row_identity.py."""
+
+    columns: list[str] = Field(min_length=1, max_length=4)
+
+
+class KeyCheck(BaseModel):
+    """What the counts say about a proposed key.
+
+    The numbers are returned on success as well as on failure: "4,103,522 records, all
+    distinct" is what makes an administrator confident, and on failure the duplicate
+    count is what tells them whether to add a column or to dedupe first.
+    """
+
+    columns: list[str]
+    total_rows: int
+    distinct_keys: int
+    duplicate_rows: int
+    blank_keys: int
+    unique: bool
+
+
+class RowEdit(Incoming):
+    """One record, addressed by its key, with the cells to change.
+
+    `key` is positional against the dataset's configured key columns - the same order
+    the administrator set them in.
+    """
+
+    key: list[str] = Field(min_length=1, max_length=4)
+    changes: dict[str, str] = Field(min_length=1)
+
+
+class CorrectionOut(BaseModel):
+    row_key: list[str]
+    column: str
+    old_value: Optional[str] = None
+    new_value: Optional[str] = None
+    actor: Optional[str] = None
+    edited_at: Optional[str] = None
+
+
+class RowEditResult(BaseModel):
+    columns: list[str]
+    row: list[Optional[str]]
+    corrections: list[CorrectionOut] = []
+
+
+class AppendResult(BaseModel):
+    rows_added: int
+    rows_replaced: int
+    row_count_raw: int
+    cleaned_rebuilt: bool
+
+
 class DatasetOut(BaseModel):
     id: str
     original_filename: str
@@ -520,6 +577,13 @@ class DatasetOut(BaseModel):
     # summary of the import-quality report, so a list can flag a bad file without
     # fetching the whole report for every row
     quality_verdict: Optional[str] = None
+    # Which columns identify a record, empty when nobody has said. Appending can only
+    # add without it, and a cell cannot be corrected - the interface reads this to say
+    # so rather than offering a control that would fail.
+    # (The number of corrections is deliberately not here: the datasets list polls every
+    # few seconds, and counting would mean opening every dataset file on every poll.
+    # GET /{id}/corrections carries it.)
+    key_columns: list[str] = []
 
 
 class JobOut(BaseModel):

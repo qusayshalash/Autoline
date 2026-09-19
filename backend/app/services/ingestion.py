@@ -113,7 +113,7 @@ def detect_encoding(path: Path) -> str:
     return match.encoding
 
 
-def _without_bom(row: list[str]) -> list[str]:
+def without_bom(row: list[str]) -> list[str]:
     """The first record, with any leading byte-order mark taken off its first field.
 
     Belt as well as braces. detect_encoding names a codec that eats the mark, but the
@@ -155,7 +155,7 @@ def read_preview(
 ) -> tuple[list[str], list[list[str]]]:
     with open(path, encoding=encoding, errors="replace", newline="") as f:
         reader = csv.reader(f, delimiter=delimiter)
-        first = _without_bom(next(reader, []))
+        first = without_bom(next(reader, []))
         if has_header:
             columns = first
             rows: list[list[str]] = []
@@ -190,7 +190,7 @@ def normalize_to_utf8(
         writer = csv.writer(fout, delimiter=delimiter, quoting=csv.QUOTE_MINIMAL)
         for row in reader:
             if lines_done == 0:
-                row = _without_bom(row)
+                row = without_bom(row)
             writer.writerow(row)
             lines_done += 1
             if on_progress and lines_done % report_every == 0:
@@ -262,6 +262,24 @@ def run_import_job(dataset_id: str, job_id: str, encoding: str, delimiter: str, 
         catalog.update_dataset(dataset_id, status="importing")
 
         columns, row_count = import_csv_to_duckdb(dataset_id, dst, delimiter, has_header)
+
+        # The import rebuilds raw_data from the original upload alone, so anything added
+        # after that upload has just been undone: later batches, and every correction
+        # anyone made. Both are kept outside the table precisely so they can be put back
+        # here - the files on disk plus the corrections table remain the whole truth
+        # about this dataset, and re-importing must not quietly be a way of losing half
+        # of it. Imported late to keep the module import graph acyclic: appending reads
+        # this module.
+        from app.services import appending, corrections
+
+        dataset_row = catalog.get_dataset(dataset_id) or {}
+        if appending.batch_files(dataset_id):
+            catalog.update_job(job_id, progress="appending")
+            appending.replay_batches(dataset_id, dataset_row)
+        corrections.replay(dataset_id, dataset_row)
+        row_count = datasets.cursor(dataset_id).execute(
+            "SELECT COUNT(*) FROM raw_data"
+        ).fetchone()[0]
 
         raw_bytes = src.stat().st_size
         catalog.update_dataset(

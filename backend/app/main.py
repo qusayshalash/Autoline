@@ -19,6 +19,7 @@ from app.routers import (
     export,
     jobs,
     roles,
+    rows,
     statistics,
     users,
 )
@@ -132,6 +133,7 @@ app.include_router(datasets.router)
 app.include_router(jobs.router)
 app.include_router(cleaning.router)
 app.include_router(data.router)
+app.include_router(rows.router)
 app.include_router(statistics.router)
 app.include_router(export.router)
 

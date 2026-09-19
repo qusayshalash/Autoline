@@ -21,8 +21,16 @@ LOCALES = BACKEND.parent / "frontend" / "src" / "i18n"
 LANGUAGES = ("ar", "en", "he")
 
 
+# Exceptions raised in the service layer that carry a code of their own, which a router
+# then hands to ApiError as `exc.code`. The code never appears as a literal beside
+# ApiError, so scanning only for that reads them as codes nobody raises - and the reverse
+# check would then delete perfectly live translations. Their first argument is the code
+# and their second the English sentence, exactly like ApiError's second and third.
+CODE_CARRYING_EXCEPTIONS = ("KeyProblem", "AppendProblem", "CorrectionProblem")
+
+
 def raised_codes() -> dict[str, str]:
-    """Every code passed to ApiError, mapped to the English sentence beside it."""
+    """Every code the API can put on the wire, mapped to the English sentence beside it."""
     found: dict[str, str] = {}
     for path in (BACKEND / "app").rglob("*.py"):
         tree = ast.parse(path.read_text(encoding="utf-8"))
@@ -31,11 +39,17 @@ def raised_codes() -> dict[str, str]:
                 continue
             func = node.func
             name = func.attr if isinstance(func, ast.Attribute) else getattr(func, "id", "")
-            if name != "ApiError" or len(node.args) < 3:
+            if name == "ApiError" and len(node.args) >= 3:
+                code, detail = node.args[1], node.args[2]
+            elif name in CODE_CARRYING_EXCEPTIONS and len(node.args) >= 2:
+                code, detail = node.args[0], node.args[1]
+            else:
                 continue
-            code, detail = node.args[1], node.args[2]
             if isinstance(code, ast.Constant) and isinstance(detail, ast.Constant):
                 found[code.value] = detail.value
+            elif isinstance(code, ast.Constant) and isinstance(detail, ast.JoinedStr):
+                # an f-string sentence: the code is what the interface reads anyway
+                found[code.value] = ""
     return found
 
 
@@ -49,6 +63,10 @@ def test_the_scan_finds_the_error_codes():
     assert len(codes) >= 20, codes
     for expected in ("dataset_not_found", "forbidden", "username_taken", "too_many_attempts"):
         assert expected in codes, f"the scan missed {expected}"
+    # one from each of the exception classes that carry their own code, so the second
+    # half of the scan cannot quietly stop finding anything
+    for expected in ("key_not_unique", "append_columns_differ", "row_not_unique"):
+        assert expected in codes, f"the scan missed {expected}, raised by a service"
 
 
 @pytest.mark.parametrize("language", LANGUAGES)

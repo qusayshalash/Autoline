@@ -1,7 +1,7 @@
 import csv
 import json
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, Form, HTTPException, UploadFile
 from fastapi import File as FastAPIFile
 
 from app.errors import ApiError
@@ -13,14 +13,17 @@ from app.db import catalog
 from app.db.connection import datasets as dataset_connections
 from app.jobs import submit
 from app.models.schemas import (
+    AppendResult,
     DatasetOut,
     DatasetRenameRequest,
     ImportConfig,
     JobOut,
+    KeyCheck,
+    KeyColumnsRequest,
     QualityReport,
     UploadResponse,
 )
-from app.services import ingestion, quality
+from app.services import appending, corrections, ingestion, quality, row_identity
 
 router = APIRouter(prefix="/api/datasets", tags=["datasets"])
 
@@ -43,6 +46,7 @@ def _dataset_out(row: dict) -> DatasetOut:
     columns = json.loads(row["columns_json"]) if row.get("columns_json") else []
     return DatasetOut(
         quality_verdict=_quality_verdict(row),
+        key_columns=row_identity.key_columns(row),
         id=row["id"],
         original_filename=row["original_filename"],
         status=row["status"],
@@ -211,6 +215,181 @@ def start_quality(
     job_id = catalog.create_job(dataset_id, "quality")
     submit(quality.run_quality_job, dataset_id, job_id)
     return JobOut(id=job_id, dataset_id=dataset_id, kind="quality", status="pending", progress="")
+
+
+# ---- which columns identify a record -------------------------------------------------
+
+def _ready_dataset(dataset_id: str) -> dict:
+    row = catalog.get_dataset(dataset_id)
+    if row is None:
+        raise ApiError(404, "dataset_not_found", "Dataset not found")
+    if row.get("status") != "ready":
+        raise ApiError(409, "dataset_not_ready", "This dataset has not finished importing")
+    return row
+
+
+def _key_problem(exc: row_identity.KeyProblem) -> ApiError:
+    """A refused key is a 422 carrying its numbers, not a bare 400.
+
+    The interface shows the duplicate count in its own language, and the only way it can
+    is if the counts travel with the code.
+    """
+    return ApiError(422, exc.code, str(exc))
+
+
+@router.get("/{dataset_id}/key/check", response_model=KeyCheck)
+def check_key(
+    dataset_id: str,
+    columns: str,
+    user: dict = Depends(require_permission("datasets.edit")),
+) -> KeyCheck:
+    """Counts what these columns would identify, without setting anything.
+
+    A dry run on purpose: on a four-million-row table an administrator should be able
+    to try `plate`, see that 12 rows share one, and try `plate, year` instead - without
+    each attempt changing the dataset.
+    """
+    _ready_dataset(dataset_id)
+    wanted = [c for c in columns.split(",") if c.strip()]
+    try:
+        return KeyCheck(**row_identity.validate(dataset_id, [c.strip() for c in wanted]))
+    except row_identity.KeyProblem as exc:
+        raise _key_problem(exc) from exc
+
+
+@router.put("/{dataset_id}/key", response_model=DatasetOut)
+def set_key(
+    dataset_id: str,
+    body: KeyColumnsRequest,
+    user: dict = Depends(require_permission("datasets.edit")),
+) -> DatasetOut:
+    row = _ready_dataset(dataset_id)
+    try:
+        result = row_identity.require_unique(dataset_id, body.columns)
+    except row_identity.KeyProblem as exc:
+        raise _key_problem(exc) from exc
+
+    catalog.update_dataset(dataset_id, key_columns_json=body.columns)
+    admin_db.log_activity(
+        user,
+        "dataset.key_set",
+        "dataset",
+        dataset_id,
+        row.get("original_filename") or "",
+        f"key: {', '.join(body.columns)}",
+        detail_code="key_columns",
+        columns=", ".join(body.columns),
+        count=result["distinct_keys"],
+    )
+    return _dataset_out(catalog.get_dataset(dataset_id))
+
+
+@router.delete("/{dataset_id}/key", response_model=DatasetOut)
+def clear_key(
+    dataset_id: str, user: dict = Depends(require_permission("datasets.edit"))
+) -> DatasetOut:
+    """Unsets the key. Existing corrections are kept, not deleted.
+
+    They are addressed by key values, so they simply stop being replayed until a key is
+    set again - and throwing away an audit trail because somebody changed their mind
+    about a column would be the wrong way round.
+    """
+    row = _ready_dataset(dataset_id)
+    catalog.update_dataset(dataset_id, key_columns_json=None)
+    admin_db.log_activity(
+        user,
+        "dataset.key_cleared",
+        "dataset",
+        dataset_id,
+        row.get("original_filename") or "",
+    )
+    return _dataset_out(catalog.get_dataset(dataset_id))
+
+
+# ---- a later batch of the same data ----------------------------------------------------
+
+@router.post("/{dataset_id}/append", response_model=AppendResult)
+async def append_batch(
+    dataset_id: str,
+    file: UploadFile = FastAPIFile(...),
+    encoding: str | None = Form(default=None),
+    delimiter: str | None = Form(default=None),
+    user: dict = Depends(require_permission("datasets.upload")),
+) -> AppendResult:
+    """Adds a later file of the same shape to a dataset that already exists.
+
+    The dataset's own encoding and delimiter are the default, not a fresh detection.
+    That is the premise of appending: this is a later instalment of the same data, so
+    the first file already answered the question. Detection on a small batch is also
+    actively dangerous - six Hebrew bytes in a 36-byte file are enough for
+    charset-normalizer to answer "johab", a Korean codepage, whose multi-byte sequences
+    then swallow the delimiter and merge two columns into one. The caller can still say
+    otherwise for a batch that genuinely differs.
+
+    Synchronous rather than a background job, deliberately: the answer the uploader
+    needs is whether the file was accepted at all, and the column check decides that in
+    the first moments. A batch big enough to need a job is a batch that should be its
+    own dataset.
+    """
+    row = _ready_dataset(dataset_id)
+    expected = json.loads(row["columns_json"]) if row.get("columns_json") else []
+    if not expected:
+        raise ApiError(409, "dataset_has_no_columns", "This dataset has no columns yet")
+
+    suffix = "".join(
+        ch for ch in ("." + (file.filename or "csv").rsplit(".", 1)[-1]) if ch.isalnum() or ch == "."
+    ) or ".csv"
+    incoming = ingestion.dataset_upload_dir(dataset_id) / f"incoming{suffix}"
+    try:
+        with open(incoming, "wb") as out:
+            while chunk := await file.read(settings.upload_chunk_bytes):
+                out.write(chunk)
+
+        encoding = encoding or row.get("encoding") or ingestion.detect_encoding(incoming)
+        delimiter = delimiter or row.get("delimiter") or ingestion.detect_delimiter(
+            incoming, encoding
+        )
+        stored = appending.next_batch_path(dataset_id)
+        try:
+            added = appending.stage(
+                incoming, stored, encoding, delimiter, True, expected
+            )
+        except Exception:
+            stored.unlink(missing_ok=True)  # never leave a half-written batch to replay
+            raise
+    except appending.AppendProblem as exc:
+        raise ApiError(422, exc.code, str(exc)) from exc
+    except _BAD_IMPORT_CONFIG_ERRORS as exc:
+        raise ApiError(400, "append_unreadable", f"Could not read the file: {exc}") from exc
+    finally:
+        incoming.unlink(missing_ok=True)
+
+    outcome = appending.apply_batch(dataset_id, stored, row)
+    corrections.replay(dataset_id, row)
+    rebuilt = appending.rebuild_cleaned(dataset_id) is not None
+
+    total = dataset_connections.cursor(dataset_id).execute(
+        "SELECT COUNT(*) FROM raw_data"
+    ).fetchone()[0]
+    catalog.update_dataset(dataset_id, row_count_raw=total)
+
+    admin_db.log_activity(
+        user,
+        "dataset.appended",
+        "dataset",
+        dataset_id,
+        row.get("original_filename") or "",
+        f"+{added} rows, {outcome['replaced']} replaced",
+        detail_code="rows_appended",
+        count=added,
+        replaced=outcome["replaced"],
+    )
+    return AppendResult(
+        rows_added=added - outcome["replaced"],
+        rows_replaced=outcome["replaced"],
+        row_count_raw=total,
+        cleaned_rebuilt=rebuilt,
+    )
 
 
 @router.patch("/{dataset_id}", response_model=DatasetOut)

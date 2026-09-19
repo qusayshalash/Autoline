@@ -323,7 +323,8 @@
       "update": "Edit",
       "delete": "Delete",
       "export": "Export",
-      "manage": "Manage"
+      "manage": "Manage",
+      "edit": "Correct"
     },
     "actions": {
       "auth.login": "signed in",
@@ -352,7 +353,12 @@
       "dataset.renamed": "renamed",
       "activity.purged": "trimmed the activity log",
       "housekeeping.swept": "trimmed the operation records",
-      "housekeeping.retention_changed": "changed how long records are kept"
+      "housekeeping.retention_changed": "changed how long records are kept",
+      "dataset.appended": "appended a batch to",
+      "dataset.key_set": "set the record key of",
+      "dataset.key_cleared": "cleared the record key of",
+      "dataset.row_corrected": "corrected a record in",
+      "dataset.row_reverted": "reverted a correction in"
     },
     "time": {
       "just_now": "just now",
@@ -652,7 +658,21 @@
       "was_named": "was: {{name}}",
       "with_role": "role: {{role}}",
       "permission_count_one": "1 permission",
-      "permission_count_other": "{{count}} permissions"
+      "permission_count_other": "{{count}} permissions",
+      "rows_appended": "{{count}} rows, {{replaced}} replacing an existing record",
+      "key_columns": "{{columns}} - {{count}} distinct records",
+      "row_corrected_zero": "no fields",
+      "row_corrected_one": "{{fields}}",
+      "row_corrected_two": "{{fields}}",
+      "row_corrected_few": "{{count}} fields: {{fields}}",
+      "row_corrected_many": "{{count}} fields: {{fields}}",
+      "row_corrected_other": "{{count}} fields: {{fields}}",
+      "row_reverted_zero": "no fields",
+      "row_reverted_one": "{{fields}}",
+      "row_reverted_two": "{{fields}}",
+      "row_reverted_few": "{{count}} fields: {{fields}}",
+      "row_reverted_many": "{{count}} fields: {{fields}}",
+      "row_reverted_other": "{{count}} fields: {{fields}}"
     },
     "fields": {
       "description": "description",
@@ -965,6 +985,25 @@
     "session_expired": "Your session has expired. Sign in again.",
     "too_many_attempts": "Too many attempts. Try again shortly.",
     "user_not_found": "That account could not be found.",
-    "username_taken": "That username is already taken."
+    "username_taken": "That username is already taken.",
+    "dataset_not_ready": "This dataset has not finished importing",
+    "dataset_has_no_columns": "This dataset has no columns yet",
+    "dataset_has_no_key": "Say which columns identify a record before correcting one",
+    "row_not_found": "No record with this key",
+    "row_not_unique": "More than one record has this key",
+    "correction_not_found": "Nothing was corrected here",
+    "cannot_edit_key_column": "That column identifies the record and cannot be corrected",
+    "key_wrong_length": "The key does not have the right number of values",
+    "unknown_column": "No such column",
+    "key_empty": "Choose at least one column",
+    "key_repeated": "The same column is listed twice",
+    "key_unknown_column": "No such column in this dataset",
+    "key_blank": "Some rows have no value in the key columns",
+    "key_not_unique": "These columns do not identify a record - rows share the same value",
+    "append_columns_differ": "The file's columns do not match this dataset",
+    "append_columns_repeated": "The file repeats a column name",
+    "append_width_differs": "The file has a different number of columns",
+    "append_unreadable": "Could not read the file",
+    "key_max_columns": "A key may use at most four columns"
   }
 }

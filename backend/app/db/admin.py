@@ -24,6 +24,12 @@ PERMISSIONS: list[tuple[str, str, str]] = [
     ("datasets.view", "datasets", "view"),
     ("datasets.upload", "datasets", "create"),
     ("datasets.clean", "datasets", "update"),
+    # Correcting a record, and saying which columns identify one. The action is "edit"
+    # rather than "update" because the permission grid is a module x action matrix and
+    # datasets:update is already datasets.clean - a second entry there would render one
+    # of the two checkboxes unreachable. Seeded to super_admin and admin only: a
+    # correction overwrites what the source file said, and the file is the record.
+    ("datasets.edit", "datasets", "edit"),
     ("datasets.delete", "datasets", "delete"),
     ("datasets.export", "datasets", "export"),
     ("users.view", "users", "view"),
@@ -122,6 +128,27 @@ def _split_system_view(conn) -> None:
     )
 
 
+def _grant_editing_to_deleters(conn) -> None:
+    """Gives datasets.edit to every role that can already delete a dataset.
+
+    Seeding alone reaches super_admin and, on a fresh install, admin - but a built-in
+    role that already exists is never touched again, so on every installation already
+    running the Admin role would get nothing and the feature would be invisible to the
+    people it is for.
+
+    Deleting a dataset destroys every row in it; correcting a cell changes one. Whoever
+    was trusted with the first is trusted with the second, and nobody who was not
+    trusted with either gains anything. Runs on every startup and does nothing after
+    the first.
+    """
+    conn.execute(
+        "INSERT INTO role_permissions (role_slug, permission_key)"
+        " SELECT role_slug, 'datasets.edit' FROM role_permissions"
+        " WHERE permission_key = 'datasets.delete'"
+        " ON CONFLICT DO NOTHING"
+    )
+
+
 def seed() -> None:
     """Writes the permission catalogue and the built-in roles.
 
@@ -156,6 +183,7 @@ def seed() -> None:
                     )
 
         _split_system_view(conn)
+        _grant_editing_to_deleters(conn)
 
         # super admin always holds every permission, including ones added by a later
         # version of the app

@@ -116,6 +116,24 @@ def test_arabic_spells_small_counts_out_rather_than_printing_them():
             )
 
 
+@pytest.mark.parametrize("language", ("ar", "en", "he"))
+def test_no_key_ends_in_a_plural_suffix_by_accident(language):
+    """A name that happens to end in one of these is read as a plural form of a key
+    that does not exist.
+
+    "errors.key_too_many" was such a name: the scan saw base "errors.key_too" with a
+    "many" form and demanded the other five, and i18next would have looked for it under
+    a key nothing ever writes. Anything genuinely plural has siblings; a lone form is
+    the collision.
+    """
+    forms = forms_by_base(language)
+    lonely = sorted(base for base, found in forms.items() if len(found) == 1)
+    assert not lonely, (
+        f"{language}.json: {', '.join(lonely)} ends in a plural suffix but has no other "
+        "form - rename it, or give it the rest"
+    )
+
+
 def test_the_forms_that_show_a_figure_keep_their_placeholder():
     """few/many/other print the number, so losing {{count}} there turns "11 files" into
     "files"."""

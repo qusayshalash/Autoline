@@ -325,7 +325,8 @@
       "update": "עריכה",
       "delete": "מחיקה",
       "export": "ייצוא",
-      "manage": "ניהול"
+      "manage": "ניהול",
+      "edit": "תיקון"
     },
     "actions": {
       "auth.login": "התחבר",
@@ -354,7 +355,12 @@
       "dataset.renamed": "שינה שם",
       "activity.purged": "גזם את יומן הפעילות",
       "housekeeping.swept": "גזם את רשומות הפעולות",
-      "housekeeping.retention_changed": "שינה את זמן שמירת הרשומות"
+      "housekeeping.retention_changed": "שינה את זמן שמירת הרשומות",
+      "dataset.appended": "הוסיף מנה אל",
+      "dataset.key_set": "הגדיר את מפתח הרשומה של",
+      "dataset.key_cleared": "ביטל את מפתח הרשומה של",
+      "dataset.row_corrected": "תיקן רשומה ב",
+      "dataset.row_reverted": "ביטל תיקון ב"
     },
     "time": {
       "just_now": "עכשיו",
@@ -664,7 +670,21 @@
       "with_role": "תפקיד: {{role}}",
       "permission_count_one": "הרשאה אחת",
       "permission_count_two": "שתי הרשאות",
-      "permission_count_other": "{{count}} הרשאות"
+      "permission_count_other": "{{count}} הרשאות",
+      "rows_appended": "{{count}} שורות, {{replaced}} מחליפות רשומה קיימת",
+      "key_columns": "{{columns}} - {{count}} רשומות ייחודיות",
+      "row_corrected_zero": "אין שדות",
+      "row_corrected_one": "{{fields}}",
+      "row_corrected_two": "{{fields}}",
+      "row_corrected_few": "{{count}} שדות: {{fields}}",
+      "row_corrected_many": "{{count}} שדות: {{fields}}",
+      "row_corrected_other": "{{count}} שדות: {{fields}}",
+      "row_reverted_zero": "אין שדות",
+      "row_reverted_one": "{{fields}}",
+      "row_reverted_two": "{{fields}}",
+      "row_reverted_few": "{{count}} שדות: {{fields}}",
+      "row_reverted_many": "{{count}} שדות: {{fields}}",
+      "row_reverted_other": "{{count}} שדות: {{fields}}"
     },
     "fields": {
       "description": "תיאור",
@@ -978,6 +998,25 @@
     "session_expired": "תוקף ההתחברות פג. התחבר מחדש.",
     "too_many_attempts": "יותר מדי ניסיונות. נסה שוב בעוד מעט.",
     "user_not_found": "המשתמש לא נמצא.",
-    "username_taken": "שם המשתמש כבר תפוס."
+    "username_taken": "שם המשתמש כבר תפוס.",
+    "dataset_not_ready": "הייבוא של קובץ זה טרם הסתיים",
+    "dataset_has_no_columns": "לקובץ זה אין עדיין עמודות",
+    "dataset_has_no_key": "הגדירו אילו עמודות מזהות רשומה לפני תיקון",
+    "row_not_found": "אין רשומה עם מפתח זה",
+    "row_not_unique": "יותר מרשומה אחת נושאת מפתח זה",
+    "correction_not_found": "לא בוצע כאן תיקון",
+    "cannot_edit_key_column": "עמודה זו מזהה את הרשומה ולא ניתן לתקנה",
+    "key_wrong_length": "מספר ערכי המפתח אינו תואם",
+    "unknown_column": "אין עמודה בשם זה",
+    "key_empty": "בחרו לפחות עמודה אחת",
+    "key_repeated": "אותה עמודה מופיעה פעמיים",
+    "key_unknown_column": "אין עמודה כזו בקובץ זה",
+    "key_blank": "לחלק מהשורות אין ערך בעמודות המפתח",
+    "key_not_unique": "עמודות אלו אינן מזהות רשומה - שורות חולקות אותו ערך",
+    "append_columns_differ": "עמודות הקובץ אינן תואמות לקובץ זה",
+    "append_columns_repeated": "הקובץ חוזר על שם עמודה",
+    "append_width_differs": "לקובץ מספר עמודות שונה",
+    "append_unreadable": "לא ניתן לקרוא את הקובץ",
+    "key_max_columns": "מפתח יכול להשתמש בארבע עמודות לכל היותר"
   }
 }
