@@ -5,11 +5,12 @@ import { useTranslation } from "react-i18next";
 import { useConfirm } from "../components/ConfirmProvider";
 import { useNavigate } from "react-router-dom";
 
-import { apiErrorMessage, deleteDataset, listDatasets, renameDataset, uploadDataset } from "../api/client";
+import { apiErrorMessage, deleteDataset, listDatasets, renameDataset, uploadDataset, type Dataset } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
 import EmptyState from "../components/EmptyState";
 import ErrorBanner from "../components/ErrorBanner";
 import QualityReportView from "../components/QualityReportView";
+import AppendBatchDialog from "../components/AppendBatchDialog";
 import UploadDropzone from "../components/UploadDropzone";
 
 function formatBytes(bytes: number | null | undefined): string {
@@ -44,6 +45,7 @@ export default function DatasetsPage() {
   const [renameValue, setRenameValue] = useState("");
   // which dataset's import report is expanded, if any
   const [quality, setQualityFor] = useState<string | null>(null);
+  const [appendTo, setAppendTo] = useState<Dataset | null>(null);
 
   const { data: datasets, isLoading } = useQuery({
     queryKey: ["datasets"],
@@ -206,6 +208,11 @@ export default function DatasetsPage() {
                     <button className="btn secondary" onClick={() => navigate(`/datasets/${d.id}/explore`)}>
                       {t("datasets.open")}
                     </button>
+                    {canUpload && (
+                      <button className="btn secondary" onClick={() => setAppendTo(d)}>
+                        {t("append.action")}
+                      </button>
+                    )}
                   </>
                 ) : d.status === "preview" && canUpload ? (
                   <button className="btn secondary" onClick={() => navigate(`/datasets/${d.id}/import`)}>
@@ -242,6 +249,10 @@ export default function DatasetsPage() {
             </div>
           )}
         </div>
+      )}
+
+      {appendTo && (
+        <AppendBatchDialog dataset={appendTo} onClose={() => setAppendTo(null)} />
       )}
     </div>
   );

@@ -2904,3 +2904,128 @@ body.is-resizing-column {
 }
 
 .search-scope-popover label:hover { background: color-mix(in srgb, var(--primary) 8%, transparent); }
+
+/* --- correcting a cell in place ---
+   The affordance has to be quiet: most cells are never edited, and a grid covered in
+   pencils reads as a form rather than as data. So an editable cell looks like the text
+   it already was, and only says so on hover and on focus. */
+.cell-edit-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  max-width: 100%;
+}
+
+.cell-edit {
+  appearance: none;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 0 0.15rem;
+  margin: 0 -0.15rem;
+  font: inherit;
+  color: inherit;
+  text-align: inherit;
+  cursor: text;
+  max-width: 100%;
+  /* A button resets white-space to normal, so a two-word value wraps onto a second
+     line that the single-line row then clips - which reads as a truncated value rather
+     than as a layout bug. The cell already clips; this only has to not re-wrap. */
+  white-space: inherit;
+}
+
+.cell-edit:hover {
+  border-color: var(--border-strong);
+}
+
+.cell-edit:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+
+/* A corrected value is not the file's value, and anyone reading the table is entitled
+   to know that at a glance. The underline carries it without costing a column. */
+.cell-corrected {
+  text-decoration: underline dotted var(--warning);
+  text-underline-offset: 3px;
+}
+
+.cell-revert {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--text-muted);
+  display: inline-flex;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+
+.cell-revert svg {
+  width: 13px;
+  height: 13px;
+}
+
+td:hover > .cell-edit-wrap > .cell-revert,
+.cell-revert:focus-visible {
+  opacity: 1;
+}
+
+.cell-revert:hover {
+  color: var(--warning);
+}
+
+.cell-editor {
+  width: 100%;
+  min-width: 0;
+  font: inherit;
+  padding: 0.1rem 0.25rem;
+  border: 1px solid var(--primary);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+/* --- the record key dialog's verdict ---
+   Shown while the choice is still being made, because the count is the whole point:
+   "12 rows share a value" is what tells somebody to add a column or dedupe first. */
+.key-verdict {
+  margin-top: 0.75rem;
+  min-height: 1.4rem;
+  font-size: 0.85rem;
+}
+
+.key-verdict-good {
+  color: var(--success, #16a34a);
+  font-weight: 600;
+}
+
+.key-verdict-bad {
+  color: var(--warning);
+  font-weight: 600;
+}
+
+/* --- appending a batch --- */
+.append-note {
+  color: var(--warning);
+  font-size: 0.85rem;
+}
+
+.append-result {
+  margin: 0.75rem 0;
+  padding: 0.75rem;
+  border-radius: 8px;
+  background: var(--primary-soft);
+}
+
+.append-result p {
+  margin: 0 0 0.25rem;
+}
+
+/* A chip sizes itself against its container, and the edit button is a shrink-to-fit
+   container - so inside one the chip resolves max-width against a box that is itself
+   waiting for the chip, and settles a few characters short. The cell already clips. */
+.cell-edit .chip {
+  max-width: none;
+}

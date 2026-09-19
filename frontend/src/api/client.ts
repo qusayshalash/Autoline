@@ -108,6 +108,14 @@ export interface Dataset {
   updated_at?: string | null;
   /** summary of the import-quality report, present once one has been produced */
   quality_verdict?: QualityVerdict | null;
+  /**
+   * Which columns identify a record, empty until an administrator says.
+   *
+   * Nothing in an imported table identifies a row on its own, so until this is set a
+   * later batch can only be added to the end and a cell cannot be corrected. The
+   * screens read it to say so, rather than offering a control that would fail.
+   */
+  key_columns: string[];
 }
 
 export type QualityVerdict = "clean" | "warning" | "problem";
@@ -418,6 +426,122 @@ export async function getStats(datasetId: string): Promise<StatsOut> {
 
 export async function applyCleaning(datasetId: string, config: CleaningConfig): Promise<CleaningResult> {
   const { data } = await api.post<CleaningResult>(`/datasets/${datasetId}/clean`, config);
+  return data;
+}
+
+/* --- which columns identify a record ------------------------------------------------ */
+
+export interface KeyCheck {
+  columns: string[];
+  total_rows: number;
+  distinct_keys: number;
+  duplicate_rows: number;
+  blank_keys: number;
+  unique: boolean;
+}
+
+/** Counts what these columns would identify, without setting anything. */
+export async function checkDatasetKey(datasetId: string, columns: string[]): Promise<KeyCheck> {
+  const { data } = await api.get<KeyCheck>(`/datasets/${datasetId}/key/check`, {
+    params: { columns: columns.join(",") },
+  });
+  return data;
+}
+
+export async function setDatasetKey(datasetId: string, columns: string[]): Promise<Dataset> {
+  const { data } = await api.put<Dataset>(`/datasets/${datasetId}/key`, { columns });
+  return data;
+}
+
+export async function clearDatasetKey(datasetId: string): Promise<Dataset> {
+  const { data } = await api.delete<Dataset>(`/datasets/${datasetId}/key`);
+  return data;
+}
+
+/* --- a later batch of the same data -------------------------------------------------- */
+
+export interface AppendResult {
+  rows_added: number;
+  rows_replaced: number;
+  row_count_raw: number;
+  cleaned_rebuilt: boolean;
+}
+
+/**
+ * Adds a later file of the same shape to a dataset that already exists.
+ *
+ * Encoding and delimiter are left to the server, which uses the dataset's own rather
+ * than detecting them again - a small batch does not carry enough evidence to detect
+ * anything reliably. They are passed only when the caller knows this batch differs.
+ */
+export async function appendBatch(
+  datasetId: string,
+  file: File,
+  options?: { encoding?: string; delimiter?: string },
+  onProgress?: (pct: number) => void
+): Promise<AppendResult> {
+  const form = new FormData();
+  form.append("file", file);
+  if (options?.encoding) form.append("encoding", options.encoding);
+  if (options?.delimiter) form.append("delimiter", options.delimiter);
+  const { data } = await api.post<AppendResult>(`/datasets/${datasetId}/append`, form, {
+    headers: { "Content-Type": "multipart/form-data" },
+    onUploadProgress: (evt) => {
+      if (onProgress && evt.total) onProgress(Math.round((evt.loaded / evt.total) * 100));
+    },
+  });
+  return data;
+}
+
+/* --- correcting a record -------------------------------------------------------------- */
+
+export interface Correction {
+  row_key: string[];
+  column: string;
+  old_value?: string | null;
+  new_value?: string | null;
+  actor?: string | null;
+  edited_at?: string | null;
+}
+
+export interface RowEditResult {
+  columns: string[];
+  row: (string | null)[];
+  corrections: Correction[];
+}
+
+/** `key` is positional against the dataset's key_columns, in that order. */
+export async function editRow(
+  datasetId: string,
+  key: string[],
+  changes: Record<string, string>
+): Promise<RowEditResult> {
+  const { data } = await api.patch<RowEditResult>(`/datasets/${datasetId}/rows`, { key, changes });
+  return data;
+}
+
+/** Puts the file's own value back. The values in `columns` are ignored by the server. */
+export async function revertCorrection(
+  datasetId: string,
+  key: string[],
+  columns: string[]
+): Promise<RowEditResult> {
+  const changes = Object.fromEntries(columns.map((c) => [c, ""]));
+  const { data } = await api.delete<RowEditResult>(`/datasets/${datasetId}/corrections`, {
+    data: { key, changes },
+  });
+  return data;
+}
+
+export async function fetchCorrections(
+  datasetId: string,
+  limit = 200,
+  offset = 0
+): Promise<{ total: number; items: Correction[] }> {
+  const { data } = await api.get<{ total: number; items: Correction[] }>(
+    `/datasets/${datasetId}/corrections`,
+    { params: { limit, offset } }
+  );
   return data;
 }
 

@@ -38,6 +38,7 @@ permission tests assert it is refused everywhere else.
 | `dataset-lifecycle.spec.ts` | upload → import → read → rename → export (csv/xlsx/pdf) → delete, de-duplication, odd files |
 | `data-grid.spec.ts` | pagination, page-size cap, search (Arabic/partial/case/wildcards), filters, numeric sort, injection probes, group-by totals, stored-XSS rendering |
 | `admin.spec.ts` | user create/read/delete through the UI, duplicate conflict, every admin page loads clean, linkable settings sections, activity-log translations, trim floor |
+| `records.spec.ts` | setting a record key (and being refused a repeated one), correcting a cell from the keyboard, adding a later batch that replaces one record and adds another, and re-importing without losing either |
 | `dates.spec.ts` | one date format across nine screens, held against an en-US browser so the app's language is what decides |
 | `accessibility.spec.ts` | every control has an accessible name, no name is a paragraph, the drawer's close button is translated, the permission grid names its checkboxes |
 

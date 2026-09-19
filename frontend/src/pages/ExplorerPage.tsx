@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useConfirm } from "../components/ConfirmProvider";
@@ -10,6 +10,8 @@ import {
   applyCleaning,
   cancelJob,
   downloadExportUrl,
+  editRow,
+  fetchCorrections,
   fetchColumns,
   fetchData,
   fetchGroups,
@@ -17,6 +19,7 @@ import {
   getJob,
   getStats,
   requestExport,
+  revertCorrection,
   type ColumnKind,
   type ExportRequest,
   type FilterRule,
@@ -29,7 +32,8 @@ import { hasHebrew, translateValue } from "../data/valueDictionary";
 import EmptyState from "../components/EmptyState";
 import ErrorBanner from "../components/ErrorBanner";
 import FilterDialog from "../components/FilterDialog";
-import GridCell from "../components/GridCell";
+import EditableCell from "../components/EditableCell";
+import RecordKeyDialog from "../components/RecordKeyDialog";
 import GroupDialog from "../components/GroupDialog";
 import GroupedGrid from "../components/GroupedGrid";
 import LoadingState from "../components/LoadingState";
@@ -76,6 +80,7 @@ export default function ExplorerPage() {
   const { can } = useAuth();
   const canExport = can("datasets.export");
   const canDeleteColumn = can("datasets.clean");
+  const canEdit = can("datasets.edit");
   const qc = useQueryClient();
 
   const [source, setSource] = useState<"raw" | "cleaned">("cleaned");
@@ -220,6 +225,62 @@ export default function ExplorerPage() {
   }, [exportJob?.status]);
 
   const [deleteColumnError, setDeleteColumnError] = useState<string | null>(null);
+
+  /* ---- correcting a record ----------------------------------------------------
+   *
+   * A row is addressed by the values of the dataset's key columns, which are already
+   * in the row - so nothing has to change about what the data endpoint returns. Without
+   * a key there is no way to say which row an edit means, and the cells stay read-only.
+   */
+  const [keyDialogOpen, setKeyDialogOpen] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
+  const keyColumns = dataset?.key_columns ?? [];
+  const canCorrect = canEdit && keyColumns.length > 0 && !isGrouped;
+
+  // Fetched once per dataset rather than per page: it is small, it changes only when
+  // somebody edits, and joining it server-side would cost every reader a join over
+  // millions of rows to find that almost none of them are corrected.
+  const { data: corrections } = useQuery({
+    queryKey: ["corrections", datasetId],
+    queryFn: () => fetchCorrections(datasetId, 500),
+    enabled: canEdit,
+    staleTime: 60 * 1000,
+  });
+
+  /** row key + column -> the value the file itself had. */
+  const correctedCells = useMemo(() => {
+    const out = new Map<string, string | null>();
+    for (const c of corrections?.items ?? []) {
+      // JSON rather than a joined string: a cell value may contain any character, and
+      // a separator that collides turns two different cells into one entry
+      out.set(JSON.stringify([c.row_key, c.column]), c.old_value ?? null);
+    }
+    return out;
+  }, [corrections]);
+
+  function keyOf(row: unknown[], columns: string[]): string[] {
+    return keyColumns.map((c) => String(row[columns.indexOf(c)] ?? ""));
+  }
+
+  function afterEdit() {
+    setEditError(null);
+    qc.invalidateQueries({ queryKey: ["data", datasetId] });
+    qc.invalidateQueries({ queryKey: ["corrections", datasetId] });
+  }
+
+  const editMutation = useMutation({
+    mutationFn: ({ key, column, value }: { key: string[]; column: string; value: string }) =>
+      editRow(datasetId, key, { [column]: value }),
+    onSuccess: afterEdit,
+    onError: (err) => setEditError(apiErrorMessage(err, t("common.error_generic"))),
+  });
+
+  const revertMutation = useMutation({
+    mutationFn: ({ key, column }: { key: string[]; column: string }) =>
+      revertCorrection(datasetId, key, [column]),
+    onSuccess: afterEdit,
+    onError: (err) => setEditError(apiErrorMessage(err, t("common.error_generic"))),
+  });
 
   /** Keeps exactly the given columns, dropping the rest. Used by "delete hidden". */
   const deleteColumnsMutation = useMutation({
@@ -534,6 +595,21 @@ export default function ExplorerPage() {
           <IconStats />
           {t("sheet.stats")}
         </button>
+        {canEdit && (
+          <button
+            type="button"
+            className={`sheet-tool${keyColumns.length > 0 ? " active" : ""}`}
+            onClick={() => setKeyDialogOpen(true)}
+            title={
+              keyColumns.length > 0
+                ? keyColumns.map(labelFor).join(" + ")
+                : t("record_key.none") ?? ""
+            }
+          >
+            <IconRecords />
+            {keyColumns.length > 0 ? t("record_key.set") : t("record_key.unset")}
+          </button>
+        )}
 
         <span className="sheet-toolbar-sep" />
 
@@ -700,6 +776,15 @@ export default function ExplorerPage() {
         onClose={() => setFilterOpen(false)}
       />
 
+      {keyDialogOpen && dataset && (
+        <RecordKeyDialog
+          dataset={dataset}
+          columns={allColumns}
+          kindByColumn={kindByColumn}
+          onClose={() => setKeyDialogOpen(false)}
+        />
+      )}
+
       <ColumnManager
         open={columnsOpen}
         onClose={() => setColumnsOpen(false)}
@@ -722,6 +807,7 @@ export default function ExplorerPage() {
       )}
 
       <ErrorBanner message={deleteColumnError} />
+      <ErrorBanner message={editError} />
       <ErrorBanner message={exportError} />
       {exportJob?.status === "error" && <ErrorBanner message={exportJob.error_message} />}
 
@@ -850,10 +936,27 @@ export default function ExplorerPage() {
                     const shown = translatedColumns.has(col)
                       ? translateValue(raw, i18n.language)
                       : raw;
+                    // A key column is what says which record this is, so changing it
+                    // would be a different operation; the server refuses it too.
+                    const editable = canCorrect && !keyColumns.includes(col);
+                    const rowKey = canCorrect ? keyOf(row, allColumns) : [];
+                    const wasCorrected = canEdit
+                      ? correctedCells.get(JSON.stringify([rowKey, col]))
+                      : undefined;
                     return (
-                      // the tooltip keeps the stored value reachable when translated
-                      <td key={colIdx} className={`cell-${kind ?? "text"}`} title={raw}>
-                        <GridCell value={shown} kind={kind} />
+                      <td key={colIdx} className={`cell-${kind ?? "text"}`}>
+                        <EditableCell
+                          value={raw}
+                          shown={shown}
+                          kind={kind}
+                          editable={editable}
+                          columnLabel={labelFor(col)}
+                          correctedFrom={wasCorrected}
+                          onCommit={(next) =>
+                            editMutation.mutate({ key: rowKey, column: col, value: next })
+                          }
+                          onRevert={() => revertMutation.mutate({ key: rowKey, column: col })}
+                        />
                       </td>
                     );
                   })}
