@@ -1079,7 +1079,8 @@
     "now_holds_two": "The dataset now holds 2 rows",
     "now_holds_few": "The dataset now holds {{count}} rows",
     "now_holds_many": "The dataset now holds {{count}} rows",
-    "now_holds_other": "The dataset now holds {{count}} rows"
+    "now_holds_other": "The dataset now holds {{count}} rows",
+    "no_key_consequence": "A record already here will be added a second time instead of being updated, and nothing will be marked as newly arrived. The key is set per dataset."
   },
   "arrivals": {
     "new": "New",

@@ -4,7 +4,9 @@ import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 
 import { apiErrorMessage, appendBatch, type AppendResult, type Dataset } from "../api/client";
+import { useAuth } from "../auth/AuthContext";
 import { IconArchive } from "./admin/AdminIcons";
+import RecordKeyDialog from "./RecordKeyDialog";
 import { IconClose } from "./SheetIcons";
 import ErrorBanner from "./ErrorBanner";
 import UploadDropzone from "./UploadDropzone";
@@ -24,7 +26,10 @@ export default function AppendBatchDialog({
   onClose: () => void;
 }) {
   const { t } = useTranslation();
+  const { can } = useAuth();
   const qc = useQueryClient();
+  const canSetKey = can("datasets.edit");
+  const [keyOpen, setKeyOpen] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<AppendResult | null>(null);
@@ -42,6 +47,10 @@ export default function AppendBatchDialog({
       qc.invalidateQueries({ queryKey: ["data", dataset.id] });
       qc.invalidateQueries({ queryKey: ["stats", dataset.id] });
       qc.invalidateQueries({ queryKey: ["group", dataset.id] });
+      // The arrivals query is the one this dialog just changed the answer to, and it is
+      // cached for a minute - so an explorer already open in another tab would show the
+      // new rows with none of them marked, which reads as the marking being broken.
+      qc.invalidateQueries({ queryKey: ["arrivals", dataset.id] });
     },
     onError: (e) => {
       setProgress(0);
@@ -76,11 +85,25 @@ export default function AppendBatchDialog({
           <p className="muted">
             {t("append.same_columns", { columns: dataset.columns.length })}
           </p>
-          <p className={hasKey ? "muted" : "append-note"}>
-            {hasKey
-              ? t("append.will_replace", { columns: dataset.key_columns.join(" + ") })
-              : t("append.will_add_only")}
-          </p>
+          {hasKey ? (
+            <p className="muted">
+              {t("append.will_replace", { columns: dataset.key_columns.join(" + ") })}
+            </p>
+          ) : (
+            /* Stated as a caution with the remedy attached, rather than as a grey line
+               of prose. The key is per dataset, so somebody who set one on another file
+               has every reason to think this one is covered - and by the time the
+               difference shows, the batch has already landed twice over. */
+            <div className="append-warning" role="note">
+              <p>{t("append.will_add_only")}</p>
+              <p className="muted">{t("append.no_key_consequence")}</p>
+              {canSetKey && (
+                <button type="button" className="btn secondary" onClick={() => setKeyOpen(true)}>
+                  {t("record_key.unset")}
+                </button>
+              )}
+            </div>
+          )}
 
           {result ? (
             <div className="append-result" role="status" aria-live="polite">
@@ -110,6 +133,14 @@ export default function AppendBatchDialog({
           </button>
         </footer>
       </div>
+
+      {keyOpen && (
+        <RecordKeyDialog
+          dataset={dataset}
+          columns={dataset.columns}
+          onClose={() => setKeyOpen(false)}
+        />
+      )}
     </div>,
     document.body
   );

@@ -3124,3 +3124,22 @@ td:hover > .cell-edit-wrap > .cell-revert,
   white-space: nowrap;
   border: 0;
 }
+
+/* A caution with its remedy attached. Grey prose beside a dropzone is read past, and
+   the cost of reading past this one is a batch landing twice. */
+.append-warning {
+  margin: 0.75rem 0;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border-inline-start: 3px solid var(--warning);
+  background: var(--warning-soft, rgba(217, 119, 6, 0.08));
+}
+
+.append-warning p {
+  margin: 0 0 0.4rem;
+}
+
+.append-warning p:first-child {
+  font-weight: 600;
+  color: var(--warning);
+}
