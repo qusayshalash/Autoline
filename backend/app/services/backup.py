@@ -212,7 +212,20 @@ def run(*, include_originals: bool = False, progress: Progress = None) -> dict:
 
         if include_originals:
             say("originals")
-            for src in sorted(settings.uploads_dir.glob("*/raw.*")):
+            # The uploaded file stopped being the whole truth the day a dataset could
+            # take a later batch: raw_data is the file plus every stored batch, replayed
+            # in order. Copying only raw.* would produce a backup that restores and then
+            # loses the appended rows the next time anyone re-runs the import - the
+            # silent kind of loss, since the file count and the row count both look
+            # right until then. normalized.csv is left out on purpose: it is derived
+            # from raw.* and is rewritten by the import that would need it.
+            sources = [
+                ("original", src) for src in sorted(settings.uploads_dir.glob("*/raw.*"))
+            ] + [
+                ("batch", src)
+                for src in sorted(settings.uploads_dir.glob("*/batch-*.csv"))
+            ]
+            for kind, src in sources:
                 dest = root / "uploads" / src.parent.name / src.name
                 dest.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(src, dest)
@@ -220,7 +233,7 @@ def run(*, include_originals: bool = False, progress: Progress = None) -> dict:
                     errors.append(f"{src.name}: copied size does not match the original")
                 items.append(
                     {
-                        "kind": "original",
+                        "kind": kind,
                         "dataset_id": src.parent.name,
                         "file": f"uploads/{src.parent.name}/{src.name}",
                         "bytes": dest.stat().st_size,

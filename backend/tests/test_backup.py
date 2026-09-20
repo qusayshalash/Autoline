@@ -7,6 +7,7 @@ what was written and reads the data back out of it.
 
 import json
 import shutil
+from pathlib import Path
 
 import duckdb
 import pytest
@@ -124,6 +125,62 @@ def test_originals_are_included_only_when_asked_for(dataset):
         path = backup.backups_root() / with_them["name"] / item["file"]
         assert path.exists()
         assert path.stat().st_size == item["bytes"]
+
+
+def test_a_stored_batch_is_backed_up_with_the_original(admin):
+    """A dataset that has taken a later batch is no longer described by raw.* alone.
+
+    raw_data is the uploaded file plus every stored batch, replayed in order, so a
+    backup holding only the original restores to a dataset that loses its appended rows
+    the next time anybody re-runs the import - and nothing says so at restore time,
+    because the databases came back complete.
+
+    It uploads its own file rather than using the shared `dataset`: appending to that
+    one would change the row count every other test in the session reads back.
+    """
+    from conftest import wait_for_job
+
+    csv = ("plate,make" + chr(10) + "10000001,KIA" + chr(10)).encode("utf-8")
+    r = admin.post("/api/datasets/upload", files={"file": ("backed-up.csv", csv, "text/csv")})
+    assert r.status_code == 200, r.text
+    dataset_id = r.json()["dataset_id"]
+    try:
+        r = admin.post(
+            f"/api/datasets/{dataset_id}/import",
+            json={"encoding": "utf-8", "delimiter": ",", "has_header": True},
+        )
+        assert wait_for_job(admin, r.json()["id"])["status"] == "done"
+
+        later = ("plate,make" + chr(10) + "10000002,HONDA" + chr(10)).encode("utf-8")
+        r = admin.post(
+            f"/api/datasets/{dataset_id}/append",
+            files={"file": ("later.csv", later, "text/csv")},
+            # stated rather than detected: a two-line file is too little evidence for
+            # charset detection, and this test is about the backup, not about that
+            data={"encoding": "utf-8", "delimiter": ","},
+        )
+        assert r.status_code == 200, r.text
+
+        stored = sorted((settings.uploads_dir / dataset_id).glob("batch-*.csv"))
+        assert stored, "the append did not leave a batch on disk"
+
+        manifest = backup.run(include_originals=True)
+        mine = [
+            i
+            for i in manifest["items"]
+            if i["kind"] == "batch" and i.get("dataset_id") == dataset_id
+        ]
+        assert len(mine) == len(stored), (
+            f"{len(stored)} stored batches, {len(mine)} in the backup: "
+            "an appended batch that is not copied is lost on re-import after a restore"
+        )
+        for item in mine:
+            copied = backup.backups_root() / manifest["name"] / item["file"]
+            assert copied.exists()
+            source = settings.uploads_dir / dataset_id / Path(item["file"]).name
+            assert copied.read_bytes() == source.read_bytes()
+    finally:
+        admin.delete(f"/api/datasets/{dataset_id}")
 
 
 def test_retention_keeps_the_newest_and_removes_the_rest(dataset):

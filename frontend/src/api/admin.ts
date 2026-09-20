@@ -331,7 +331,7 @@ export async function sweepHousekeeping(): Promise<HousekeepingSweepResult> {
 // ---- backups ----
 
 export interface BackupItem {
-  kind: "catalog" | "dataset" | "key" | "original";
+  kind: "catalog" | "dataset" | "key" | "original" | "batch";
   file: string;
   bytes: number;
   dataset_id?: string | null;
