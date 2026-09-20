@@ -23,6 +23,11 @@ _LIKE_PATTERNS = {
 # as a wildcard and quietly match more than the user asked for.
 _LIKE_ESCAPE = "\\"
 
+# How many spellings of one search may be looked for at once. Every term multiplies
+# the OR chain by the number of columns searched, and a dictionary that offers more
+# than a handful of readings for one word is guessing rather than translating.
+MAX_SEARCH_TERMS = 8
+
 
 def quote_ident(name: str) -> str:
     return '"' + name.replace('"', '""') + '"'
@@ -127,7 +132,9 @@ def resolve_search_columns(
     return [c for c in columns if c in chosen]
 
 
-def build_search_sql(search: str, columns: list[str]) -> tuple[str, list[Any]]:
+def build_search_sql(
+    search: str, columns: list[str], alternatives: list[str] | None = None
+) -> tuple[str, list[Any]]:
     """Free-text search: does any column of this row contain the text?
 
     Expressed as one comparison per column rather than one comparison against all of
@@ -143,14 +150,35 @@ def build_search_sql(search: str, columns: list[str]) -> tuple[str, list[Any]]:
 
     The term is escaped, so a user searching for a literal `%` or `_` gets rows
     containing that character rather than every row in the file.
+
+    `alternatives` are other spellings of the same search, which the caller derives and
+    this function does not interpret. The screen may show a column's Hebrew values
+    translated - white for לבן - and somebody who reads "white" and types it
+    is searching for what they were shown. Without the alternative the answer is no rows,
+    which reads as the data being absent rather than as the search speaking a different
+    language than the table. Each one widens the OR chain, so the caller sends the few
+    that a dictionary actually confirms rather than guesses.
     """
     if not columns:
         return "FALSE", []
-    pattern = f"%{escape_like(search)}%"
+
+    terms: list[str] = []
+    for term in [search, *(alternatives or [])]:
+        term = (term or "").strip()
+        if term and term not in terms:
+            terms.append(term)
+    if not terms:
+        return "FALSE", []
+    terms = terms[:MAX_SEARCH_TERMS]
+
+    patterns = [f"%{escape_like(t)}%" for t in terms]
     clause = " OR ".join(
-        f"{quote_ident(c)} ILIKE ? ESCAPE '{_LIKE_ESCAPE}'" for c in columns
+        f"{quote_ident(c)} ILIKE ? ESCAPE '{_LIKE_ESCAPE}'" for c in columns for _ in terms
     )
-    return f"({clause})", [pattern] * len(columns)
+    params: list[Any] = []
+    for _ in columns:
+        params.extend(patterns)
+    return f"({clause})", params
 
 
 def build_order_sql(

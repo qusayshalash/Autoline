@@ -672,6 +672,11 @@ class DataQuery(Incoming):
     # the old behaviour and the one that surprises nobody; narrowing it is what makes a
     # search over a wide table fast.
     search_columns: Optional[list[str]] = None
+    # Other spellings of the same search. The grid can show a column's Hebrew values
+    # translated, and somebody who reads the translation and types it is searching for
+    # what they were shown - so the screen that did the translating says what the
+    # original was. The server does not translate anything; it looks for all of them.
+    search_alternatives: Optional[list[str]] = None
     filters: list[FilterRule] = []
     source: Literal["raw", "cleaned"] = "cleaned"
     # Keep only records that arrived in a recent batch. Not a FilterRule because it is
@@ -701,6 +706,7 @@ class GroupQuery(Incoming):
     page_size: int = 100
     search: Optional[str] = None
     search_columns: Optional[list[str]] = None
+    search_alternatives: Optional[list[str]] = None
     filters: list[FilterRule] = []
     source: Literal["raw", "cleaned"] = "cleaned"
 
@@ -749,6 +755,7 @@ class StatisticsQuery(Incoming):
     filters: list[FilterRule] = []
     search: Optional[str] = None
     search_columns: Optional[list[str]] = None
+    search_alternatives: Optional[list[str]] = None
     source: Literal["raw", "cleaned"] = "cleaned"
     limit: int = Field(default=50, ge=1, le=200)
     # how ties between buckets are ordered: by popularity, or by the value itself
@@ -813,6 +820,7 @@ class PivotQuery(Incoming):
     filters: list[FilterRule] = []
     search: Optional[str] = None
     search_columns: Optional[list[str]] = None
+    search_alternatives: Optional[list[str]] = None
     source: Literal["raw", "cleaned"] = "cleaned"
     # A matrix wider than a dozen columns stops being readable, and taller than ~50 rows
     # stops being scannable; whatever falls outside is aggregated rather than dropped.
@@ -882,6 +890,7 @@ class ExportRequest(Incoming):
     source: Literal["raw", "cleaned"] = "cleaned"
     search: Optional[str] = None
     search_columns: Optional[list[str]] = None
+    search_alternatives: Optional[list[str]] = None
     filters: list[FilterRule] = []
     sort_by: Optional[str] = None
     sort_dir: Literal["asc", "desc"] = "asc"

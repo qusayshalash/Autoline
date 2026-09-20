@@ -24,6 +24,9 @@ const PHRASES: Record<string, Term> = {
   'חשמל': { ar: "كهرباء", en: "Electric" },
   'חשמל/בנזין': { ar: "كهرباء/بنزين", en: "Electric/Petrol" },
   'חשמל/דיזל': { ar: "كهرباء/ديزل", en: "Electric/Diesel" },
+  'היברידי': { ar: "هجين", en: "Hybrid" },
+  'היבריד': { ar: "هجين", en: "Hybrid" },
+  'בנזין/חשמל': { ar: "بنزين/كهرباء", en: "Petrol/Electric" },
   'גפמ"': { ar: "غاز مسال", en: "LPG" },
 
   // ownership (baalut)
@@ -32,6 +35,15 @@ const PHRASES: Record<string, Term> = {
   'חברה': { ar: "شركة", en: "Company" },
   'סוחר': { ar: "تاجر", en: "Dealer" },
   'השכרה': { ar: "تأجير", en: "Rental" },
+
+  // names that are one thing written as several words - see translateValue
+  'ב מ וו': { ar: "بي إم دبليو", en: "BMW" },
+  'בי ווי די': { ar: "بي واي دي", en: "BYD" },
+  'אלפא רומיאו': { ar: "ألفا روميو", en: "Alfa Romeo" },
+  'לינק אנד קו': { ar: "لينك آند كو", en: "Lynk & Co" },
+  'אף אי דאבל יו': { ar: "إف إيه دبليو", en: "FAW" },
+  'קיי גי מוביליט': { ar: "كي جي موبيليتي", en: "KG Mobility" },
+  'דרום אפ': { ar: "جنوب أفريقيا", en: "South Africa" },
 
   // multi-word colour values that don't read well token by token
   'לא ידוע': { ar: "غير معروف", en: "Unknown" },
@@ -189,6 +201,43 @@ const WORDS: Record<string, Term> = {
   'פורטוגל': { ar: "البرتغال", en: "Portugal" },
   'קנדה': { ar: "كندا", en: "Canada" },
   'ד.אפ': { ar: "جنوب أفريقيا", en: "South Africa" },
+
+  // --- read off the registry's own distinct values, commonest first ---
+  "פיג'ו": { ar: "بيجو", en: "Peugeot" },
+  'זיקר': { ar: "زيكر", en: "Zeekr" },
+  'סרס': { ar: "سيريس", en: "Seres" },
+  'סאנגיונג': { ar: "سانغ يونغ", en: "SsangYong" },
+  'רובר': { ar: "روفر", en: "Rover" },
+  'לנדרובר': { ar: "لاند روفر", en: "Land Rover" },
+  'קאדילאק': { ar: "كاديلاك", en: "Cadillac" },
+  'ביואיק': { ar: "بيويك", en: "Buick" },
+  'דימלרקריזלר': { ar: "دايملر كرايسلر", en: "DaimlerChrysler" },
+  'דיפאל': { ar: "ديبال", en: "Deepal" },
+  'מקסוס': { ar: "ماكسوس", en: "Maxus" },
+  'אורה': { ar: "أورا", en: "Ora" },
+  'דונגפנג': { ar: "دونغفنغ", en: "Dongfeng" },
+  'ליפמוטור': { ar: "ليب موتور", en: "Leapmotor" },
+  'סקיוול': { ar: "سكاي ويل", en: "Skywell" },
+  'איווייס': { ar: "أيوايز", en: "Aiways" },
+  'אומודה': { ar: "أومودا", en: "Omoda" },
+  'יגואר': { ar: "جاغوار", en: "Jaguar" },
+  'פורתינג': { ar: "فورثينغ", en: "Forthing" },
+  "ג'קו": { ar: "جاكوار", en: "Jaguar" },
+  'ד.קוריאה': { ar: "كوريا الجنوبية", en: "South Korea" },
+  'ד.קור': { ar: "كوريا الجنوبية", en: "South Korea" },
+  'שוודיה': { ar: "السويد", en: "Sweden" },
+  'פולי': { ar: "بولندا", en: "Poland" },
+  'פורטוג': { ar: "البرتغال", en: "Portugal" },
+  'פורט': { ar: "البرتغال", en: "Portugal" },
+  'סלובק': { ar: "سلوفاكيا", en: "Slovakia" },
+  'סלובקי': { ar: "سلوفاكيا", en: "Slovakia" },
+  'מרוקו': { ar: "المغرب", en: "Morocco" },
+  'גר': { ar: "ألمانيا", en: "Germany" },
+  "ארה''ב": { ar: "أمريكا", en: "USA" },
+  'אודי': { ar: "أودي", en: "Audi" },
+  'סלוב': { ar: "سلوفاكيا", en: "Slovakia" },
+  'אינדיגו': { ar: "نيلي", en: "Indigo" },
+  'אחר': { ar: "أخرى", en: "Other" },
 };
 
 const HEBREW_RE = /[֐-׿]/;
@@ -200,6 +249,23 @@ export function hasHebrew(value: string): boolean {
 
 function pick(term: Term, language: string): string {
   return language.startsWith("ar") ? term.ar : term.en;
+}
+
+const SEPARATOR_RE = /[\s/\-()]/;
+
+// A character the data cannot contain, used to stand in for a phrase already translated.
+const HOLD = "\u0000";
+
+let multiWord: string[] | null = null;
+
+/** Phrase keys that span more than one word, longest first. */
+function multiWordPhrases(): string[] {
+  if (!multiWord) {
+    multiWord = Object.keys(PHRASES)
+      .filter((k) => /\s/.test(k))
+      .sort((a, b) => b.length - a.length);
+  }
+  return multiWord;
 }
 
 /**
@@ -220,9 +286,34 @@ export function translateValue(value: string, language: string): string {
   const phrase = PHRASES[trimmed];
   if (phrase) return pick(phrase, language);
 
-  const parts = trimmed.split(/([\s/\-()]+)/);
+  // Names that are several words but one thing. The registry writes BMW as three
+  // separate letters and BYD as three syllables, and each token on its own is either
+  // meaningless or means something else - so the longest known run is taken out first
+  // and set aside, and what is left goes through the per-token pass below.
+  let working = trimmed;
+  const held: string[] = [];
+  for (const known of multiWordPhrases()) {
+    const at = working.indexOf(known);
+    if (at === -1) continue;
+    const before = working[at - 1];
+    const after = working[at + known.length];
+    const bounded =
+      (before === undefined || SEPARATOR_RE.test(before)) &&
+      (after === undefined || SEPARATOR_RE.test(after));
+    if (!bounded) continue;
+    held.push(pick(PHRASES[known], language));
+    working =
+      working.slice(0, at) + HOLD + (held.length - 1) + HOLD + working.slice(at + known.length);
+  }
+
+  const parts = working.split(/([\s/\-()]+)/);
   const out: string[] = [];
   for (const part of parts) {
+    const kept = part.startsWith(HOLD) ? held[Number(part.slice(1, -1))] : undefined;
+    if (kept !== undefined) {
+      out.push(kept);
+      continue;
+    }
     const term = WORDS[part] ?? PHRASES[part];
     if (term) {
       out.push(pick(term, language));
@@ -233,4 +324,98 @@ export function translateValue(value: string, language: string): string {
     }
   }
   return out.join("");
+}
+
+/* ---- reading the dictionary backwards ------------------------------------------------
+ *
+ * The grid shows a translated value, so that is what gets typed into the search box.
+ * Searching the table for it finds nothing, because the table holds the Hebrew - and
+ * "no rows" reads as "this data is not here", not as "you and the table are speaking
+ * different languages". So the screen that did the translating is the one that has to
+ * say what the original was.
+ *
+ * Deliberately generous in what it accepts and strict in what it returns: it answers a
+ * prefix, because a search box is read while it is being typed, but it only ever returns
+ * Hebrew that is actually in the dictionary. Nothing is guessed at.
+ */
+
+type Reverse = Map<string, string[]>;
+
+let reverseIndex: Reverse | null = null;
+
+function normalize(text: string): string {
+  return text
+    .trim()
+    .toLowerCase()
+    // Arabic writers reach for whichever alef and ya are under the finger; a search box
+    // is not the place to be strict about which one.
+    .replace(/[أإآ]/g, "ا")
+    .replace(/ى/g, "ي")
+    .replace(/ة/g, "ه")
+    .replace(/[\u064B-\u0652]/g, "")
+    .replace(/\s+/g, " ");
+}
+
+function buildReverse(): Reverse {
+  const index: Reverse = new Map();
+  const add = (term: string, hebrew: string) => {
+    const key = normalize(term);
+    if (!key) return;
+    const found = index.get(key);
+    if (found) {
+      if (!found.includes(hebrew)) found.push(hebrew);
+    } else {
+      index.set(key, [hebrew]);
+    }
+  };
+  for (const source of [PHRASES, WORDS]) {
+    for (const [hebrew, term] of Object.entries(source)) {
+      add(term.ar, hebrew);
+      add(term.en, hebrew);
+    }
+  }
+  return index;
+}
+
+/** How many readings one search may carry. Mirrors the server's own cap. */
+const MAX_ALTERNATIVES = 8;
+
+/**
+ * The Hebrew a search term could have been translated from.
+ *
+ * Returns nothing for a search that is already Hebrew, for one too short to mean
+ * anything (a single letter prefixes half the dictionary), and for one the dictionary
+ * does not know.
+ */
+export function hebrewAlternatives(search: string): string[] {
+  const text = normalize(search);
+  if (!text || text.length < 2 || HEBREW_RE.test(search)) return [];
+  if (!reverseIndex) reverseIndex = buildReverse();
+
+  const out: string[] = [];
+  const take = (values: string[]) => {
+    for (const v of values) {
+      if (!out.includes(v) && out.length < MAX_ALTERNATIVES) out.push(v);
+    }
+  };
+
+  // the whole thing, as typed
+  take(reverseIndex.get(text) ?? []);
+
+  // still being typed: "whi" should already be finding לבן
+  if (out.length < MAX_ALTERNATIVES) {
+    for (const [term, values] of reverseIndex) {
+      if (term.length > text.length && term.startsWith(text)) take(values);
+      if (out.length >= MAX_ALTERNATIVES) break;
+    }
+  }
+
+  // a compound the reader sees as one value: "silver metallic" -> "כסף מטלי"
+  if (out.length === 0 && text.includes(" ")) {
+    const parts = text.split(" ");
+    const mapped = parts.map((p) => reverseIndex!.get(p)?.[0]);
+    if (mapped.every(Boolean)) out.push(mapped.join(" "));
+  }
+
+  return out;
 }

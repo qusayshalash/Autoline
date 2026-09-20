@@ -1,5 +1,6 @@
 import { api } from "./client";
 import type { ColumnKind, FilterRule } from "./client";
+import { hebrewAlternatives } from "../data/valueDictionary";
 
 /** How the backend split the rows up: by the value itself, by a truncated date, or
  *  into equal-width numeric buckets. */
@@ -76,6 +77,7 @@ export async function fetchStatistics(
     group_by: params.group_by,
     filters: params.filters ?? [],
     search: params.search ?? null,
+    search_alternatives: hebrewAlternatives(params.search ?? ""),
     source: params.source ?? "cleaned",
     limit: params.limit ?? 50,
     sort: params.sort ?? "count",
@@ -152,6 +154,7 @@ export async function fetchPivot(datasetId: string, params: PivotParams): Promis
     column_column: params.column_column,
     filters: params.filters ?? [],
     search: params.search ?? null,
+    search_alternatives: hebrewAlternatives(params.search ?? ""),
     source: params.source ?? "cleaned",
     row_limit: params.row_limit ?? 25,
     column_limit: params.column_limit ?? 12,

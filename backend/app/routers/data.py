@@ -1,6 +1,6 @@
-from typing import Literal, Optional
+from typing import Annotated, Literal, Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.errors import ApiError
 from app.auth import require_permission
@@ -79,13 +79,16 @@ def get_distinct_values(
     dataset_id: str,
     column: str,
     search: Optional[str] = None,
+    # Repeated: ?alt=...&alt=... . The suggestions list shows a translated value where
+    # the column is translated, so what gets typed back is the translation.
+    alt: Annotated[list[str], Query()] = [],
     source: Literal["raw", "cleaned"] = "cleaned",
     limit: Optional[int] = None,
     user: dict = Depends(require_permission("datasets.view")),
 ) -> DistinctValuesOut:
     _require_ready(dataset_id)
     try:
-        return query_service.distinct_values(dataset_id, source, column, search, limit)
+        return query_service.distinct_values(dataset_id, source, column, search, limit, alt)
     except ValueError as exc:
         raise HTTPException(400, str(exc)) from exc
 

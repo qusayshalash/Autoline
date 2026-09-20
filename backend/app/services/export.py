@@ -71,7 +71,9 @@ def build_export_query(
     if req.scope == "current_view":
         if req.search:
             looked_in = sql_utils.resolve_search_columns(req.search_columns, columns)
-            s_sql, s_params = sql_utils.build_search_sql(req.search, looked_in)
+            s_sql, s_params = sql_utils.build_search_sql(
+                req.search, looked_in, req.search_alternatives
+            )
             where_clauses.append(s_sql)
             params.extend(s_params)
         if req.filters:

@@ -1,6 +1,7 @@
 import axios from "axios";
 
 import i18n from "../i18n";
+import { hebrewAlternatives } from "../data/valueDictionary";
 
 export const api = axios.create({
   baseURL: "http://localhost:8000/api",
@@ -342,6 +343,10 @@ export async function fetchData(
     sort_dir: params.sort_dir ?? "asc",
     search: params.search ?? null,
     search_columns: params.search_columns ?? [],
+    // Derived here rather than by each caller: the grid shows translated values, so a
+    // translated term is what gets typed, and a screen that forgot to say so would
+    // answer "no rows" to a search for something plainly on it.
+    search_alternatives: hebrewAlternatives(params.search ?? ""),
     filters: params.filters ?? [],
     source: params.source ?? "cleaned",
     only_recent: params.only_recent ?? false,
@@ -383,6 +388,7 @@ export async function fetchGroups(
     page_size: params.page_size ?? 100,
     search: params.search ?? null,
     search_columns: params.search_columns ?? [],
+    search_alternatives: hebrewAlternatives(params.search ?? ""),
     filters: params.filters ?? [],
     source: params.source ?? "cleaned",
   });
@@ -422,9 +428,14 @@ export async function fetchDistinctValues(
     params: {
       column: params.column,
       search: params.search || undefined,
+      alt: hebrewAlternatives(params.search ?? ""),
       source: params.source ?? "cleaned",
       limit: params.limit,
     },
+    // `alt` repeats; axios would otherwise send alt[]=x, which FastAPI reads as a
+    // parameter of a different name and drops - silently, so the suggestions would
+    // just come back empty for a translated term.
+    paramsSerializer: { indexes: null },
   });
   return data;
 }
@@ -596,7 +607,11 @@ export interface ExportRequest {
 }
 
 export async function requestExport(datasetId: string, req: ExportRequest): Promise<JobOut> {
-  const { data } = await api.post<JobOut>(`/datasets/${datasetId}/export`, req);
+  const { data } = await api.post<JobOut>(`/datasets/${datasetId}/export`, {
+    ...req,
+    // so that exporting "the current view" exports the rows that were on screen
+    search_alternatives: hebrewAlternatives(req.search ?? ""),
+  });
   return data;
 }
 

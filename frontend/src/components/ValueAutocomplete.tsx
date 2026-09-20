@@ -4,6 +4,7 @@ import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 
 import { fetchDistinctValues } from "../api/client";
+import { translateValue } from "../data/valueDictionary";
 
 interface Props {
   datasetId: string;
@@ -27,7 +28,7 @@ export default function ValueAutocomplete({
   onChange,
   placeholder,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   const [debounced, setDebounced] = useState(value);
   const [highlight, setHighlight] = useState(-1);
@@ -171,7 +172,7 @@ export default function ValueAutocomplete({
                   onMouseEnter={() => setHighlight(i)}
                   onClick={() => choose(it.value)}
                 >
-                  <span className="autocomplete-value">{it.value}</span>
+                  <SuggestedValue value={it.value} language={i18n.language} />
                   <span className="autocomplete-count">{it.count.toLocaleString()}</span>
                 </button>
               ))
@@ -180,5 +181,25 @@ export default function ValueAutocomplete({
           document.body
         )}
     </>
+  );
+}
+
+/**
+ * One suggested value, translated where the dictionary can read it - with the stored
+ * value kept beside it rather than replaced by it.
+ *
+ * Showing only the translation would be a lie about what is in the column: the filter
+ * this builds compares against the Hebrew, so the Hebrew is what the reader is choosing.
+ * Showing both is also how somebody learns the pair, which is worth more here than in
+ * the grid, where the same treatment would double the width of every cell.
+ */
+function SuggestedValue({ value, language }: { value: string; language: string }) {
+  const translated = translateValue(value, language);
+  if (translated === value) return <span className="autocomplete-value">{value}</span>;
+  return (
+    <span className="autocomplete-value">
+      {translated}
+      <span className="autocomplete-original">{value}</span>
+    </span>
   );
 }

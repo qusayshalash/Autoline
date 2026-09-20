@@ -122,7 +122,35 @@ export default function ExplorerPage() {
   const [columnOrder, setColumnOrder] = useState<string[] | null>(null);
   const [dragColumn, setDragColumn] = useState<string | null>(null);
   const [dropTarget, setDropTarget] = useState<string | null>(null);
-  const [translatedColumns, setTranslatedColumns] = useState<Set<string>>(new Set());
+  /* ---- translated values -------------------------------------------------------
+   *
+   * On by default for every column the dictionary can actually read, because the
+   * alternative was a feature nobody found: a per-column menu item, off on arrival and
+   * forgotten on the next visit, on a page whose column names were already translated.
+   * The values sitting in Hebrew beside an Arabic heading did not read as a setting -
+   * they read as a translation that had not been done.
+   *
+   * What is remembered is the choice, not the result: a column the reader switched off
+   * stays off, a column they switched on stays on, and anything they never touched
+   * follows the dictionary. So a column that becomes translatable later - a new batch,
+   * a wider dictionary - is not held back by a decision nobody made.
+   */
+  const [translateChoice, setTranslateChoice] = useState<Record<string, boolean>>(() => {
+    try {
+      const raw = localStorage.getItem(`translate-columns:${datasetId}`);
+      return raw ? (JSON.parse(raw) as Record<string, boolean>) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(`translate-columns:${datasetId}`, JSON.stringify(translateChoice));
+    } catch {
+      // a browser refusing storage is not a reason to stop working
+    }
+  }, [datasetId, translateChoice]);
   const [onlyRecent, setOnlyRecent] = useState(false);
   const [panel, setPanel] = useState<Panel>(null);
   const [filterOpen, setFilterOpen] = useState(false);
@@ -368,12 +396,7 @@ export default function ExplorerPage() {
   }
 
   function toggleTranslateColumn(col: string) {
-    setTranslatedColumns((prev) => {
-      const next = new Set(prev);
-      if (next.has(col)) next.delete(col);
-      else next.add(col);
-      return next;
-    });
+    setTranslateChoice((prev) => ({ ...prev, [col]: !translatedColumns.has(col) }));
   }
 
   function toggleHideColumn(col: string) {
@@ -464,7 +487,7 @@ export default function ExplorerPage() {
     setHiddenColumns(new Set());
     setColumnWidths({});
     setColumnOrder(null);
-    setTranslatedColumns(new Set());
+    setTranslateChoice({});
     setGroupBy([]);
     setPage(1);
     resetExport();
@@ -490,14 +513,32 @@ export default function ExplorerPage() {
   // Which columns hold Hebrew text, judged from the rows currently on screen. Only those
   // are offered a "translate values" toggle - and never while the UI itself is in Hebrew,
   // where showing the file untouched is the whole point.
+  //
+  // `translatable` is the narrower set: a column the dictionary can actually read, found
+  // by translating and seeing whether anything changed. That is what decides the default,
+  // because switching translation on for a column of Hebrew the dictionary has never
+  // heard of changes nothing and only makes the menu look wrong.
   const rawMode = usesRawHeaders(i18n.language);
   const hebrewColumns = new Set<string>();
+  const translatableColumns = new Set<string>();
   if (!rawMode) {
     for (const row of page_?.rows ?? []) {
       allColumns.forEach((c, i) => {
-        if (!hebrewColumns.has(c) && hasHebrew(String(row[i] ?? ""))) hebrewColumns.add(c);
+        const value = String(row[i] ?? "");
+        if (!hasHebrew(value)) return;
+        hebrewColumns.add(c);
+        if (!translatableColumns.has(c) && translateValue(value, i18n.language) !== value) {
+          translatableColumns.add(c);
+        }
       });
     }
+  }
+
+  // The dictionary's answer, unless the reader has said otherwise for this column.
+  const translatedColumns = new Set<string>();
+  for (const c of allColumns) {
+    const chosen = translateChoice[c];
+    if (chosen === undefined ? translatableColumns.has(c) : chosen) translatedColumns.add(c);
   }
   const totalRows = page_?.total_rows ?? 0;
   // rows in the whole source table, so the toolbar can show "matched of total" while a

@@ -1298,6 +1298,16 @@ tbody tr:hover {
   text-overflow: ellipsis;
 }
 
+/* The stored value, shown beside its translation so the reader can see that the filter
+   is built from what the column actually holds. Sized down rather than hidden: it is
+   reference, not the label. */
+.autocomplete-original {
+  margin-inline-start: 0.4rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  unicode-bidi: isolate;
+}
+
 .autocomplete-count {
   flex: none;
   font-size: 0.75rem;

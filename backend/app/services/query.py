@@ -38,6 +38,7 @@ def _build_where(
     filters: list,
     columns: list[str],
     search_columns: list[str] | None = None,
+    search_alternatives: list[str] | None = None,
 ) -> tuple[str, list]:
     """Shared WHERE builder for the row, group and count queries.
 
@@ -49,7 +50,7 @@ def _build_where(
 
     if search:
         looked_in = sql_utils.resolve_search_columns(search_columns, columns)
-        s_sql, s_params = sql_utils.build_search_sql(search, looked_in)
+        s_sql, s_params = sql_utils.build_search_sql(search, looked_in, search_alternatives)
         clauses.append(s_sql)
         params.extend(s_params)
 
@@ -68,7 +69,9 @@ def fetch_page(dataset_id: str, q: DataQuery) -> DataPage:
     columns = sql_utils.table_columns(dataset_id, table)
     valid = set(columns)
 
-    where_sql, params = _build_where(q.search, q.filters, columns, q.search_columns)
+    where_sql, params = _build_where(
+        q.search, q.filters, columns, q.search_columns, q.search_alternatives
+    )
 
     # "only what arrived recently" is not a statement about a column, so it joins the
     # WHERE here rather than going through the filter builder. It costs nothing when it
@@ -143,7 +146,9 @@ def fetch_groups(dataset_id: str, q: GroupQuery) -> GroupPage:
     if q.column not in columns:
         raise ValueError(f"Unknown column: {q.column}")
 
-    where_sql, params = _build_where(q.search, q.filters, columns, q.search_columns)
+    where_sql, params = _build_where(
+        q.search, q.filters, columns, q.search_columns, q.search_alternatives
+    )
     table_sql = sql_utils.quote_ident(table)
     col_sql = sql_utils.quote_ident(q.column)
     where_clause = f" WHERE {where_sql}" if where_sql else ""
@@ -269,7 +274,12 @@ def sorts_numerically(dataset_id: str, table: str, column: str) -> bool:
 
 @read_locked
 def distinct_values(
-    dataset_id: str, source: str, column: str, search: str | None, limit: int | None
+    dataset_id: str,
+    source: str,
+    column: str,
+    search: str | None,
+    limit: int | None,
+    search_alternatives: list[str] | None = None,
 ) -> DistinctValuesOut:
     table = sql_utils.resolve_source_table(dataset_id, source)
     columns = sql_utils.table_columns(dataset_id, table)
@@ -283,8 +293,12 @@ def distinct_values(
     where_sql = f"{col_sql} IS NOT NULL AND {col_sql} != ''"
     params: list = []
     if search:
-        where_sql += f" AND {col_sql} ILIKE ?"
-        params.append(f"%{search}%")
+        # The same builder the grid's search uses, so a typed term finds the same values
+        # here as it does there - including through the value dictionary - and a literal
+        # % or _ is a character rather than a wildcard.
+        s_sql, s_params = sql_utils.build_search_sql(search, [column], search_alternatives)
+        where_sql += f" AND {s_sql}"
+        params.extend(s_params)
 
     cur = datasets.cursor(dataset_id)
     total = cur.execute(
