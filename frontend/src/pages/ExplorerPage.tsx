@@ -564,34 +564,6 @@ export default function ExplorerPage() {
 
   return (
     <div className="sheet">
-      {/* The live region is always here and only its contents change. A region that
-          appears at the same moment as its text is not reliably announced - some screen
-          readers only watch regions that were already present. It is fixed, empty and
-          click-through until there is something to say. */}
-      <div className="export-ready-region" role="status" aria-live="polite">
-        {showExportReady && exportJob?.status === "done" && (
-        <div className="export-ready-toast">
-          <span className="export-ready-icon"><IconCheck /></span>
-          <a
-            className="export-ready-copy"
-            href={downloadExportUrl(datasetId, exportJob.id)}
-            onClick={() => setShowExportReady(false)}
-          >
-            <strong>{t("explorer.export_ready_title")}</strong>
-            <span>{t("explorer.export_ready_body")}</span>
-            <em>{t("explorer.export_ready_action")}</em>
-          </a>
-          <button
-            type="button"
-            className="export-ready-close"
-            onClick={() => setShowExportReady(false)}
-            aria-label={t("explorer.export_ready_close")}
-          >
-            <IconClose />
-          </button>
-        </div>
-        )}
-      </div>
       <div className="sheet-titlebar">
         <Link to="/" className="sheet-back">
           {t("common.back")}
@@ -816,6 +788,39 @@ export default function ExplorerPage() {
               </button>
             )}
           </>
+        )}
+      </div>
+
+      {/* The live region is always here and only its contents change: a region inserted
+          into the page at the same moment as its text is not reliably announced, because
+          some screen readers only watch regions that were already present. Until there
+          is something to say it is empty, takes no height and cannot be clicked.
+
+          It sits right under the toolbar rather than at a measured distance from the top
+          of the window, because the toolbar wraps to two rows on a narrower screen and
+          anything pinned below it by a fixed number would land on top of it. */}
+      <div className="export-ready-region" role="status" aria-live="polite">
+        {showExportReady && exportJob?.status === "done" && (
+        <div className="export-ready-toast">
+          <span className="export-ready-icon"><IconCheck /></span>
+          <a
+            className="export-ready-copy"
+            href={downloadExportUrl(datasetId, exportJob.id)}
+            onClick={() => setShowExportReady(false)}
+          >
+            <strong>{t("explorer.export_ready_title")}</strong>
+            <span>{t("explorer.export_ready_body")}</span>
+            <em>{t("explorer.export_ready_action")}</em>
+          </a>
+          <button
+            type="button"
+            className="export-ready-close"
+            onClick={() => setShowExportReady(false)}
+            aria-label={t("explorer.export_ready_close")}
+          >
+            <IconClose />
+          </button>
+        </div>
         )}
       </div>
 

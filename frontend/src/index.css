@@ -787,22 +787,28 @@ tbody tr:hover {
 }
 
 /* The region holds the toast's place in the accessibility tree whether or not there is
-   a toast in it, so it is fixed, empty and click-through by default.
+   a toast in it, so it is empty and click-through by default.
 
-   Bottom inline-end rather than top centre: the top of this page is the title bar and
-   then a dense row of tools, and a card pinned over them with no auto-dismiss blocks
-   whatever it covers until somebody closes it. The only thing under this corner is the
-   status bar's row-range label, which is text. */
+   Zero height: it is a flex item in the sheet's column, directly after the toolbar, and
+   the toast hangs out of it. So the card appears just under the tools the export was
+   started from - at the top, where the reader is already looking - and it follows the
+   toolbar down when that wraps to a second row, which a fixed offset from the top of
+   the window cannot do. It covers the first rows of the sheet, which no control lives
+   in, rather than the tools themselves: it has no auto-dismiss, so a card that waits to
+   be closed must not be sitting on a control. */
 .export-ready-region {
-  position: fixed;
+  position: relative;
+  height: 0;
   z-index: 140;
-  inset-block-end: 1rem;
-  inset-inline-end: 1rem;
   pointer-events: none;
 }
 
 .export-ready-toast {
+  position: absolute;
+  inset-block-start: 0.6rem;
+  inset-inline-end: 1rem;
   pointer-events: auto;
+  animation: export-ready-in 0.18s ease-out;
   display: flex;
   align-items: center;
   gap: 0.8rem;
@@ -814,6 +820,19 @@ tbody tr:hover {
   background: var(--surface);
   box-shadow: var(--shadow-md);
   color: var(--text);
+}
+
+@keyframes export-ready-in {
+  from {
+    opacity: 0;
+    transform: translateY(-0.4rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .export-ready-toast {
+    animation: none;
+  }
 }
 
 .export-ready-icon {
