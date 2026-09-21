@@ -197,3 +197,16 @@ def test_the_repeated_query_parameter_is_serialised_as_the_server_reads_it():
     and drops it, so the suggestions would come back empty with nothing reporting why."""
     source = (FRONTEND / "api" / "client.ts").read_text(encoding="utf-8")
     assert "paramsSerializer: { indexes: null }" in source
+
+# Every list of a column's values that a reader picks from. Showing these in one language
+# while the cells behind them are in another leaves nothing to match up: the count says
+# 316,253 next to a word that is nowhere on the screen.
+VALUE_PICKERS = ("ColumnHeaderMenu.tsx", "ValueAutocomplete.tsx")
+
+
+@pytest.mark.parametrize("name", VALUE_PICKERS)
+def test_a_list_of_values_reads_in_the_same_language_as_the_column(name):
+    source = (FRONTEND / "components" / name).read_text(encoding="utf-8")
+    assert "translateValue" in source, (
+        f"{name} lists a column's values without translating them"
+    )

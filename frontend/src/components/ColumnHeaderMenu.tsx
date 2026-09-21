@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 
 import { fetchDistinctValues, type ColumnKind, type FilterRule } from "../api/client";
 import { columnLabel, columnMeta, usesRawHeaders } from "../data/columnDictionary";
+import { translateValue } from "../data/valueDictionary";
 import ColumnKindIcon from "./ColumnKindIcon";
 import SemanticIcon from "./SemanticIcons";
 
@@ -284,7 +285,13 @@ export default function ColumnHeaderMenu({
                   values.map((v) => (
                     <label className="column-menu-value-row" key={v.value}>
                       <input type="checkbox" checked={selected.has(v.value)} onChange={() => toggleValue(v.value)} />
-                      <span className="column-menu-value-text" title={v.value}>{v.value}</span>
+                      {/* Reads in whichever language the column is showing, so the list
+                          and the cells behind it can be matched up. The stored value is
+                          in the tooltip, because that is what the filter compares
+                          against and what an export will contain. */}
+                      <span className="column-menu-value-text" title={v.value}>
+                        {translated ? translateValue(v.value, i18n.language) : v.value}
+                      </span>
                       <span className="column-menu-value-count">{v.count.toLocaleString()}</span>
                     </label>
                   ))
