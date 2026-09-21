@@ -1020,15 +1020,27 @@
 
 /* --- toasts ---------------------------------------------------------------- */
 
+/* Sticky rather than fixed, and at the top: these answer a control on this page, so they
+   belong beside it rather than in the corner where a browser puts its own status text.
+   Sticking to the scrolling panel keeps them clear of the topbar without being told how
+   tall it is, and keeps them on screen while the page scrolls under them. Zero height,
+   so nothing moves to make room. */
 .set-toasts {
-  position: fixed;
-  bottom: 20px;
-  inset-inline-start: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  position: sticky;
+  inset-block-start: 0;
+  height: 0;
   z-index: 120;
   pointer-events: none;
+}
+
+.set-toasts-stack {
+  position: absolute;
+  inset-block-start: 12px;
+  inset-inline-end: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
 }
 
 .set-toast {
@@ -1067,7 +1079,7 @@
 @keyframes set-toast-in {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(-6px);
   }
 }
 

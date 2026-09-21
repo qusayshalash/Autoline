@@ -32,21 +32,26 @@ export function Toaster({ children }: { children: ReactNode }) {
 
   return (
     <ToastContext.Provider value={push}>
-      {children}
+      {/* Before the page, not after it: the region sticks to the top of the scrolling
+          panel, and a sticky element only holds that edge from the start of the flow.
+          It has no height of its own, so it changes nothing about the layout. */}
       <div className="set-toasts" aria-live="polite" aria-atomic="false">
-        {toasts.map((x) => (
-          <div key={x.id} className={`set-toast ${x.kind}`} role="status">
-            {x.kind === "success" ? (
-              <IconCheckCircle />
-            ) : x.kind === "error" ? (
-              <IconAlert />
-            ) : (
-              <IconInfo />
-            )}
-            <span>{x.text}</span>
-          </div>
-        ))}
+        <div className="set-toasts-stack">
+          {toasts.map((x) => (
+            <div key={x.id} className={`set-toast ${x.kind}`} role="status">
+              {x.kind === "success" ? (
+                <IconCheckCircle />
+              ) : x.kind === "error" ? (
+                <IconAlert />
+              ) : (
+                <IconInfo />
+              )}
+              <span>{x.text}</span>
+            </div>
+          ))}
+        </div>
       </div>
+      {children}
     </ToastContext.Provider>
   );
 }
