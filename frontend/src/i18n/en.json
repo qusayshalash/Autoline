@@ -427,7 +427,9 @@
       "confirm_bulk_delete_other": "Permanently delete {{count}} users?",
       "select_all": "Select all users",
       "filter_by_role": "Filter by role",
-      "filter_by_status": "Filter by status"
+      "filter_by_status": "Filter by status",
+      "person": "User",
+      "no_email": "No email"
     },
     "roles": {
       "title": "Roles ({{count}})",

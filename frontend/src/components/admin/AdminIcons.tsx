@@ -265,3 +265,30 @@ export function IconArrow() {
     </svg>
   );
 }
+
+export function IconPencil() {
+  return (
+    <svg {...base}>
+      <path d="M13.4 3.3l3.3 3.3-9 9-4 .7.7-4z" />
+      <path d="M11.8 4.9l3.3 3.3" />
+    </svg>
+  );
+}
+
+export function IconEye() {
+  return (
+    <svg {...base}>
+      <path d="M1.8 10S5 4.4 10 4.4 18.2 10 18.2 10 15 15.6 10 15.6 1.8 10 1.8 10z" />
+      <circle cx="10" cy="10" r="2.4" />
+    </svg>
+  );
+}
+
+export function IconCrown() {
+  return (
+    <svg {...base}>
+      <path d="M2.6 6.2l3.1 3 4.3-5 4.3 5 3.1-3-1.4 9.1H4z" />
+      <path d="M4 15.3h12" />
+    </svg>
+  );
+}

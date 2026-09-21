@@ -16,7 +16,16 @@ import {
 } from "../../api/admin";
 import { apiErrorMessage } from "../../api/client";
 import { useAuth } from "../../auth/AuthContext";
-import { IconPlus, IconSearch, IconTrash, IconUsers } from "../../components/admin/AdminIcons";
+import {
+  IconCrown,
+  IconEye,
+  IconPencil,
+  IconPlus,
+  IconSearch,
+  IconShield,
+  IconTrash,
+  IconUsers,
+} from "../../components/admin/AdminIcons";
 import { AdminPanel, Drawer, StatusPill } from "../../components/admin/AdminUI";
 import { formatDateTime, formatRelative } from "../../data/datetime";
 import ErrorBanner from "../../components/ErrorBanner";
@@ -209,8 +218,7 @@ export default function AdminUsersPage() {
                     aria-label={t("admin.users.select_all") ?? ""}
                   />
                 </th>
-                <th>{t("admin.users.name")}</th>
-                <th>{t("admin.users.email")}</th>
+                <th>{t("admin.users.person")}</th>
                 <th>{t("admin.users.username")}</th>
                 <th>{t("admin.users.role")}</th>
                 <th>{t("admin.users.status")}</th>
@@ -231,13 +239,25 @@ export default function AdminUsersPage() {
                     />
                   </td>
                   <td>
-                    <button className="cell-link" onClick={() => setDetailId(u.id)}>
-                      {u.full_name || "—"}
+                    <button className="user-cell" onClick={() => setDetailId(u.id)}>
+                      <span className="admin-avatar" aria-hidden="true">
+                        {initialOf(u)}
+                      </span>
+                      <span className="user-cell-text">
+                        <strong>{u.full_name || u.username}</strong>
+                        <span className={u.email ? undefined : "muted"}>
+                          {u.email || t("admin.users.no_email")}
+                        </span>
+                      </span>
                     </button>
                   </td>
-                  <td>{u.email || "—"}</td>
                   <td className="mono">{u.username}</td>
-                  <td>{roles?.find((r) => r.slug === u.role)?.name ?? u.role}</td>
+                  <td>
+                    <span className="role-cell">
+                      <RoleIcon slug={u.role} />
+                      {roles?.find((r) => r.slug === u.role)?.name ?? u.role}
+                    </span>
+                  </td>
                   <td>
                     <StatusPill status={u.status} />
                   </td>
@@ -254,7 +274,7 @@ export default function AdminUsersPage() {
               ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={9} className="muted empty-row">
+                  <td colSpan={8} className="muted empty-row">
                     {t("admin.users.none")}
                   </td>
                 </tr>
@@ -543,4 +563,37 @@ function CreateUserDrawer({
       <ErrorBanner message={error} />
     </Drawer>
   );
+}
+
+/** The letter on somebody's disc.
+
+ *  Taken from the name they are listed under rather than always the username, so the
+ *  disc and the line beside it start with the same letter. A name that begins with a
+ *  character that has no case - Arabic, Hebrew, a digit - is left exactly as it is;
+ *  toUpperCase() is a no-op there rather than a mistake.
+ */
+function initialOf(u: AdminUser): string {
+  const source = (u.full_name || u.username || "?").trim();
+  return (Array.from(source)[0] ?? "?").toUpperCase();
+}
+
+/** A glyph for what a role can do, not for its name.
+
+ *  The four built-in roles get a mark of their own; anything an administrator has
+ *  created since gets the generic one, because guessing from a slug we have never seen
+ *  would put a shield on a role that cannot do anything.
+ */
+function RoleIcon({ slug }: { slug: string }) {
+  switch (slug) {
+    case "super_admin":
+      return <IconCrown />;
+    case "admin":
+      return <IconShield />;
+    case "editor":
+      return <IconPencil />;
+    case "viewer":
+      return <IconEye />;
+    default:
+      return <IconUsers />;
+  }
 }

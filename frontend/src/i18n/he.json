@@ -434,7 +434,9 @@
       "confirm_bulk_delete_other": "למחוק לצמיתות {{count}} משתמשים?",
       "select_all": "בחירת כל המשתמשים",
       "filter_by_role": "סינון לפי תפקיד",
-      "filter_by_status": "סינון לפי מצב"
+      "filter_by_status": "סינון לפי מצב",
+      "person": "משתמש",
+      "no_email": "אין דוא\"ל"
     },
     "roles": {
       "title": "תפקידים ({{count}})",

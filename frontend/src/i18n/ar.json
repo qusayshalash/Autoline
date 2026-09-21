@@ -455,7 +455,9 @@
       "confirm_bulk_delete_other": "حذف {{count}} مستخدم نهائيًا؟",
       "select_all": "تحديد كل المستخدمين",
       "filter_by_role": "تصفية حسب الدور",
-      "filter_by_status": "تصفية حسب الحالة"
+      "filter_by_status": "تصفية حسب الحالة",
+      "person": "المستخدم",
+      "no_email": "البريد غير مضاف"
     },
     "roles": {
       "title": "الأدوار ({{count}})",

@@ -185,6 +185,81 @@
   justify-content: center;
 }
 
+/* Who this row is about, in one cell: the disc, the name they are listed under, and the
+   address underneath. Three columns saying one thing became one saying it once.
+
+   A button rather than a link with a button inside it: the whole block opens the drawer,
+   so the target is the block. */
+.user-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+/* Tinted rather than grey: down a column of them the disc is what the eye lands on
+   first, and --primary-soft-text carries the contrast in both themes, where the plain
+   accent on a pale ground does not. */
+.user-cell .admin-avatar {
+  background: var(--primary-soft);
+  color: var(--primary-soft-text);
+}
+
+.user-cell-text {
+  display: grid;
+  min-width: 0;
+  gap: 0.05rem;
+  line-height: 1.3;
+}
+
+.user-cell-text strong {
+  font-weight: 600;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.user-cell-text span {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.user-cell:hover strong {
+  color: var(--primary);
+}
+
+.user-cell:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* The glyph carries no information the word beside it does not; it is there so a role
+   can be told from the next one down the column without reading. Muted for that reason:
+   louder than the name it labels would be the wrong way round. */
+.role-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.role-cell svg {
+  flex: none;
+  width: 15px;
+  height: 15px;
+  color: var(--text-muted);
+}
+
 .admin-avatar {
   flex: none;
   display: inline-flex;
