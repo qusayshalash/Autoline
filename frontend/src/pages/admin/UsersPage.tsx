@@ -261,10 +261,10 @@ export default function AdminUsersPage() {
                   <td>
                     <StatusPill status={u.status} />
                   </td>
-                  <td title={formatDateTime(u.last_login_at, i18n.language)}>
+                  <td className="meta" title={formatDateTime(u.last_login_at, i18n.language)}>
                     {u.last_login_at ? formatRelative(u.last_login_at, t, i18n.language) : "—"}
                   </td>
-                  <td>{formatDateTime(u.created_at, i18n.language)}</td>
+                  <td className="meta">{formatDateTime(u.created_at, i18n.language)}</td>
                   <td className="row-actions">
                     <button className="link-btn" onClick={() => setDetailId(u.id)}>
                       {t("admin.users.view")}
