@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../auth/AuthContext";
 import { ADMIN_ACCESS_PERMISSIONS } from "../auth/permissionRoutes";
@@ -94,16 +94,21 @@ export default function Sidebar() {
 
   return (
     <aside className={collapsed ? "sidebar collapsed" : "sidebar"}>
-      <div className="sidebar-head">
-        <svg className="sidebar-logo" width="30" height="30" viewBox="0 0 32 32" aria-hidden="true">
-          <rect x="2" y="2" width="28" height="28" rx="8" fill="#2468ed" />
-          <rect x="8" y="8" width="6.5" height="6.5" rx="2" fill="#fff" />
-          <rect x="17.5" y="8" width="6.5" height="6.5" rx="2" fill="#fff" opacity="0.82" />
-          <rect x="8" y="17.5" width="6.5" height="6.5" rx="2" fill="#fff" opacity="0.68" />
-          <rect x="17.5" y="17.5" width="6.5" height="6.5" rx="2" fill="#fff" opacity="0.92" />
-        </svg>
-        {!collapsed && <span className="sidebar-title">{t("app_title")}</span>}
-      </div>
+      {/* The mark is the way back to the files, which is what people try first - and
+          where every other screen in the app is reached from. It is a link only for
+          somebody allowed to see the files; for anyone else it stays the wordmark it
+          looks like, rather than a control that leads to a refusal. */}
+      {can("datasets.view") ? (
+        <Link className="sidebar-head" to="/" title={t("nav.datasets") ?? ""}>
+          <AppMark />
+          {!collapsed && <span className="sidebar-title">{t("app_title")}</span>}
+        </Link>
+      ) : (
+        <div className="sidebar-head">
+          <AppMark />
+          {!collapsed && <span className="sidebar-title">{t("app_title")}</span>}
+        </div>
+      )}
 
       <button
         type="button"
@@ -181,5 +186,19 @@ export default function Sidebar() {
         </div>
       </div>
     </aside>
+  );
+}
+
+/** The application's mark. Decorative wherever it appears: the text beside it, or the
+ *  link's own title, is what a screen reader announces. */
+function AppMark() {
+  return (
+    <svg className="sidebar-logo" width="30" height="30" viewBox="0 0 32 32" aria-hidden="true">
+      <rect x="2" y="2" width="28" height="28" rx="8" fill="#2468ed" />
+      <rect x="8" y="8" width="6.5" height="6.5" rx="2" fill="#fff" />
+      <rect x="17.5" y="8" width="6.5" height="6.5" rx="2" fill="#fff" opacity="0.82" />
+      <rect x="8" y="17.5" width="6.5" height="6.5" rx="2" fill="#fff" opacity="0.68" />
+      <rect x="17.5" y="17.5" width="6.5" height="6.5" rx="2" fill="#fff" opacity="0.92" />
+    </svg>
   );
 }

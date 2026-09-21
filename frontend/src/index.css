@@ -160,6 +160,25 @@ button {
   gap: 0.6rem;
   padding: 0 0.25rem 0.9rem;
   min-height: 46px;
+  /* it is a link when the reader may see the files, and must not pick up the underline
+     and colour every other link in the sidebar has */
+  color: inherit;
+  text-decoration: none;
+}
+
+/* a wordmark that leads somewhere says so on approach, and no louder than that */
+a.sidebar-head:hover .sidebar-title {
+  color: var(--primary);
+}
+
+a.sidebar-head:hover .sidebar-logo {
+  opacity: 0.88;
+}
+
+a.sidebar-head:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+  border-radius: 10px;
 }
 
 .sidebar-logo {
