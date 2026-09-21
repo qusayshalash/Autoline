@@ -45,6 +45,15 @@ const PHRASES: Record<string, Term> = {
   'קיי גי מוביליט': { ar: "كي جي موبيليتي", en: "KG Mobility" },
   'דרום אפ': { ar: "جنوب أفريقيا", en: "South Africa" },
 
+  'גרייט וול': { ar: "جريت وول", en: "Great Wall" },
+  'אסטון מרטין': { ar: "أستون مارتن", en: "Aston Martin" },
+  'אל אי וי סי': { ar: "إل إي في سي", en: "LEVC" },
+  'אס דאבל יו אמ': { ar: "إس دبليو إم", en: "SWM" },
+  'דאבל יו אם איי': { ar: "دبليو إم آي", en: "WMI" },
+  'איי אם': { ar: "آي إم", en: "IM" },
+  'די אס': { ar: "دي إس", en: "DS" },
+  'די.אס': { ar: "دي إس", en: "DS" },
+
   // multi-word colour values that don't read well token by token
   'לא ידוע': { ar: "غير معروف", en: "Unknown" },
   'שן פיל': { ar: "عاجي", en: "Ivory" },
@@ -121,6 +130,7 @@ const WORDS: Record<string, Term> = {
   'סיאט': { ar: "سيات", en: "Seat" },
   'סוזוקי': { ar: "سوزوكي", en: "Suzuki" },
   'רנו': { ar: "رينو", en: "Renault" },
+  'רינו': { ar: "رينو", en: "Renault" },
   'סובארו': { ar: "سوبارو", en: "Subaru" },
   'שברולט': { ar: "شفروليه", en: "Chevrolet" },
   'פולקסווגן': { ar: "فولكسفاغن", en: "Volkswagen" },
@@ -236,6 +246,71 @@ const WORDS: Record<string, Term> = {
   "ארה''ב": { ar: "أمريكا", en: "USA" },
   'אודי': { ar: "أودي", en: "Audi" },
   'סלוב': { ar: "سلوفاكيا", en: "Slovakia" },
+  'וויה': { ar: "فوياه", en: "Voyah" },
+  'וואי': { ar: "ويي", en: "WEY" },
+  'פוטון': { ar: "فوتون", en: "Foton" },
+  'פולסטאר': { ar: "بولستار", en: "Polestar" },
+  'מזארטי': { ar: "مازيراتي", en: "Maserati" },
+  'פיגו': { ar: "بيجو", en: "Peugeot" },
+  'אוואטר': { ar: "أفاتار", en: "Avatr" },
+  'איון': { ar: "أيون", en: "Aion" },
+  'יודו': { ar: "يودو", en: "Yudo" },
+  'בנטלי': { ar: "بنتلي", en: "Bentley" },
+  'פרארי': { ar: "فيراري", en: "Ferrari" },
+  'האמר': { ar: "هامر", en: "Hummer" },
+  'נטע': { ar: "نيتا", en: "Neta" },
+  'סאאב': { ar: "ساب", en: "Saab" },
+  'באייק': { ar: "بايك", en: "BAIC" },
+  'פאריזון': { ar: "فاريزون", en: "Farizon" },
+  'מאן': { ar: "مان", en: "MAN" },
+  'למבורגיני': { ar: "لامبورغيني", en: "Lamborghini" },
+  'דייהו': { ar: "دايو", en: "Daewoo" },
+  'גיפ': { ar: "جيب", en: "Jeep" },
+  'סנטרו': { ar: "سنترو", en: "Centro" },
+  'אלפין': { ar: "ألبين", en: "Alpine" },
+  'איווקו': { ar: "إيفيكو", en: "Iveco" },
+  'רולס': { ar: "رولز", en: "Rolls" },
+  'רויס': { ar: "رويس", en: "Royce" },
+  'דאיון': { ar: "دايون", en: "Dayun" },
+  'לינקולן': { ar: "لينكولن", en: "Lincoln" },
+  'לוטוס': { ar: "لوتس", en: "Lotus" },
+  'אקסלנטיקס': { ar: "إكسلانتكس", en: "Exlantix" },
+  'מיני': { ar: "ميني", en: "Mini" },
+  'אינאוס': { ar: "إينيوس", en: "Ineos" },
+  'קארמה': { ar: "كارما", en: "Karma" },
+  'ארקפוקס': { ar: "أركفوكس", en: "Arcfox" },
+  'ניאו': { ar: "نيو", en: "NIO" },
+  'מודרן': { ar: "مودرن", en: "Modern" },
+  'ואז': { ar: "فاز", en: "VAZ" },
+  'טלקו': { ar: "تيلكو", en: "Telco" },
+  'מקלארין': { ar: "ماكلارين", en: "McLaren" },
+  'מורגן': { ar: "مورغان", en: "Morgan" },
+  'לנציה': { ar: "لانشيا", en: "Lancia" },
+  'גי.אי.סי': { ar: "جي إيه سي", en: "GAC" },
+  'גיי.איי.סי': { ar: "جي إيه سي", en: "GAC" },
+  'די.אף.אס.קיי': { ar: "دي إف إس كي", en: "DFSK" },
+  'אמ.סי.סי.': { ar: "إم سي سي", en: "MCC" },
+  'אל.טי.איי.': { ar: "إل تي آي", en: "LTI" },
+  "ג'.מ": { ar: "جي إم", en: "GM" },
+  'ג.מ.': { ar: "جي إم", en: "GM" },
+  "ג'.מ.ב.ה": { ar: "جي إم بي إتش", en: "GmbH" },
+  'סלובניה': { ar: "سلوفينيا", en: "Slovenia" },
+  'סרביה': { ar: "صربيا", en: "Serbia" },
+  'בלגיקה': { ar: "بلجيكا", en: "Belgium" },
+  'בלגי': { ar: "بلجيكا", en: "Belgium" },
+  'שודיה': { ar: "السويد", en: "Sweden" },
+  'אוסטרי': { ar: "النمسا", en: "Austria" },
+  'פינלנד': { ar: "فنلندا", en: "Finland" },
+  'ארגנ': { ar: "الأرجنتين", en: "Argentina" },
+  'מקס': { ar: "المكسيك", en: "Mexico" },
+  'ספ': { ar: "إسبانيا", en: "Spain" },
+  'אפריקה': { ar: "أفريقيا", en: "Africa" },
+  'אפר': { ar: "أفريقيا", en: "Africa" },
+  'דרום': { ar: "جنوب", en: "South" },
+  'ד': { ar: "جنوب", en: "South" },
+  'ד.': { ar: "جنوب", en: "South" },
+  "פורט'": { ar: "البرتغال", en: "Portugal" },
+  'רכב': { ar: "مركبة", en: "vehicle" },
   'אינדיגו': { ar: "نيلي", en: "Indigo" },
   'אחר': { ar: "أخرى", en: "Other" },
 };
@@ -251,7 +326,7 @@ function pick(term: Term, language: string): string {
   return language.startsWith("ar") ? term.ar : term.en;
 }
 
-const SEPARATOR_RE = /[\s/\-()]/;
+const SEPARATOR_RE = /[\s/\-()_]/;
 
 // A character the data cannot contain, used to stand in for a phrase already translated.
 const HOLD = "\u0000";
@@ -306,7 +381,7 @@ export function translateValue(value: string, language: string): string {
       working.slice(0, at) + HOLD + (held.length - 1) + HOLD + working.slice(at + known.length);
   }
 
-  const parts = working.split(/([\s/\-()]+)/);
+  const parts = working.split(/([\s/\-()_]+)/);
   const out: string[] = [];
   for (const part of parts) {
     const kept = part.startsWith(HOLD) ? held[Number(part.slice(1, -1))] : undefined;

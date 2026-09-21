@@ -210,3 +210,42 @@ def test_a_list_of_values_reads_in_the_same_language_as_the_column(name):
     assert "translateValue" in source, (
         f"{name} lists a column's values without translating them"
     )
+
+# ---- the dictionary itself -----------------------------------------------------------
+
+ENTRY = re.compile(
+    r"""^\s*(?P<q>['"])(?P<hebrew>.+?)(?P=q): \{ ar: "(?P<ar>[^"]*)", en: "(?P<en>[^"]*)" \},""",
+    re.M,
+)
+HEBREW_LETTER = re.compile(r"[֐-׿]")
+
+
+def entries() -> list[tuple[str, str, str]]:
+    source = (FRONTEND / "data" / "valueDictionary.ts").read_text(encoding="utf-8")
+    found = [(m.group("hebrew"), m.group("ar"), m.group("en")) for m in ENTRY.finditer(source)]
+    assert len(found) > 200, f"only {len(found)} entries parsed - has the shape changed?"
+    return found
+
+
+def test_no_value_is_defined_twice():
+    """A repeated key is not an error at runtime: the later one silently wins, and the
+    reading somebody carefully chose is simply gone. TypeScript does object to it, which
+    is exactly why this is worth a test - a dictionary edited without a build catches
+    nothing."""
+    seen: dict[str, int] = {}
+    for hebrew, _, _ in entries():
+        seen[hebrew] = seen.get(hebrew, 0) + 1
+    repeated = sorted(k for k, n in seen.items() if n > 1)
+    assert not repeated, "defined more than once: " + ", ".join(repeated)
+
+
+def test_every_entry_says_something_in_both_languages():
+    empty = [h for h, ar, en in entries() if not ar.strip() or not en.strip()]
+    assert not empty, "entries with a blank reading: " + ", ".join(empty)
+
+
+def test_no_entry_translates_hebrew_into_hebrew():
+    """The failure a copy-paste produces, and the one that looks fine in the file: the
+    value renders unchanged and reads as a word the dictionary has never heard of."""
+    untranslated = [h for h, ar, en in entries() if HEBREW_LETTER.search(ar + en)]
+    assert not untranslated, "still Hebrew on the other side: " + ", ".join(untranslated)
