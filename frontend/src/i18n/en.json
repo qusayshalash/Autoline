@@ -273,7 +273,8 @@
     "confirm_title": "Are you sure?",
     "list_separator": ", ",
     "close": "Close",
-    "help": "Help"
+    "help": "Help",
+    "saving": "Saving..."
   },
   "theme": {
     "label": "Theme",
@@ -462,11 +463,20 @@
       "direction": "Direction",
       "enabled": "Enabled",
       "default": "Default",
-      "note": "Only languages the build ships full translations for can be enabled. Enabling one without a bundle would show untranslated keys.",
+      "note": "Enabling a language with no translation will show untranslated keys.",
       "cannot_disable_default": "The default language cannot be disabled",
       "cannot_disable_last": "The last enabled language cannot be disabled",
       "enable": "Enable {{language}}",
-      "make_default": "Make {{language}} the default"
+      "make_default": "Make {{language}} the default",
+      "available": "Available languages",
+      "direction_rtl": "Right to left",
+      "direction_ltr": "Left to right",
+      "state_on": "Enabled",
+      "state_off": "Disabled",
+      "default_stays_on": "The default language always stays enabled.",
+      "save_changes": "Save changes",
+      "activation": "Activation",
+      "writing_direction": "Writing direction"
     },
     "files": {
       "title": "Files ({{count}})",

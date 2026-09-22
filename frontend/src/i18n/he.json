@@ -275,7 +275,8 @@
     "confirm_title": "לאשר?",
     "list_separator": ", ",
     "close": "סגור",
-    "help": "הסבר"
+    "help": "הסבר",
+    "saving": "שומר..."
   },
   "theme": {
     "label": "ערכת נושא",
@@ -471,11 +472,20 @@
       "direction": "כיוון",
       "enabled": "פעילה",
       "default": "ברירת מחדל",
-      "note": "ניתן להפעיל רק שפות שהמערכת נשלחת עבורן עם תרגום מלא.",
+      "note": "הפעלת שפה ללא תרגום תציג מפתחות לא מתורגמים.",
       "cannot_disable_default": "לא ניתן לכבות את שפת ברירת המחדל",
       "cannot_disable_last": "לא ניתן לכבות את השפה הפעילה האחרונה",
       "enable": "הפעלת {{language}}",
-      "make_default": "הגדרת {{language}} כברירת מחדל"
+      "make_default": "הגדרת {{language}} כברירת מחדל",
+      "available": "שפות זמינות",
+      "direction_rtl": "מימין לשמאל",
+      "direction_ltr": "משמאל לימין",
+      "state_on": "מופעלת",
+      "state_off": "מושבתת",
+      "default_stays_on": "שפת ברירת המחדל נשארת מופעלת תמיד.",
+      "save_changes": "שמירת השינויים",
+      "activation": "הפעלה",
+      "writing_direction": "כיוון כתיבה"
     },
     "files": {
       "title": "קבצים ({{count}})",

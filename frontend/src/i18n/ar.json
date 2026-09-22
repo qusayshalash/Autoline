@@ -281,7 +281,8 @@
     "confirm_title": "تأكيد",
     "list_separator": "، ",
     "close": "إغلاق",
-    "help": "شرح"
+    "help": "شرح",
+    "saving": "جارٍ الحفظ..."
   },
   "theme": {
     "label": "المظهر",
@@ -498,11 +499,20 @@
       "direction": "الاتجاه",
       "enabled": "مفعّلة",
       "default": "الافتراضية",
-      "note": "اللغات المتاحة هي التي يشحن معها البرنامج ترجمات كاملة. تفعيل لغة بلا ترجمة سيعرض مفاتيح غير مترجمة.",
+      "note": "تفعيل لغة بلا ترجمة سيُظهر مفاتيح غير مترجمة.",
       "cannot_disable_default": "لا يمكن تعطيل اللغة الافتراضية",
       "cannot_disable_last": "لا يمكن تعطيل آخر لغة مفعّلة",
       "enable": "تفعيل {{language}}",
-      "make_default": "جعل {{language}} اللغة الافتراضية"
+      "make_default": "جعل {{language}} اللغة الافتراضية",
+      "available": "اللغات المتاحة",
+      "direction_rtl": "من اليمين إلى اليسار",
+      "direction_ltr": "من اليسار إلى اليمين",
+      "state_on": "مفعّلة",
+      "state_off": "معطّلة",
+      "default_stays_on": "اللغة الافتراضية تبقى مفعّلة دائمًا.",
+      "save_changes": "حفظ التغييرات",
+      "activation": "التفعيل",
+      "writing_direction": "اتجاه الكتابة"
     },
     "files": {
       "title": "الملفات ({{count}})",

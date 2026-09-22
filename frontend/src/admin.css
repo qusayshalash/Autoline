@@ -1385,3 +1385,265 @@
   .compaction-row { grid-template-columns: 1fr auto; }
   .compaction-action { grid-column: 1 / -1; }
 }
+
+/* --- languages ------------------------------------------------------------- */
+
+/* A count that belongs to the title rather than to the row of actions: it says how many
+   things the panel is about, so it sits where the eye already is. */
+.count-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.4rem;
+  height: 1.4rem;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background: var(--primary-soft);
+  color: var(--primary-soft-text);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+/* Said once, above the table it is about. A muted line under the title read as a caption
+   nobody had to finish; this is a consequence worth reading before touching a switch. */
+.admin-callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  margin: 0 0 0.9rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: 10px;
+  background: var(--primary-soft);
+  color: var(--primary-soft-text);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.admin-callout svg {
+  flex: none;
+  width: 17px;
+  height: 17px;
+  margin-top: 0.1rem;
+}
+
+/* The default row is the one the app opens in, and the tint says so before the radio on
+   the far side of the table is read. The bar on the leading edge is what survives being
+   looked at quickly. */
+.lang-table tr.is-default td {
+  background: var(--primary-soft);
+}
+
+.lang-table tr.is-default td:first-child {
+  box-shadow: inset 3px 0 0 var(--primary);
+}
+
+[dir="rtl"] .lang-table tr.is-default td:first-child {
+  box-shadow: inset -3px 0 0 var(--primary);
+}
+
+.lang-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+/* The language's own first letter, in its own script: the tile reads as that language
+   rather than as a label about it. */
+.lang-mark {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--surface-muted);
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.lang-table tr.is-default .lang-mark {
+  background: var(--primary);
+  color: #fff;
+}
+
+.lang-names {
+  display: grid;
+  gap: 0.05rem;
+  line-height: 1.3;
+}
+
+.lang-names strong {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.lang-names > span {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.lang-chip {
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+/* A code is typed and compared, not read as a word, so it gets a field of its own. */
+.code-chip {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border-radius: 7px;
+  background: var(--surface-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.84rem;
+}
+
+/* The direction spelled out, with the two letters underneath for whoever knows them
+   already - the abbreviation alone is jargon to everybody else. */
+.lang-direction {
+  display: grid;
+  gap: 0.05rem;
+  line-height: 1.3;
+}
+
+.lang-direction .mono {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.lang-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+/* A switch, because this is a state being turned on and off rather than a box being
+   ticked - and the word beside it says which, since the position of a switch is not
+   self-evident to everyone. */
+.switch {
+  position: relative;
+  flex: none;
+  display: inline-flex;
+  width: 40px;
+  height: 22px;
+}
+
+.switch input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.switch-track {
+  flex: 1;
+  border-radius: 999px;
+  background: var(--border-strong);
+  transition: background 0.16s ease;
+}
+
+.switch-track::after {
+  content: "";
+  position: absolute;
+  inset-block-start: 3px;
+  inset-inline-start: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  transition: translate 0.16s ease;
+}
+
+.switch input:checked + .switch-track {
+  background: var(--primary);
+}
+
+.switch input:checked + .switch-track::after {
+  translate: 18px 0;
+}
+
+[dir="rtl"] .switch input:checked + .switch-track::after {
+  translate: -18px 0;
+}
+
+.switch input:focus-visible + .switch-track {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.switch input:disabled {
+  cursor: not-allowed;
+}
+
+.switch-state {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.switch-state.on {
+  color: var(--success);
+}
+
+.lang-lock {
+  display: inline-grid;
+  place-items: center;
+  color: var(--text-muted);
+}
+
+.lang-lock svg {
+  width: 15px;
+  height: 15px;
+}
+
+.lang-radio {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+.lang-radio:disabled {
+  cursor: not-allowed;
+}
+
+/* The rule that governs the table, stated under it, next to the controls that commit
+   the change - rather than only inside a tooltip on a switch that cannot be pressed. */
+.lang-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 1rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--border);
+}
+
+.lang-foot-note {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.lang-foot-note svg {
+  flex: none;
+  width: 15px;
+  height: 15px;
+}
+
+.lang-foot-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}

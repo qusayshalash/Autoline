@@ -292,3 +292,12 @@ export function IconCrown() {
     </svg>
   );
 }
+
+export function IconLock() {
+  return (
+    <svg {...base}>
+      <rect x="4" y="8.6" width="12" height="8.4" rx="2" />
+      <path d="M6.9 8.6V6.4a3.1 3.1 0 016.2 0v2.2" />
+    </svg>
+  );
+}
