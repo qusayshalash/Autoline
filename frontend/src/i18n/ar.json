@@ -526,7 +526,8 @@
       "rows": "الصفوف",
       "columns": "الأعمدة",
       "size": "الحجم",
-      "created": "تاريخ الرفع"
+      "created": "تاريخ الرفع",
+      "delete_file": "حذف الملف {{name}}"
     },
     "activity": {
       "title": "سجل النشاط ({{count}})",

@@ -853,6 +853,30 @@
   color: var(--warning);
 }
 
+/* The size, and how much of the total it is. The bar is the point: a column of sizes in
+   mixed units cannot be compared by eye, and this page's whole job is to say which files
+   the disk is holding. */
+.admin-table td.file-size {
+  font-variant-numeric: tabular-nums;
+}
+
+.file-share {
+  display: block;
+  width: 72px;
+  height: 4px;
+  margin-top: 0.3rem;
+  border-radius: 999px;
+  background: var(--surface-muted);
+  overflow: hidden;
+}
+
+.file-share > span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--primary);
+}
+
 /* --- activity feed --- */
 
 .activity-list {

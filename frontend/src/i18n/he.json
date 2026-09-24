@@ -499,7 +499,8 @@
       "rows": "שורות",
       "columns": "עמודות",
       "size": "גודל",
-      "created": "הועלה"
+      "created": "הועלה",
+      "delete_file": "מחיקת {{name}}"
     },
     "activity": {
       "title": "יומן פעילות ({{count}})",

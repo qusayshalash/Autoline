@@ -490,7 +490,8 @@
       "rows": "Rows",
       "columns": "Columns",
       "size": "Size",
-      "created": "Uploaded"
+      "created": "Uploaded",
+      "delete_file": "Delete {{name}}"
     },
     "activity": {
       "title": "Activity log ({{count}})",

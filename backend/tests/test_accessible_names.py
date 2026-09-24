@@ -193,3 +193,46 @@ def test_every_label_is_attached_to_something():
             line = src[: match.start()].count("\n") + 1
             loose.append(f"{relative(path)}:{line}  {' '.join(body.split())[:60]}")
     assert not loose, "labels attached to nothing:\n" + "\n".join(loose)
+
+# An icon standing in for a word. `<button>` is normally named by the text inside it, so
+# it is left out of CONTROLS - but a button holding only an icon has no text, and the
+# icon's own svg is aria-hidden. The file table's delete button was one: a red bin, in
+# every row, announced as "button".
+ICON_ELEMENT = re.compile(r"<(Icon[A-Za-z0-9]*|[A-Z][A-Za-z0-9]*Icon)\s*/>")
+
+
+def icon_only_buttons(src: str):
+    """Yield (line, tag) for each <button> whose whole content is icon elements."""
+    for line, position, tag in tags(src, ("button",)):
+        if tag.rstrip().endswith("/>"):
+            continue  # self-closing: no content to judge
+        opened = position + len(tag)
+        closed = src.find("</button>", opened)
+        if closed < 0:
+            continue
+        body = src[opened:closed]
+        if not ICON_ELEMENT.search(body):
+            continue
+        if ICON_ELEMENT.sub("", body).strip():
+            continue  # there is text beside the icon, and the text is the name
+        yield line, tag
+
+
+def test_the_scan_finds_the_buttons_that_do_have_text():
+    """A guard on this guard: a button with a word in it must not be reported, or the
+    check below would demand a label on most of the app."""
+    with_text = '<button onClick={() => go()}><IconPlus />{t("add")}</button>'
+    assert not list(icon_only_buttons(with_text))
+    without = '<button onClick={() => go()}><IconTrash /></button>'
+    assert list(icon_only_buttons(without))
+
+
+def test_a_button_that_is_only_an_icon_says_what_it_does():
+    nameless = []
+    for path in sources():
+        for line, tag in icon_only_buttons(code(path)):
+            if not named(tag):
+                nameless.append(f"{relative(path)}:{line}  {' '.join(tag.split())[:80]}")
+    assert not nameless, "icon-only buttons announced as just \"button\":\n" + "\n".join(
+        nameless
+    )

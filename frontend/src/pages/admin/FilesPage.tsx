@@ -83,23 +83,41 @@ export default function FilesPage() {
               {filtered.map((d) => (
                 <tr key={d.id}>
                   <td>
-                    <Link to={`/datasets/${d.id}/explore`} className="cell-link">
+                    {/* A filename carries its own direction: "QA_مركبات.csv" put its
+                        extension at the wrong end of an Arabic page without this. */}
+                    <Link to={`/datasets/${d.id}/explore`} className="cell-link" dir="auto">
                       {d.original_filename}
                     </Link>
                   </td>
                   <td>
-                    <span className={`status-pill status-${d.status === "ready" ? "active" : "pending"}`}>
+                    <span className={`status-pill status-${statusTone(d.status)}`}>
                       {t(`datasets.status_${d.status}`, { defaultValue: d.status })}
                     </span>
                   </td>
-                  <td className="mono">{(d.row_count_raw ?? 0).toLocaleString()}</td>
-                  <td className="mono">{d.columns?.length ?? 0}</td>
-                  <td className="mono">{formatBytes(d.raw_file_bytes)}</td>
-                  <td>{formatDateTime(d.created_at, i18n.language)}</td>
+                  <td className="num">{(d.row_count_raw ?? 0).toLocaleString(i18n.language)}</td>
+                  <td className="num">{d.columns?.length ?? 0}</td>
+                  <td className="file-size">
+                    <span>{formatBytes(d.raw_file_bytes)}</span>
+                    {/* Which files the disk is actually holding. This page exists to
+                        answer that, and a column of sizes in mixed units does not -
+                        826 MB beside 3 KB reads as two numbers, not as all of it
+                        beside none of it. */}
+                    <span className="file-share" aria-hidden="true">
+                      <span
+                        style={{
+                          inlineSize: totalBytes
+                            ? `${Math.max(((d.raw_file_bytes ?? 0) / totalBytes) * 100, 1)}%`
+                            : "0%",
+                        }}
+                      />
+                    </span>
+                  </td>
+                  <td className="meta">{formatDateTime(d.created_at, i18n.language)}</td>
                   <td className="row-actions">
                     {can("datasets.delete") && (
                       <button
                         className="link-btn danger"
+                        aria-label={t("admin.files.delete_file", { name: d.original_filename }) ?? ""}
                         onClick={async () => {
                           if (await confirm({ body: t("datasets.confirm_delete") })) {
                             remove.mutate(d.id);
@@ -125,4 +143,17 @@ export default function FilesPage() {
       </AdminPanel>
     </div>
   );
+}
+
+/**
+ * Which pill a status wears.
+ *
+ * Anything that was not "ready" wore the same amber, so a file whose import failed
+ * looked like one still waiting to be confirmed - the difference between "do something"
+ * and "wait".
+ */
+function statusTone(status: string): string {
+  if (status === "ready") return "active";
+  if (status === "error") return "suspended";
+  return "pending";
 }
