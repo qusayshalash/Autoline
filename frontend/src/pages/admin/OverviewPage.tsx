@@ -14,7 +14,7 @@ import {
   IconUsers,
 } from "../../components/admin/AdminIcons";
 import { AdminPanel, KpiCard, formatBytes } from "../../components/admin/AdminUI";
-import { formatDateTime } from "../../data/datetime";
+import { formatDateTime, formatRelative } from "../../data/datetime";
 import QueryState from "../../components/QueryState";
 import LoadingState from "../../components/LoadingState";
 import ActivityRow from "./ActivityRow";
@@ -50,28 +50,46 @@ export default function OverviewPage() {
 
   return (
     <div className="admin-page">
-      {/* Three figures, not eight.
-       *
-       * The grid used to carry a card each for roles, permissions and enabled
-       * languages - facts you check once and then know - next to two cards saying the
-       * same thing about users, and a third saying what the panel below it says at
-       * greater length. Eight cards of equal weight rank nothing. These three are the
-       * ones that move: who is here, what is stored, how much room it takes.
-       */}
       <div className="kpi-grid">
         <KpiCard
           lead
           icon={<IconUsers />}
           label={t("admin.overview.users_total")}
-          value={overview.users_total.toLocaleString(i18n.language)}
+          value={overview.users_total.toLocaleString()}
           hint={t("admin.overview.inactive_hint", { count: inactive })}
           share={activeShare}
+        />
+        <KpiCard
+          accent="success"
+          icon={<IconUsers />}
+          label={t("admin.overview.users_active")}
+          value={overview.users_active.toLocaleString()}
+          hint={`${Math.round(activeShare)}%`}
+          share={activeShare}
+        />
+        <KpiCard
+          accent="primary"
+          icon={<IconShield />}
+          label={t("admin.overview.roles")}
+          value={overview.roles_total.toLocaleString()}
+        />
+        <KpiCard
+          accent="primary"
+          icon={<IconKey />}
+          label={t("admin.overview.permissions")}
+          value={overview.permissions_total.toLocaleString()}
+        />
+        <KpiCard
+          accent="warning"
+          icon={<IconGlobe />}
+          label={t("admin.overview.languages")}
+          value={overview.languages_enabled.toLocaleString()}
         />
         <KpiCard
           accent="primary"
           icon={<IconDatabase />}
           label={t("admin.overview.files")}
-          value={overview.files_total.toLocaleString(i18n.language)}
+          value={overview.files_total.toLocaleString()}
           hint={t("admin.overview.rows_hint", {
             formatted: overview.files_rows.toLocaleString(i18n.language),
           })}
@@ -82,27 +100,23 @@ export default function OverviewPage() {
           label={t("admin.overview.files_size")}
           value={formatBytes(overview.files_bytes)}
         />
-      </div>
-
-      {/* The settled facts, on one line. Still here, no longer competing with the
-          figures above for the same attention. */}
-      <div className="config-strip">
-        <span className="config-strip-label">{t("admin.overview.configuration")}</span>
-        <Link className="config-item" to="/admin/roles">
-          <IconShield />
-          <strong>{overview.roles_total.toLocaleString(i18n.language)}</strong>
-          {t("admin.overview.roles")}
-        </Link>
-        <Link className="config-item" to="/admin/roles">
-          <IconKey />
-          <strong>{overview.permissions_total.toLocaleString(i18n.language)}</strong>
-          {t("admin.overview.permissions")}
-        </Link>
-        <Link className="config-item" to="/admin/languages">
-          <IconGlobe />
-          <strong>{overview.languages_enabled.toLocaleString(i18n.language)}</strong>
-          {t("admin.overview.languages")}
-        </Link>
+        <KpiCard
+          accent="success"
+          icon={<IconActivity />}
+          label={t("admin.overview.last_activity")}
+          value={
+            overview.last_activity
+              ? t(`admin.actions.${overview.last_activity.action}`, {
+                  defaultValue: overview.last_activity.action,
+                })
+              : "—"
+          }
+          hint={
+            overview.last_activity
+              ? formatRelative(overview.last_activity.at, t, i18n.language)
+              : undefined
+          }
+        />
       </div>
 
       <div className="admin-columns">
@@ -128,85 +142,54 @@ export default function OverviewPage() {
 
         <AdminPanel icon={<IconSettings />} title={t("admin.overview.system_status")}>
           {system ? (
-            <>
-              <dl className="detail-list">
-                <div>
-                  <dt>{t("admin.system.status")}</dt>
-                  <dd>
-                    <span className="status-pill status-active">
-                      {t("admin.system.operational")}
-                    </span>
-                  </dd>
-                </div>
-                <div>
-                  <dt>{t("admin.system.storage_used")}</dt>
-                  <dd>{formatBytes(system.storage_bytes)}</dd>
-                </div>
-                <div>
-                  <dt>{t("admin.system.started_at")}</dt>
-                  <dd>{formatDateTime(system.started_at, i18n.language)}</dd>
-                </div>
-                <div>
-                  <dt>{t("admin.system.uptime")}</dt>
-                  <dd>{formatUptime(system.uptime_seconds, t)}</dd>
-                </div>
-              </dl>
-
-              {/* Three numbers under a total is arithmetic the reader has to do. As
-                  lengths of one bar it is a shape: whether the space is the data, the
-                  files it came from, or exports nobody has collected. */}
-              <StorageSplit
-                label={t("admin.overview.storage_split")}
-                parts={[
-                  { key: "datasets", bytes: system.datasets_bytes },
-                  { key: "uploads", bytes: system.uploads_bytes },
-                  { key: "exports", bytes: system.exports_bytes },
-                ]}
-              />
-            </>
+            <dl className="detail-list">
+              <div>
+                <dt>{t("admin.system.status")}</dt>
+                <dd>
+                  <span className="status-pill status-active">{t("admin.system.operational")}</span>
+                </dd>
+              </div>
+              <div>
+                <dt>{t("admin.system.storage_used")}</dt>
+                <dd>{formatBytes(system.storage_bytes)}</dd>
+              </div>
+              <div>
+                <dt>{t("admin.system.datasets_size")}</dt>
+                <dd>{formatBytes(system.datasets_bytes)}</dd>
+              </div>
+              <div>
+                <dt>{t("admin.system.uploads_size")}</dt>
+                <dd>{formatBytes(system.uploads_bytes)}</dd>
+              </div>
+              <div>
+                <dt>{t("admin.system.exports_size")}</dt>
+                <dd>{formatBytes(system.exports_bytes)}</dd>
+              </div>
+              <div>
+                <dt>{t("admin.system.started_at")}</dt>
+                <dd>{formatDateTime(system.started_at, i18n.language)}</dd>
+              </div>
+              <div>
+                <dt>{t("admin.system.uptime")}</dt>
+                <dd>{formatUptime(system.uptime_seconds, t)}</dd>
+              </div>
+            </dl>
           ) : (
             <LoadingState />
           )}
           <p className="muted admin-note">{t("admin.system.backup_note")}</p>
         </AdminPanel>
       </div>
+
+      {overview.last_activity && (
+        <p className="muted admin-footnote">
+          {t("admin.overview.last_admin_action", {
+            actor: overview.last_activity.actor_username,
+            when: formatDateTime(overview.last_activity.at, i18n.language),
+          })}
+        </p>
+      )}
     </div>
-  );
-}
-
-/** The storage total drawn as its parts, with a legend that names and sizes each one. */
-function StorageSplit({
-  label,
-  parts,
-}: {
-  label: string;
-  parts: { key: string; bytes: number }[];
-}) {
-  const { t } = useTranslation();
-  const total = parts.reduce((sum, p) => sum + (p.bytes || 0), 0);
-
-  return (
-    <section className="storage-split">
-      <h4>{label}</h4>
-      <div className="split-bar" role="img" aria-label={label}>
-        {parts.map((p) => (
-          <span
-            key={p.key}
-            className={`split-seg split-part-${p.key}`}
-            style={{ inlineSize: total ? `${((p.bytes || 0) / total) * 100}%` : "0%" }}
-          />
-        ))}
-      </div>
-      <ul className="split-legend">
-        {parts.map((p) => (
-          <li key={p.key}>
-            <span className={`split-key split-part-${p.key}`} aria-hidden="true" />
-            {t(`admin.system.${p.key}_size`)}
-            <strong>{formatBytes(p.bytes)}</strong>
-          </li>
-        ))}
-      </ul>
-    </section>
   );
 }
 
@@ -214,9 +197,8 @@ function StorageSplit({
  * How long the server has been up, in words.
  *
  * It used to read "3d 4h" - two Latin abbreviations on an Arabic page, which are not
- * short for anything in that language. The two largest units that are non-zero are
- * said, because "3 days and 4 hours and 12 minutes" is more precision than anyone
- * reading a status panel wants.
+ * short for anything in that language. The two largest non-zero units are said, because
+ * "3 days and 4 hours and 12 minutes" is more precision than a status panel wants.
  */
 function formatUptime(seconds: number, t: TFunction): string {
   const days = Math.floor(seconds / 86_400);

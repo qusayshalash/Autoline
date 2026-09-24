@@ -408,9 +408,7 @@
       "view_all": "عرض الكل",
       "no_activity": "لا يوجد نشاط بعد",
       "system_status": "حالة النظام",
-      "last_admin_action": "آخر إجراء إداري: {{actor}} — {{when}}",
-      "configuration": "التهيئة",
-      "storage_split": "ممّ تتكوّن المساحة"
+      "last_admin_action": "آخر إجراء إداري: {{actor}} — {{when}}"
     },
     "system": {
       "status": "الحالة",

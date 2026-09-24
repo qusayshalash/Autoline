@@ -388,9 +388,7 @@
       "view_all": "View all",
       "no_activity": "No activity yet",
       "system_status": "System status",
-      "last_admin_action": "Last admin action: {{actor}} — {{when}}",
-      "configuration": "Configuration",
-      "storage_split": "What the space is made of"
+      "last_admin_action": "Last admin action: {{actor}} — {{when}}"
     },
     "system": {
       "status": "Status",

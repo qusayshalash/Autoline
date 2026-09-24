@@ -393,9 +393,7 @@
       "view_all": "הצג הכל",
       "no_activity": "אין פעילות עדיין",
       "system_status": "מצב המערכת",
-      "last_admin_action": "פעולת ניהול אחרונה: {{actor}} — {{when}}",
-      "configuration": "תצורה",
-      "storage_split": "ממה מורכב השטח"
+      "last_admin_action": "פעולת ניהול אחרונה: {{actor}} — {{when}}"
     },
     "system": {
       "status": "מצב",
