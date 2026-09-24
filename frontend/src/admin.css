@@ -1823,3 +1823,135 @@
   align-items: center;
   gap: 0.5rem;
 }
+
+/* --- overview -------------------------------------------------------------- */
+
+/* Roles, permissions, languages: settled facts you check rather than figures you
+   watch. On one line, at one weight, each a way into the page that owns it. */
+.config-strip {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.1rem;
+  margin: 0.9rem 0 0;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.config-strip-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.config-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.86rem;
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.config-item svg {
+  width: 15px;
+  height: 15px;
+  color: var(--text-muted);
+}
+
+.config-item strong {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.config-item:hover {
+  color: var(--primary);
+}
+
+.config-item:hover strong,
+.config-item:hover svg {
+  color: var(--primary);
+}
+
+.config-item:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* The total drawn as its parts. Three sizes under a total is arithmetic; three lengths
+   of one bar is a shape. */
+.storage-split {
+  margin-top: 0.9rem;
+}
+
+.storage-split h4 {
+  margin: 0 0 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.split-bar {
+  display: flex;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--surface-muted);
+  overflow: hidden;
+}
+
+.split-seg {
+  display: block;
+  height: 100%;
+}
+
+/* Three hues of the one accent rather than three unrelated colours: these are parts of
+   a whole, not categories in competition.
+
+   Named split-* rather than storage-*: .storage-bar > span already exists in index.css,
+   drawing the column-size bars on the cleaning screen, and it is one selector more
+   specific than a class - so every segment here came out that component's grey. */
+.split-part-datasets {
+  background: var(--primary);
+}
+
+.split-part-uploads {
+  background: var(--primary);
+  opacity: 0.42;
+}
+
+.split-part-exports {
+  background: var(--warning);
+}
+
+.split-legend {
+  list-style: none;
+  margin: 0.6rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.split-legend li {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.split-legend strong {
+  margin-inline-start: auto;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.split-key {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+}

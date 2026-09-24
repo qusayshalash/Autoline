@@ -383,12 +383,14 @@
       "files_size": "Total file size",
       "last_activity": "Last activity",
       "inactive_hint": "{{count}} inactive",
-      "rows_hint": "{{count}} rows",
+      "rows_hint": "{{formatted}} rows",
       "recent_activity": "Recent activity",
       "view_all": "View all",
       "no_activity": "No activity yet",
       "system_status": "System status",
-      "last_admin_action": "Last admin action: {{actor}} — {{when}}"
+      "last_admin_action": "Last admin action: {{actor}} — {{when}}",
+      "configuration": "Configuration",
+      "storage_split": "What the space is made of"
     },
     "system": {
       "status": "Status",
@@ -399,7 +401,15 @@
       "exports_size": "Exports size",
       "started_at": "Started at",
       "uptime": "Uptime",
-      "backup_note": "Backups and session tracking are not built yet - no placeholder values are shown for them."
+      "backup_note": "Backups and session tracking are not built yet - no placeholder values are shown for them.",
+      "uptime_join": " ",
+      "up_days_one": "{{count}} day",
+      "up_days_other": "{{count}} days",
+      "up_hours_one": "{{count}} hour",
+      "up_hours_other": "{{count}} hours",
+      "up_minutes_zero": "under a minute",
+      "up_minutes_one": "{{count}} minute",
+      "up_minutes_other": "{{count}} minutes"
     },
     "users": {
       "title": "Users ({{count}})",

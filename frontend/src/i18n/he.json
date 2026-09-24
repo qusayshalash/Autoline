@@ -388,12 +388,14 @@
       "files_size": "נפח הקבצים",
       "last_activity": "פעילות אחרונה",
       "inactive_hint": "{{count}} לא פעילים",
-      "rows_hint": "{{count}} שורות",
+      "rows_hint": "{{formatted}} שורות",
       "recent_activity": "פעילות אחרונה",
       "view_all": "הצג הכל",
       "no_activity": "אין פעילות עדיין",
       "system_status": "מצב המערכת",
-      "last_admin_action": "פעולת ניהול אחרונה: {{actor}} — {{when}}"
+      "last_admin_action": "פעולת ניהול אחרונה: {{actor}} — {{when}}",
+      "configuration": "תצורה",
+      "storage_split": "ממה מורכב השטח"
     },
     "system": {
       "status": "מצב",
@@ -404,7 +406,18 @@
       "exports_size": "נפח הייצוא",
       "started_at": "זמן הפעלה",
       "uptime": "משך פעילות",
-      "backup_note": "גיבוי ומעקב הפעלות טרם נבנו - לא מוצגים עבורם ערכים מדומים."
+      "backup_note": "גיבוי ומעקב הפעלות טרם נבנו - לא מוצגים עבורם ערכים מדומים.",
+      "uptime_join": " ו",
+      "up_days_one": "יום",
+      "up_days_two": "יומיים",
+      "up_days_other": "{{count}} ימים",
+      "up_hours_one": "שעה",
+      "up_hours_two": "שעתיים",
+      "up_hours_other": "{{count}} שעות",
+      "up_minutes_zero": "פחות מדקה",
+      "up_minutes_one": "דקה",
+      "up_minutes_two": "שתי דקות",
+      "up_minutes_other": "{{count}} דקות"
     },
     "users": {
       "title": "משתמשים ({{count}})",
