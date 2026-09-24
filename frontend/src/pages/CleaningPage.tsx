@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+
+import { formatBytes, formatNumber } from "../data/numbers";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { apiErrorMessage, applyCleaning, getDataset, type CleaningResult, type FilterRule } from "../api/client";
@@ -9,19 +11,9 @@ import ErrorBanner from "../components/ErrorBanner";
 import FilterBuilder from "../components/FilterBuilder";
 import LoadingState from "../components/LoadingState";
 
-function formatBytes(bytes: number): string {
-  const units = ["B", "KB", "MB", "GB"];
-  let n = bytes;
-  let i = 0;
-  while (n >= 1024 && i < units.length - 1) {
-    n /= 1024;
-    i++;
-  }
-  return `${n.toFixed(1)} ${units[i]}`;
-}
 
 export default function CleaningPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { datasetId = "" } = useParams();
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -157,19 +149,19 @@ export default function CleaningPage() {
             <h3>{t("cleaning.result_title")}</h3>
             <div className="stat-grid">
               <div className="stat-tile">
-                <div className="value">{result.rows_before.toLocaleString()}</div>
+                <div className="value">{formatNumber(result.rows_before, i18n.language)}</div>
                 <div className="label">{t("cleaning.rows_before")}</div>
               </div>
               <div className="stat-tile">
-                <div className="value">{result.rows_after.toLocaleString()}</div>
+                <div className="value">{formatNumber(result.rows_after, i18n.language)}</div>
                 <div className="label">{t("cleaning.rows_after")}</div>
               </div>
               <div className="stat-tile">
-                <div className="value">{result.duplicates_removed.toLocaleString()}</div>
+                <div className="value">{formatNumber(result.duplicates_removed, i18n.language)}</div>
                 <div className="label">{t("cleaning.duplicates_removed")}</div>
               </div>
               <div className="stat-tile">
-                <div className="value">{result.filtered_out.toLocaleString()}</div>
+                <div className="value">{formatNumber(result.filtered_out, i18n.language)}</div>
                 <div className="label">{t("cleaning.filtered_out")}</div>
               </div>
               <div className="stat-tile">
@@ -177,7 +169,7 @@ export default function CleaningPage() {
                 <div className="label">{t("cleaning.reduction")}</div>
               </div>
               <div className="stat-tile">
-                <div className="value">{formatBytes(result.cleaned_file_bytes)}</div>
+                <div className="value">{formatBytes(result.cleaned_file_bytes, i18n.language)}</div>
                 <div className="label">{t("stats.cleaned_size")}</div>
               </div>
             </div>

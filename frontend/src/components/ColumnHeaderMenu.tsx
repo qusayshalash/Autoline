@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 
+import { formatNumber } from "../data/numbers";
+
 import { fetchGroups, type ColumnKind, type FilterRule } from "../api/client";
 import { columnLabel, columnMeta, usesRawHeaders } from "../data/columnDictionary";
 import { translateValue } from "../data/valueDictionary";
@@ -331,7 +333,7 @@ export default function ColumnHeaderMenu({
                       <span className="column-menu-value-text" title={v.value}>
                         {translated ? translateValue(v.value, i18n.language) : v.value}
                       </span>
-                      <span className="column-menu-value-count">{v.count.toLocaleString()}</span>
+                      <span className="column-menu-value-count">{formatNumber(v.count, i18n.language)}</span>
                     </label>
                   ))
                 )}

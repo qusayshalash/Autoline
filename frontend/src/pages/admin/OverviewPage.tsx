@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+
+import { formatNumber } from "../../data/numbers";
 import type { TFunction } from "i18next";
 import { Link } from "react-router-dom";
 
@@ -55,7 +57,7 @@ export default function OverviewPage() {
           lead
           icon={<IconUsers />}
           label={t("admin.overview.users_total")}
-          value={overview.users_total.toLocaleString()}
+          value={formatNumber(overview.users_total, i18n.language)}
           hint={t("admin.overview.inactive_hint", { count: inactive })}
           share={activeShare}
         />
@@ -63,7 +65,7 @@ export default function OverviewPage() {
           accent="success"
           icon={<IconUsers />}
           label={t("admin.overview.users_active")}
-          value={overview.users_active.toLocaleString()}
+          value={formatNumber(overview.users_active, i18n.language)}
           hint={`${Math.round(activeShare)}%`}
           share={activeShare}
         />
@@ -71,25 +73,25 @@ export default function OverviewPage() {
           accent="primary"
           icon={<IconShield />}
           label={t("admin.overview.roles")}
-          value={overview.roles_total.toLocaleString()}
+          value={formatNumber(overview.roles_total, i18n.language)}
         />
         <KpiCard
           accent="primary"
           icon={<IconKey />}
           label={t("admin.overview.permissions")}
-          value={overview.permissions_total.toLocaleString()}
+          value={formatNumber(overview.permissions_total, i18n.language)}
         />
         <KpiCard
           accent="warning"
           icon={<IconGlobe />}
           label={t("admin.overview.languages")}
-          value={overview.languages_enabled.toLocaleString()}
+          value={formatNumber(overview.languages_enabled, i18n.language)}
         />
         <KpiCard
           accent="primary"
           icon={<IconDatabase />}
           label={t("admin.overview.files")}
-          value={overview.files_total.toLocaleString()}
+          value={formatNumber(overview.files_total, i18n.language)}
           hint={t("admin.overview.rows_hint", {
             formatted: overview.files_rows.toLocaleString(i18n.language),
           })}

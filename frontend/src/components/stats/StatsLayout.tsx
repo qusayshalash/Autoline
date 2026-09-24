@@ -77,7 +77,7 @@ export default function StatsLayout() {
               <IconFile />
               {!collapsed && (
                 <span className="stats-file-text">
-                  <strong>{d.original_filename}</strong>
+                  <strong dir="auto">{d.original_filename}</strong>
                   <small>
                     {(d.row_count_cleaned ?? d.row_count_raw ?? 0).toLocaleString(i18n.language)}{" "}
                     {t("explorer.rows")}

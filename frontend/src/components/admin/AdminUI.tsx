@@ -2,6 +2,8 @@ import { useEffect, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 
+import { formatBytes } from "../../data/numbers";
+
 import type { UserStatus } from "../../api/admin";
 import { IconClose } from "./AdminIcons";
 
@@ -142,33 +144,5 @@ export function Drawer({
   );
 }
 
-/**
- * A byte count as a number and a unit: "2.1 KB", "826 MB".
- *
- * Wrapped in a directional isolate, because the unit is Latin and most of this app is
- * not: dropped into an Arabic line, the bidirectional algorithm reorders the pair and
- * "2.1 KB" is rendered "KB 2.1". The isolate is two invisible characters that say "read
- * what is between us left to right, and do not let it disturb what is around it".
- *
- * Done here rather than at the call sites: there are around forty, some of them inside
- * translated sentences where there is no element to hang a dir on.
- */
-export function formatBytes(bytes: number | null | undefined): string {
-  const units = ["B", "KB", "MB", "GB", "TB"];
-  let n = bytes || 0;
-  let i = 0;
-  while (n >= 1024 && i < units.length - 1) {
-    n /= 1024;
-    i += 1;
-  }
-  return isolate(`${n.toFixed(i === 0 ? 0 : 1)} ${units[i]}`);
-}
-
-/** U+2066 LEFT-TO-RIGHT ISOLATE ... U+2069 POP DIRECTIONAL ISOLATE.
- *
- *  Written as escapes on purpose: both characters are invisible, and a maintainer who
- *  cannot see them cannot avoid deleting them. */
-function isolate(text: string): string {
-  return `⁦${text}⁩`;
-}
-
+// re-exported so the admin screens can keep importing it from here
+export { formatBytes };

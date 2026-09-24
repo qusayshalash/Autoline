@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+
+import { formatNumber } from "../data/numbers";
 import { useNavigate, useParams } from "react-router-dom";
 
 import {
@@ -25,7 +27,7 @@ const DELIMITERS = [
 ];
 
 export default function ImportWizardPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { datasetId = "" } = useParams();
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -222,7 +224,7 @@ export default function ImportWizardPage() {
         {job?.status === "done" && (
           <div>
             <p style={{ color: "var(--success)", fontWeight: 600 }}>
-              {t("import_wizard.done")} ({(job.result?.row_count as number)?.toLocaleString()})
+              {t("import_wizard.done")} ({formatNumber(job.result?.row_count as number, i18n.language)})
             </p>
             <div style={{ display: "flex", gap: "0.6rem" }}>
               <button className="btn" onClick={() => navigate(`/datasets/${datasetId}/explore`)}>

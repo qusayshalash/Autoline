@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 
+import { formatNumber } from "../data/numbers";
+
 import { fetchGroups, type FilterRule } from "../api/client";
 import { translateValue } from "../data/valueDictionary";
 
@@ -200,7 +202,7 @@ export default function ValueAutocomplete({
                   onClick={() => choose(it.value)}
                 >
                   <SuggestedValue value={it.value} language={i18n.language} />
-                  <span className="autocomplete-count">{it.count.toLocaleString()}</span>
+                  <span className="autocomplete-count">{formatNumber(it.count, i18n.language)}</span>
                 </button>
               ))
             )}

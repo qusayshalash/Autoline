@@ -2,6 +2,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { formatBytes, formatNumber } from "../data/numbers";
+
 import { useConfirm } from "../components/ConfirmProvider";
 import { useNavigate } from "react-router-dom";
 
@@ -13,20 +15,9 @@ import QualityReportView from "../components/QualityReportView";
 import AppendBatchDialog from "../components/AppendBatchDialog";
 import UploadDropzone from "../components/UploadDropzone";
 
-function formatBytes(bytes: number | null | undefined): string {
-  if (!bytes) return "-";
-  const units = ["B", "KB", "MB", "GB"];
-  let n = bytes;
-  let i = 0;
-  while (n >= 1024 && i < units.length - 1) {
-    n /= 1024;
-    i++;
-  }
-  return `${n.toFixed(1)} ${units[i]}`;
-}
 
 export default function DatasetsPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const confirm = useConfirm();
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -165,7 +156,7 @@ export default function DatasetsPage() {
                   </div>
                 ) : (
                   <div style={{ display: "flex", gap: "0.4rem", alignItems: "center" }}>
-                    <span style={{ fontWeight: 600 }}>{d.original_filename}</span>
+                    <span style={{ fontWeight: 600 }} dir="auto">{d.original_filename}</span>
                     {canRename && (
                       <button
                         type="button"
@@ -178,9 +169,9 @@ export default function DatasetsPage() {
                   </div>
                 )}
                 <div className="muted">
-                  {t("datasets.rows_raw")}: {d.row_count_raw?.toLocaleString() ?? "-"} ·{" "}
-                  {t("datasets.rows_cleaned")}: {d.row_count_cleaned?.toLocaleString() ?? "-"} ·{" "}
-                  {t("datasets.size")}: {formatBytes(d.raw_file_bytes)}
+                  {t("datasets.rows_raw")}: {formatNumber(d.row_count_raw, i18n.language)} ·{" "}
+                  {t("datasets.rows_cleaned")}: {formatNumber(d.row_count_cleaned, i18n.language)} ·{" "}
+                  {t("datasets.size")}: {formatBytes(d.raw_file_bytes, i18n.language)}
                 </div>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>

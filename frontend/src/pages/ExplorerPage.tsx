@@ -2,6 +2,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { formatNumber } from "../data/numbers";
+
 import { useConfirm } from "../components/ConfirmProvider";
 import { Link, useParams } from "react-router-dom";
 
@@ -568,7 +570,7 @@ export default function ExplorerPage() {
         <Link to="/" className="sheet-back">
           {t("common.back")}
         </Link>
-        <span className="sheet-name" title={dataset?.original_filename}>
+        <span className="sheet-name" dir="auto" title={dataset?.original_filename}>
           {dataset?.original_filename ?? "…"}
         </span>
         <span className="sheet-source">
@@ -699,15 +701,15 @@ export default function ExplorerPage() {
           className="sheet-count"
           title={
             isNarrowed
-              ? `${totalRows.toLocaleString()} / ${sourceTotal.toLocaleString()}`
+              ? `${formatNumber(totalRows, i18n.language)} / ${formatNumber(sourceTotal, i18n.language)}`
               : undefined
           }
         >
           <IconRecords />
-          <strong>{totalRows.toLocaleString()}</strong>
+          <strong>{formatNumber(totalRows, i18n.language)}</strong>
           {isNarrowed && (
             <span className="sheet-count-total">
-              {t("explorer.of")} {sourceTotal.toLocaleString()}
+              {t("explorer.of")} {formatNumber(sourceTotal, i18n.language)}
             </span>
           )}
           {t("sheet.records")}
@@ -1031,7 +1033,7 @@ export default function ExplorerPage() {
               {page_.rows.map((row, i) => (
                 <tr key={i}>
                   {showRowNumbers && (
-                    <td className="rownum-col">{(firstRowIndex + i).toLocaleString()}</td>
+                    <td className="rownum-col">{formatNumber(firstRowIndex + i, i18n.language)}</td>
                   )}
                   {hasArrivals && (
                     <td className="arrival-col">
@@ -1118,9 +1120,9 @@ export default function ExplorerPage() {
             ? t("group.groups_count", { count: groupPage?.total_groups ?? 0 })
             : totalRows > 0 &&
               t("sheet.showing_range", {
-                from: firstRowIndex.toLocaleString(),
-                to: Math.min(firstRowIndex + rowsOnPage - 1, totalRows).toLocaleString(),
-                total: totalRows.toLocaleString(),
+                from: formatNumber(firstRowIndex, i18n.language),
+                to: formatNumber(Math.min(firstRowIndex + rowsOnPage - 1, totalRows), i18n.language),
+                total: formatNumber(totalRows, i18n.language),
               })}
           {" · "}
           {t("sheet.cols")}: {visibleColumns.length} {t("explorer.of")} {allColumns.length}

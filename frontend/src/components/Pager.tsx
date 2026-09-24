@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import { formatNumber } from "../data/numbers";
 
 import { IconChevronLeft, IconChevronRight, IconFirst, IconLast } from "./SheetIcons";
 
@@ -30,6 +33,7 @@ interface Props {
 }
 
 export default function Pager({ page, totalPages, onChange, labels }: Props) {
+  const { i18n } = useTranslation();
   // free text while typing so the field can be cleared or partially typed ("30" on the
   // way to "3000") without the grid jumping on every keystroke
   const [draft, setDraft] = useState("");
@@ -63,7 +67,7 @@ export default function Pager({ page, totalPages, onChange, labels }: Props) {
             aria-current={p === page ? "page" : undefined}
             onClick={() => onChange(p)}
           >
-            {p.toLocaleString()}
+            {formatNumber(p, i18n.language)}
           </button>
         )
       )}

@@ -248,6 +248,10 @@ export default function AnalysisSetup({
                 value={String(draft.value ?? "")}
                 onChange={(value) => setDraft({ ...draft, value })}
                 placeholder={t("statistics.value_placeholder") ?? ""}
+                // the filters already applied on this screen, minus any on the column
+                // being written: offering values that no longer exist under them leads
+                // to picking one and getting an empty analysis
+                context={filters.filter((f) => f.column !== draft.column)}
               />
             </div>
           )}

@@ -2,6 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { formatNumber } from "../data/numbers";
+
 import {
   fetchData,
   fetchGroups,
@@ -160,7 +162,7 @@ function GroupNode(props: NodeProps) {
               />
             </svg>
             <span className="group-value">{label === null || label === "" ? "—" : label}</span>
-            <span className="group-count">({count.toLocaleString()})</span>
+            <span className="group-count">({formatNumber(count, i18n.language)})</span>
           </button>
         </td>
         <td className="group-summary" colSpan={colSpan}>
@@ -188,8 +190,8 @@ function GroupNode(props: NodeProps) {
         <tr className="group-more">
           <td colSpan={colSpan + 1}>
             {t("group.more_groups", {
-              shown: subQuery.data.groups.length.toLocaleString(),
-              total: subQuery.data.total_groups.toLocaleString(),
+              shown: formatNumber(subQuery.data.groups.length, i18n.language),
+              total: formatNumber(subQuery.data.total_groups, i18n.language),
             })}
           </td>
         </tr>
@@ -219,8 +221,8 @@ function GroupNode(props: NodeProps) {
         <tr className="group-more">
           <td colSpan={colSpan + 1}>
             {t("group.more_rows", {
-              shown: rowQuery.data.rows.length.toLocaleString(),
-              total: rowQuery.data.total_rows.toLocaleString(),
+              shown: formatNumber(rowQuery.data.rows.length, i18n.language),
+              total: formatNumber(rowQuery.data.total_rows, i18n.language),
             })}
           </td>
         </tr>
