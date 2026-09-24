@@ -273,6 +273,12 @@ def _read_manifest(path: Path) -> Optional[dict]:
         data = json.loads((path / MANIFEST_NAME).read_text(encoding="utf-8"))
     except (OSError, ValueError):
         return None
+    # The folder's own name wins over the one written inside it. Everything that acts on
+    # a backup - delete, and restore - finds it by matching folder names, so a folder
+    # renamed or copied in under a different name was listed under its manifest's name
+    # and then could not be found by it: it appeared on the screen and every button on it
+    # failed. The name is where the folder is, not what it remembers being called.
+    data["name"] = path.name
     # size is recomputed from disk rather than trusted: a backup that was truncated or
     # partly deleted afterwards should not keep reporting the size it had when written
     on_disk = sum(p.stat().st_size for p in path.rglob("*") if p.is_file())

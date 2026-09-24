@@ -28,11 +28,16 @@ from app.services import backup, restore
 
 
 @pytest.fixture(scope="module")
-def safety(admin, dataset):
+def safety(admin, editor, viewer, dataset):
     """A backup of the way things are, restored again when the module is finished.
 
-    `dataset` is requested so the session's fixtures have already built everything they
-    build: the snapshot has to contain the world the following test files expect to find.
+    Every session-scoped fixture is requested, not only the ones these tests use, and
+    that is the whole of a mistake this made once. The snapshot has to contain the world
+    the other test files expect to find; taken before `viewer` and `editor` existed, the
+    teardown restore deleted those two accounts and every permission test that ran
+    afterwards failed on a cookie for a user who was no longer there. Under pytest's
+    alphabetical order it passed, because test_backup happened to run first - which is
+    the worst kind of green.
     """
     before = backup.run(include_originals=True)
     assert before["verified"], before["errors"]
@@ -361,3 +366,59 @@ def test_a_job_touched_just_now_does_block_it(admin, safety):
         assert "jobs_running" in restore.plan(safety["name"])["blockers"]
     finally:
         catalog.delete_jobs([job_id])
+
+
+# ---- a backup brought in from somewhere else --------------------------------------------
+
+
+def test_a_backup_folder_copied_in_is_listed_and_restorable(admin, safety, tmp_path):
+    """The case the whole feature is for: the machine is gone, and what survives is a
+    copy of the folder. There is no upload - the folder is put in the backups directory
+    and the screen picks it up - so what has to hold is that a backup is identified by
+    where it is, not by where it was taken.
+    """
+    manifest = backup.run()
+    assert manifest["verified"], manifest["errors"]
+    root = backup.backups_root() / manifest["name"]
+
+    elsewhere = tmp_path / "carried-away"
+    shutil.copytree(root, elsewhere)
+    shutil.rmtree(root)
+    assert manifest["name"] not in {b["name"] for b in backup.list_all()}
+
+    # brought back under a different name, which is what happens when somebody copies a
+    # folder and the copy is called "backup (1)" or the date is rewritten by a transfer
+    landed = backup.backups_root() / "carried-away"
+    shutil.copytree(elsewhere, landed)
+    try:
+        listed = next(b for b in backup.list_all() if b["name"] == "carried-away")
+        assert listed["intact"], "a folder copied in whole was read as damaged"
+        plan = restore.plan("carried-away")
+        assert plan["found"], plan
+        # only the blockers that would be about *this backup* are asserted on: another
+        # test file's leftover job row is about the instance, not about whether a folder
+        # carried in from elsewhere can be read
+        assert "backup_not_found" not in plan["blockers"], plan
+        assert "backup_not_verified" not in plan["blockers"], plan
+        assert restore.run("carried-away", actor_note="test")["ok"]
+    finally:
+        backup.delete("carried-away")
+        for kept in restore.kept_states():
+            restore.delete_kept(kept["name"])
+
+
+def test_a_backup_is_named_by_its_folder_not_by_its_manifest(admin):
+    """The defect that test found. Delete and restore both locate a backup by matching
+    folder names; listing it under the name written inside it put a row on the screen
+    whose every button answered "no such backup"."""
+    manifest = backup.run()
+    root = backup.backups_root() / manifest["name"]
+    renamed = backup.backups_root() / "renamed-by-hand"
+    root.rename(renamed)
+    try:
+        listed = [b["name"] for b in backup.list_all()]
+        assert "renamed-by-hand" in listed
+        assert manifest["name"] not in listed
+        assert restore.plan("renamed-by-hand")["found"]
+    finally:
+        backup.delete("renamed-by-hand")
