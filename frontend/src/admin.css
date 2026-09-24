@@ -863,13 +863,50 @@
   flex-direction: column;
 }
 
+/* One day's entries. The heading holds the top of the panel while its own rows scroll
+   past, so "which day am I looking at" never leaves the screen. */
+.activity-day + .activity-day {
+  margin-top: 0.4rem;
+}
+
+.activity-day-head {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.5rem 0;
+  background: var(--surface);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.activity-day-head::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.activity-day-count {
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  background: var(--surface-muted);
+  color: var(--text-muted);
+  font-size: 0.74rem;
+  font-variant-numeric: tabular-nums;
+}
+
 .activity-item {
   display: flex;
   align-items: flex-start;
-  gap: 0.65rem;
-  padding: 0.55rem 0;
+  gap: 0.7rem;
+  padding: 0.6rem 0;
   border-bottom: 1px solid var(--border);
-  font-size: 0.84rem;
+  font-size: 0.88rem;
 }
 
 .activity-item:last-child {
@@ -917,14 +954,17 @@
 }
 
 .activity-detail {
-  font-size: 0.75rem;
+  font-size: 0.79rem;
   color: var(--text-muted);
 }
 
+/* Lining figures, so a column of clock times reads down rather than jostling. */
 .activity-time {
   flex: none;
-  font-size: 0.73rem;
+  margin-top: 0.05rem;
+  font-size: 0.79rem;
   color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
@@ -934,6 +974,7 @@
   justify-content: center;
   gap: 0.75rem;
   margin-top: 0.9rem;
+  font-variant-numeric: tabular-nums;
 }
 
 /* --- definition lists --- */

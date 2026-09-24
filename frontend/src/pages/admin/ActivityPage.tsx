@@ -2,11 +2,12 @@ import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { fetchActivity, fetchUsers } from "../../api/admin";
+import { fetchActivity, fetchUsers, type ActivityItem } from "../../api/admin";
 import i18n from "../../i18n";
 import { IconActivity } from "../../components/admin/AdminIcons";
 import { AdminPanel } from "../../components/admin/AdminUI";
 import QueryState from "../../components/QueryState";
+import { dayKey, dayLabel } from "../../data/datetime";
 import ActivityRow from "./ActivityRow";
 
 const PAGE_SIZE = 50;
@@ -101,18 +102,37 @@ export default function ActivityPage() {
           <QueryState loading={isLoading} error={isError ? error : null} onRetry={refetch} />
         ) : data && data.items.length > 0 ? (
           <>
-            <ul className="activity-list">
-              {data.items.map((item) => (
-                <ActivityRow key={item.id} item={item} />
-              ))}
-            </ul>
+            {/* Grouped by the day it happened. A log is read by asking "what happened
+                on Tuesday", and a flat run of "2 days ago" repeated forty times cannot
+                answer that - nor say where one day ends and the next begins. The
+                heading sticks while its own entries scroll past, so the answer stays
+                on screen. */}
+            {groupByDay(data.items).map(([key, items]) => (
+              <section className="activity-day" key={key}>
+                <h3 className="activity-day-head">
+                  <span>{dayLabel(items[0].at, t, active.language)}</span>
+                  <span className="activity-day-count">{items.length}</span>
+                </h3>
+                <ul className="activity-list">
+                  {items.map((item) => (
+                    <ActivityRow key={item.id} item={item} />
+                  ))}
+                </ul>
+              </section>
+            ))}
             {totalPages > 1 && (
               <div className="admin-pager">
                 <button className="btn secondary" disabled={page === 0} onClick={() => setPage((p) => p - 1)}>
                   {t("explorer.prev")}
                 </button>
+                {/* Which entries these are, not only which page: on 32 pages of one
+                    shape, "page 2 of 32" says almost nothing about where you are. */}
                 <span className="muted">
-                  {page + 1} / {totalPages}
+                  {t("admin.activity.range", {
+                    from: page * PAGE_SIZE + 1,
+                    to: Math.min((page + 1) * PAGE_SIZE, data.total),
+                    total: data.total,
+                  })}
                 </span>
                 <button
                   className="btn secondary"
@@ -130,4 +150,16 @@ export default function ActivityPage() {
       </AdminPanel>
     </div>
   );
+}
+
+/** The page's entries split into runs of the same calendar day, order preserved. */
+function groupByDay(items: ActivityItem[]): [string, ActivityItem[]][] {
+  const out: [string, ActivityItem[]][] = [];
+  for (const item of items) {
+    const key = dayKey(item.at);
+    const last = out[out.length - 1];
+    if (last && last[0] === key) last[1].push(item);
+    else out.push([key, [item]]);
+  }
+  return out;
 }

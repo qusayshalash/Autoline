@@ -99,3 +99,50 @@ export function formatRelative(
   if (days > RELATIVE_HORIZON_DAYS) return formatDate(value, language);
   return t("admin.time.days", { count: days });
 }
+
+/**
+ * The clock time alone: "8:03 PM", "٢٠:٠٣".
+ *
+ * For a list already grouped by day, where repeating the date on every line says the
+ * same thing forty times and hides the one part that orders the entries.
+ */
+export function formatTimeOfDay(value: string | null | undefined, language: string): string {
+  const when = parseTimestamp(value);
+  if (!when) return value ? value : "—";
+  return formatter(language, { timeStyle: "short" }).format(when);
+}
+
+/**
+ * A stable key for the calendar day a moment falls on, in the reader's own timezone.
+ *
+ * Built from the parts rather than from toISOString(), which is UTC: an event at 1am
+ * local in Jerusalem is the previous day in UTC, so grouping on the ISO date would put
+ * it under a heading the reader would have to do arithmetic to recognise.
+ */
+export function dayKey(value: string | null | undefined): string {
+  const when = parseTimestamp(value);
+  if (!when) return "";
+  return `${when.getFullYear()}-${when.getMonth() + 1}-${when.getDate()}`;
+}
+
+/**
+ * What to call that day: "today", "yesterday", or its date.
+ *
+ * The two nearest days get a word because that is how people refer to them; anything
+ * further back is a date, since "11 days ago" is arithmetic to undo.
+ */
+export function dayLabel(
+  value: string | null | undefined,
+  t: TFunction,
+  language: string
+): string {
+  const when = parseTimestamp(value);
+  if (!when) return "—";
+  const today = dayKey(new Date().toISOString());
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const key = dayKey(value);
+  if (key === today) return t("admin.time.today");
+  if (key === dayKey(yesterday.toISOString())) return t("admin.time.yesterday");
+  return formatter(language, { dateStyle: "full" }).format(when);
+}

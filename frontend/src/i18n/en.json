@@ -369,7 +369,9 @@
       "hours_one": "1h ago",
       "hours_other": "{{count}}h ago",
       "days_one": "1d ago",
-      "days_other": "{{count}}d ago"
+      "days_other": "{{count}}d ago",
+      "today": "Today",
+      "yesterday": "Yesterday"
     },
     "overview": {
       "users_total": "Total users",
@@ -495,7 +497,8 @@
       "all_actions": "All actions",
       "all_actors": "All users",
       "filter_by_action": "Filter by action",
-      "filter_by_actor": "Filter by user"
+      "filter_by_actor": "Filter by user",
+      "range": "{{from}}–{{to}} of {{total}}"
     },
     "settings": {
       "storage": "Storage",

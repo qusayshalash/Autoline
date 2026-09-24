@@ -374,7 +374,9 @@
       "hours_other": "לפני {{count}} שעות",
       "days_one": "לפני יום",
       "days_two": "לפני יומיים",
-      "days_other": "לפני {{count}} ימים"
+      "days_other": "לפני {{count}} ימים",
+      "today": "היום",
+      "yesterday": "אתמול"
     },
     "overview": {
       "users_total": "סה\"כ משתמשים",
@@ -504,7 +506,8 @@
       "all_actions": "כל הפעולות",
       "all_actors": "כל המשתמשים",
       "filter_by_action": "סינון לפי פעולה",
-      "filter_by_actor": "סינון לפי משתמש"
+      "filter_by_actor": "סינון לפי משתמש",
+      "range": "{{from}}–{{to}} מתוך {{total}}"
     },
     "settings": {
       "storage": "אחסון",

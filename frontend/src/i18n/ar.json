@@ -389,7 +389,9 @@
       "days_two": "قبل يومين",
       "days_few": "قبل {{count}} أيام",
       "days_many": "قبل {{count}} يومًا",
-      "days_other": "قبل {{count}} يوم"
+      "days_other": "قبل {{count}} يوم",
+      "today": "اليوم",
+      "yesterday": "أمس"
     },
     "overview": {
       "users_total": "إجمالي المستخدمين",
@@ -531,7 +533,8 @@
       "all_actions": "كل الإجراءات",
       "all_actors": "كل المستخدمين",
       "filter_by_action": "تصفية حسب الإجراء",
-      "filter_by_actor": "تصفية حسب المستخدم"
+      "filter_by_actor": "تصفية حسب المستخدم",
+      "range": "{{from}}–{{to}} من {{total}}"
     },
     "settings": {
       "storage": "التخزين",

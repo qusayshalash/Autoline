@@ -3,7 +3,7 @@ import type { TFunction } from "i18next";
 
 import type { ActivityItem } from "../../api/admin";
 import { formatBytes } from "../../components/admin/AdminUI";
-import { formatInstant, formatRelative } from "../../data/datetime";
+import { formatInstant, formatTimeOfDay } from "../../data/datetime";
 
 /** Colour family per action group, so a log skimmed at speed still reads. */
 function toneFor(action: string): string {
@@ -50,18 +50,25 @@ export default function ActivityRow({ item }: { item: ActivityItem }) {
   const label = t(`admin.actions.${item.action}`, { defaultValue: item.action });
   const detail = detailFor(item, t);
 
+  // "qa_admin signed in qa_admin": for a sign-in the target is the person who signed
+  // in, which is the actor, and the line said the name twice.
+  const target = item.target_label === item.actor_username ? "" : item.target_label;
+
   return (
     <li className="activity-item">
       <span className={`activity-dot tone-${toneFor(item.action)}`} aria-hidden="true" />
       <span className="activity-text">
         <span className="activity-main">
-          <strong>{item.actor_username}</strong> {label}
-          {item.target_label && <em> {item.target_label}</em>}
+          <strong dir="auto">{item.actor_username}</strong> {label}
+          {target && <em dir="auto"> {target}</em>}
         </span>
         {detail && <span className="activity-detail">{detail}</span>}
       </span>
+      {/* The day is the heading above this row, so the row carries the clock time -
+          which is the part that orders one entry against the next within it. The full
+          instant, to the second, stays in the tooltip. */}
       <time className="activity-time" title={formatInstant(item.at, i18n.language)}>
-        {formatRelative(item.at, t, i18n.language)}
+        {formatTimeOfDay(item.at, i18n.language)}
       </time>
     </li>
   );
