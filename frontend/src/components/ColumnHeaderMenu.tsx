@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 
-import { fetchDistinctValues, type ColumnKind, type FilterRule } from "../api/client";
+import { fetchGroups, type ColumnKind, type FilterRule } from "../api/client";
 import { columnLabel, columnMeta, usesRawHeaders } from "../data/columnDictionary";
 import { translateValue } from "../data/valueDictionary";
 import ColumnKindIcon from "./ColumnKindIcon";
@@ -19,6 +19,9 @@ interface Props {
   onSort: (column: string, dir: "asc" | "desc") => void;
   filters: FilterRule[];
   onFiltersChange: (filters: FilterRule[]) => void;
+  /** the grid's free-text search, so the values offered are the ones on screen */
+  search: string;
+  searchColumns: string[];
   onHide: () => void;
   canDelete: boolean;
   onDeleteColumn: () => void;
@@ -38,6 +41,8 @@ export default function ColumnHeaderMenu({
   onSort,
   filters,
   onFiltersChange,
+  search: gridSearch,
+  searchColumns,
   onHide,
   canDelete,
   onDeleteColumn,
@@ -138,17 +143,51 @@ export default function ColumnHeaderMenu({
     };
   }, [open]);
 
+  /* The values on offer, counted over what is on screen rather than over the table.
+   *
+   * Filters on *other* columns narrow the list - that is the point: a view of 125,375
+   * Kia Picantos should offer the engine models those cars have, not the 5,924 in the
+   * registry. A filter on *this* column does not, or picking one value would hide every
+   * other and there would be no way to add a second.
+   *
+   * It asks the group endpoint rather than the distinct-values one because grouping is
+   * the same question with the view's filters and search already applied.
+   */
+  const otherFilters = filters.filter((f) => f.column !== column);
+  const listFilters: FilterRule[] = debouncedSearch
+    ? [...otherFilters, { column, op: "contains", value: debouncedSearch }]
+    : otherFilters;
+
   const {
     data: distinct,
     isFetching,
     isError: distinctError,
   } = useQuery({
-    queryKey: ["distinct-values", datasetId, source, column, debouncedSearch],
-    queryFn: () => fetchDistinctValues(datasetId, { column, source, search: debouncedSearch, limit: 500 }),
+    queryKey: [
+      "distinct-values",
+      datasetId,
+      source,
+      column,
+      debouncedSearch,
+      gridSearch,
+      JSON.stringify(otherFilters),
+    ],
+    queryFn: () =>
+      fetchGroups(datasetId, {
+        column,
+        source,
+        page_size: 500,
+        search: gridSearch || null,
+        search_columns: searchColumns,
+        filters: listFilters,
+      }),
     enabled: open,
   });
 
-  const values = distinct?.values ?? [];
+  // Blank and missing are not values to tick; the filter builder has is_null for those.
+  const values = (distinct?.groups ?? []).filter(
+    (v): v is { value: string; count: number } => !!v.value
+  );
   const allVisibleSelected = values.length > 0 && values.every((v) => selected.has(v.value));
 
   function toggleValue(v: string) {
@@ -297,9 +336,9 @@ export default function ColumnHeaderMenu({
                   ))
                 )}
               </div>
-              {distinct?.truncated && (
+              {distinct && distinct.total_groups > values.length && (
                 <div className="muted" style={{ fontSize: "0.75rem" }}>
-                  {t("column_menu.showing_x_of_y", { shown: values.length, total: distinct.total_distinct })}
+                  {t("column_menu.showing_x_of_y", { shown: values.length, total: distinct.total_groups })}
                 </div>
               )}
               <div className="column-menu-filter-actions">

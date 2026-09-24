@@ -1000,6 +1000,8 @@ export default function ExplorerPage() {
                         sortDir={sortDir}
                         onSort={handleSort}
                         filters={filters}
+                        search={search}
+                        searchColumns={searchColumns}
                         onFiltersChange={(f) => {
                           setFilters(f);
                           setPage(1);
