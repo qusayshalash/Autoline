@@ -454,7 +454,9 @@
       "permissions_other": "{{count}} permissions",
       "users_label": "Users",
       "toggle_permission": "{{action}} permission for {{module}}",
-      "toggle_module": "All {{module}} permissions"
+      "toggle_module": "All {{module}} permissions",
+      "reach": "{{granted}} of {{total}} permissions",
+      "not_applicable": "Does not apply to this module"
     },
     "languages": {
       "title": "Languages",

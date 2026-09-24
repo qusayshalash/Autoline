@@ -983,8 +983,8 @@
 .role-card {
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
-  padding: 0.9rem 1rem;
+  gap: 0.6rem;
+  padding: 1rem 1.1rem;
   border: 1px solid var(--border);
   border-radius: 12px;
   background: var(--surface);
@@ -1006,46 +1006,105 @@
 .role-card-head {
   display: flex;
   align-items: center;
-  gap: 0.45rem;
-  color: var(--primary);
+  gap: 0.6rem;
+}
+
+/* The same tile the languages table uses, so a card and a row read as one family. */
+.role-mark {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: var(--primary-soft);
+  color: var(--primary-soft-text);
+}
+
+.role-mark svg {
+  width: 17px;
+  height: 17px;
 }
 
 .role-card-head strong {
+  min-width: 0;
   color: var(--text);
-  font-size: 0.92rem;
+  font-size: 1rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .role-badge {
+  flex: none;
   margin-inline-start: auto;
-  padding: 0.12rem 0.5rem;
+  padding: 0.15rem 0.55rem;
   border-radius: 999px;
   background: var(--surface-muted);
   color: var(--text-muted);
-  font-size: 0.67rem;
+  font-size: 0.72rem;
   font-weight: 700;
 }
 
+/* Two lines, always - so the cards in a row end at the same place whether their
+   descriptions are one line, three, or missing. */
 .role-desc {
-  font-size: 0.79rem;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  margin-block-end: auto;
+  min-height: 2.8em;
+  font-size: 0.85rem;
   color: var(--text-muted);
-  min-height: 2.4em;
-  line-height: 1.5;
+  line-height: 1.45;
 }
 
 .role-stats {
   display: flex;
-  gap: 1rem;
-  font-size: 0.78rem;
-  color: var(--text-muted);
+  flex-wrap: wrap;
+  gap: 0.4rem;
 }
 
-.role-stats strong {
+.role-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: var(--surface-muted);
   color: var(--text);
+  font-size: 0.8rem;
   font-variant-numeric: tabular-nums;
 }
 
+.role-stat svg {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  color: var(--text-muted);
+}
+
+/* How far into the system the role reaches. A bar rather than a second number: the
+   question it answers - is this a lot? - is a comparison, and a comparison is what a
+   length is good at. */
+.role-reach {
+  display: block;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--surface-muted);
+  overflow: hidden;
+}
+
+.role-reach > span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--primary);
+}
+
 .role-updated {
-  font-size: 0.71rem;
+  font-size: 0.76rem;
   color: var(--text-muted);
 }
 
@@ -1058,12 +1117,12 @@
 .perm-matrix {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.81rem;
+  font-size: 0.86rem;
 }
 
 .perm-matrix th,
 .perm-matrix td {
-  padding: 0.45rem 0.55rem;
+  padding: 0.58rem 0.6rem;
   border-bottom: 1px solid var(--border);
   border-inline-end: 1px solid var(--border);
   text-align: center;
@@ -1081,11 +1140,18 @@
 
 .perm-matrix thead th {
   background: var(--surface-muted);
-  font-size: 0.71rem;
+  font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.03em;
   text-transform: uppercase;
   color: var(--text-muted);
+}
+
+/* Latin tracking and capitals do nothing for Arabic and Hebrew, and the tracking pulls
+   Arabic apart at the joins - the same fix the admin tables carry. */
+[dir="rtl"] .perm-matrix thead th {
+  letter-spacing: normal;
+  text-transform: none;
 }
 
 .perm-matrix tbody th {
@@ -1095,6 +1161,34 @@
   white-space: nowrap;
 }
 
+/* The module, and how much of it this role has. Counting ticks across a row is the
+   work the grid was supposed to save. */
+.matrix-module {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.matrix-count {
+  padding: 0.05rem 0.4rem;
+  border-radius: 999px;
+  background: var(--primary-soft);
+  color: var(--primary-soft-text);
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* A module this role has nothing in recedes, so what it does have stands out. */
+.perm-matrix tbody tr.is-empty th {
+  color: var(--text-muted);
+}
+
+.perm-matrix tbody tr.is-empty .matrix-count {
+  background: var(--surface-muted);
+  color: var(--text-muted);
+}
+
 .perm-matrix tbody tr:hover td,
 .perm-matrix tbody tr:hover th {
   background: var(--surface-hover);
@@ -1102,17 +1196,34 @@
 
 .perm-matrix input[type="checkbox"] {
   accent-color: var(--primary);
-  width: 15px;
-  height: 15px;
+  width: 17px;
+  height: 17px;
   cursor: pointer;
+}
+
+.perm-matrix input[type="checkbox"]:disabled {
+  cursor: not-allowed;
 }
 
 .perm-matrix .matrix-all {
   background: var(--surface-muted);
 }
 
+/* "There is no such permission" is a different fact from "not granted", and an em dash
+   the same weight as the text read as a third kind of value. A hollow mark says absence
+   without being read as a word. */
 .matrix-na {
-  color: var(--border-strong);
+  display: inline-grid;
+  place-items: center;
+  width: 17px;
+  height: 17px;
+}
+
+.matrix-na > span[aria-hidden] {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong);
 }
 
 .perm-chips {

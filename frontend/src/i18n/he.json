@@ -463,7 +463,9 @@
       "permissions_other": "{{count}} הרשאות",
       "users_label": "משתמשים",
       "toggle_permission": "הרשאת {{action}} עבור {{module}}",
-      "toggle_module": "כל ההרשאות של {{module}}"
+      "toggle_module": "כל ההרשאות של {{module}}",
+      "reach": "{{granted}} מתוך {{total}} הרשאות",
+      "not_applicable": "לא חל על מודול זה"
     },
     "languages": {
       "title": "שפות",

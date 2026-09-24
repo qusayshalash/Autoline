@@ -14,7 +14,7 @@ import {
 } from "../../api/admin";
 import { apiErrorMessage } from "../../api/client";
 import { useAuth } from "../../auth/AuthContext";
-import { IconPlus, IconShield, IconTrash } from "../../components/admin/AdminIcons";
+import { IconKey, IconPlus, IconShield, IconTrash, IconUsers } from "../../components/admin/AdminIcons";
 import { AdminPanel, Drawer } from "../../components/admin/AdminUI";
 import { formatDateTime } from "../../data/datetime";
 import ErrorBanner from "../../components/ErrorBanner";
@@ -34,6 +34,7 @@ export default function RolesPage() {
 
   const { data: roles, isLoading } = useQuery({ queryKey: ["admin-roles"], queryFn: fetchRoles });
   const { data: permissions } = useQuery({ queryKey: ["admin-permissions"], queryFn: fetchPermissions });
+  const totalPermissions = permissions?.length ?? 0;
 
   function invalidate() {
     qc.invalidateQueries({ queryKey: ["admin-roles"] });
@@ -73,18 +74,52 @@ export default function RolesPage() {
           {(roles ?? []).map((r) => (
             <button className="role-card" key={r.slug} onClick={() => setOpenSlug(r.slug)}>
               <span className="role-card-head">
-                <IconShield />
-                <strong>{r.name}</strong>
+                <span className="role-mark" aria-hidden="true">
+                  <IconShield />
+                </span>
+                {/* dir="auto" on everything a person typed or the database holds: a role
+                    named or described in English inside an Arabic page has its trailing
+                    period moved to the front by the bidirectional algorithm, which is
+                    how ".Full access to the system" came to be on screen. */}
+                <strong dir="auto">{r.name}</strong>
                 {r.is_system && <span className="role-badge">{t("admin.roles.system")}</span>}
               </span>
-              <span className="role-desc">{r.description || "—"}</span>
+              <span className="role-desc" dir="auto">
+                {r.description || "—"}
+              </span>
               {/* The number goes through the translation rather than sitting beside it:
                   Arabic agreement depends on the count, so "2 مستخدم" has to become
                   "مستخدمان" and "4 صلاحية" has to become "صلاحيات". A number rendered
                   outside the string cannot reach the rule that decides its noun. */}
               <span className="role-stats">
-                <span>{t("admin.roles.users", { count: r.user_count })}</span>
-                <span>{t("admin.roles.permissions", { count: r.permission_count })}</span>
+                <span className="role-stat">
+                  <IconUsers />
+                  {t("admin.roles.users", { count: r.user_count })}
+                </span>
+                <span className="role-stat">
+                  <IconKey />
+                  {t("admin.roles.permissions", { count: r.permission_count })}
+                </span>
+              </span>
+              {/* How much of the system this role reaches. The count alone says little -
+                  4 permissions is most of the app or almost none of it depending on how
+                  many there are - and it is the first thing anybody wants to know about
+                  a role they did not create. */}
+              <span
+                className="role-reach"
+                role="img"
+                aria-label={t("admin.roles.reach", {
+                  granted: r.permission_count,
+                  total: totalPermissions,
+                })}
+              >
+                <span
+                  style={{
+                    inlineSize: totalPermissions
+                      ? `${Math.round((r.permission_count / totalPermissions) * 100)}%`
+                      : "0%",
+                  }}
+                />
               </span>
               <span className="role-updated">
                 {t("admin.roles.updated")}: {formatDateTime(r.updated_at, i18n.language)}
@@ -165,9 +200,17 @@ function PermissionMatrix({
             // headings name it on screen, but a screen reader announces only the name
             // it carries. Built from the same two translations the headings use.
             const moduleName = t(`admin.modules.${m}`, { defaultValue: m });
+            const granted = keys.filter((k) => selected.has(k)).length;
             return (
-              <tr key={m}>
-                <th scope="row">{t(`admin.modules.${m}`, { defaultValue: m })}</th>
+              <tr key={m} className={granted === 0 ? "is-empty" : undefined}>
+                <th scope="row">
+                  <span className="matrix-module">
+                    {t(`admin.modules.${m}`, { defaultValue: m })}
+                    <span className="matrix-count">
+                      {granted}/{keys.length}
+                    </span>
+                  </span>
+                </th>
                 {actions.map((a) => {
                   const key = lookup.get(`${m}:${a}`);
                   return (
@@ -184,7 +227,10 @@ function PermissionMatrix({
                           })}
                         />
                       ) : (
-                        <span className="matrix-na">—</span>
+                        <span className="matrix-na" title={t("admin.roles.not_applicable") ?? ""}>
+                          <span aria-hidden="true" />
+                          <span className="sr-only">{t("admin.roles.not_applicable")}</span>
+                        </span>
                       )}
                     </td>
                   );
@@ -297,6 +343,7 @@ function RoleDrawer({
             {t("admin.roles.description")}
             <textarea
               rows={2}
+              dir="auto"
               value={description}
               disabled={locked}
               onChange={(e) => setDescription(e.target.value)}

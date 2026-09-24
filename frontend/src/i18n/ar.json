@@ -490,7 +490,9 @@
       "permissions_other": "{{count}} صلاحية",
       "users_label": "المستخدمون",
       "toggle_permission": "صلاحية {{action}} في {{module}}",
-      "toggle_module": "كل صلاحيات {{module}}"
+      "toggle_module": "كل صلاحيات {{module}}",
+      "reach": "{{granted}} من {{total}} صلاحية",
+      "not_applicable": "لا تنطبق على هذه الوحدة"
     },
     "languages": {
       "title": "اللغات",
