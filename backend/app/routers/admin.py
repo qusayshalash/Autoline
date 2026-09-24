@@ -30,9 +30,12 @@ from app.models.schemas import (
     HousekeepingRequest,
     HousekeepingStatus,
     HousekeepingSweepResult,
+    KeptState,
     LanguageOut,
     LockoutOut,
     OverviewOut,
+    RestorePlan,
+    RestoreStatus,
     RetentionRequest,
     StorageCandidate,
     StorageCleanupRequest,
@@ -47,6 +50,7 @@ from app.services import backup as backup_service
 from app.services import compaction as compaction_service
 from app.services import housekeeping as housekeeping_service
 from app.services import login_guard
+from app.services import restore as restore_service
 from app.services import storage as storage_service
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
@@ -496,6 +500,107 @@ def delete_backup(
     if not backup_service.delete(name):
         raise ApiError(404, "backup_not_found", "Backup not found")
     admin_db.log_activity(actor, "backup.deleted", "system", "backup", name, "")
+    return {"deleted": name}
+
+
+# ---- restoring ----------------------------------------------------------------
+#
+# A restore is not a job. Jobs live in the catalog, and the catalog is the file being
+# replaced: the row saying the restore had succeeded would be overwritten by the backup's
+# own copy of that table at the moment it succeeded. So progress is held in memory in the
+# service, and read from here.
+
+
+@router.get("/backups/{name}/restore-plan", response_model=RestorePlan)
+def restore_plan(
+    name: str, _actor: dict = Depends(require_permission("system.manage"))
+) -> RestorePlan:
+    """What restoring this backup would change. Reads only - nothing is touched."""
+    return RestorePlan(**restore_service.plan(name))
+
+
+@router.post("/backups/{name}/restore", response_model=RestoreStatus)
+def start_restore(
+    name: str, actor: dict = Depends(require_permission("system.manage"))
+) -> RestoreStatus:
+    plan = restore_service.plan(name)
+    if not plan["found"]:
+        raise ApiError(404, "backup_not_found", "Backup not found")
+    # Written out rather than built from the blocker name. A code assembled with an
+    # f-string is invisible to the scan that keeps codes and translations in step, so it
+    # would ship untranslated and nothing would say so.
+    blockers = plan["blockers"]
+    if "backup_not_verified" in blockers:
+        raise ApiError(
+            409, "restore_not_verified",
+            "This backup was never verified and will not be restored",
+        )
+    if "restore_in_progress" in blockers:
+        raise ApiError(409, "restore_in_progress", "A restore is already running")
+    if "jobs_running" in blockers:
+        raise ApiError(
+            409, "restore_jobs_running", "Wait for the running jobs to finish first"
+        )
+    if "not_enough_disk" in blockers:
+        raise ApiError(
+            409, "restore_no_disk_space", "Not enough free space to stage this backup"
+        )
+
+    # logged before it runs, in the catalog that is about to be replaced by one which will
+    # not contain this line. That is the point: the record of the restore belongs to the
+    # state that comes after it, so it is written again on the other side.
+    admin_db.log_activity(
+        actor, "backup.restore_started", "system", "backup", name, "",
+        detail_code="restore_started",
+    )
+    who = str(actor.get("username") or "")
+    # the flag goes up here rather than on the worker thread: between answering this
+    # request and the thread starting, the screen would otherwise get one normal reply
+    # and take it for a restore that had already finished
+    restore_service.begin(name)
+    submit(_run_restore, name, who)
+    return RestoreStatus(**restore_service.status())
+
+
+def _run_restore(name: str, actor_note: str) -> None:
+    result = restore_service.run(name, actor_note=actor_note)
+    # written into the restored catalog, so the trail on the other side records what
+    # produced it; a failure is logged the same way, into the catalog that never moved
+    try:
+        admin_db.log_activity(
+            {"id": "", "username": actor_note},
+            "backup.restored" if result.get("ok") else "backup.restore_failed",
+            "system",
+            "backup",
+            name,
+            "" if result.get("ok") else str(result.get("error", ""))[:500],
+            detail_code="restore_ok" if result.get("ok") else "restore_failed",
+        )
+    except Exception:  # noqa: BLE001 - the restore itself already succeeded or failed
+        pass
+
+
+@router.get("/restore/status", response_model=RestoreStatus,
+            dependencies=[Depends(require_permission("system.view"))])
+def restore_status() -> RestoreStatus:
+    return RestoreStatus(**restore_service.status())
+
+
+@router.get("/restore/kept", response_model=list[KeptState],
+            dependencies=[Depends(require_permission("system.view"))])
+def list_kept_states() -> list[KeptState]:
+    """The states earlier restores replaced. Kept until somebody says otherwise: a restore
+    can be the mistake, and this is the only copy of what was there before it."""
+    return [KeptState(**k) for k in restore_service.kept_states()]
+
+
+@router.delete("/restore/kept/{name}")
+def delete_kept_state(
+    name: str, actor: dict = Depends(require_permission("system.manage"))
+) -> dict:
+    if not restore_service.delete_kept(name):
+        raise ApiError(404, "kept_state_not_found", "No such replaced state")
+    admin_db.log_activity(actor, "backup.kept_deleted", "system", "backup", name, "")
     return {"deleted": name}
 
 

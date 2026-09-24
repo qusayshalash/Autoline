@@ -401,6 +401,98 @@ export async function pruneBackups(): Promise<{ removed: number; freed_bytes: nu
   return data;
 }
 
+// ---- restoring a backup ----
+
+export interface RestoreDataset {
+  dataset_id: string;
+  name: string;
+  rows_in_backup: number;
+  rows_now: number;
+}
+
+/** What restoring a backup would do, asked before anyone confirms it. */
+export interface RestorePlan {
+  found: boolean;
+  name: string;
+  created_at: string;
+  verified: boolean;
+  include_originals: boolean;
+  total_bytes: number;
+  datasets_restored: RestoreDataset[];
+  datasets_changed: RestoreDataset[];
+  /** here now, absent from the backup: these are the ones somebody has to see */
+  datasets_removed: RestoreDataset[];
+  users_now: number;
+  users_in_backup: number | null;
+  ends_sessions: boolean;
+  pre_restore_dir: string;
+  disk_free_bytes: number;
+  /** empty means it can go ahead */
+  blockers: string[];
+}
+
+export interface RestoreStatus {
+  active: boolean;
+  stage: string;
+  name: string;
+  started_at: string;
+  finished_at: string;
+  ok: boolean | null;
+  error: string;
+  pre_restore_dir: string;
+}
+
+export interface KeptState {
+  name: string;
+  restored: string;
+  at: string;
+  bytes: number;
+}
+
+export async function fetchRestorePlan(name: string): Promise<RestorePlan> {
+  const { data } = await api.get<RestorePlan>(
+    `/admin/backups/${encodeURIComponent(name)}/restore-plan`
+  );
+  return data;
+}
+
+export async function startRestore(name: string): Promise<RestoreStatus> {
+  const { data } = await api.post<RestoreStatus>(
+    `/admin/backups/${encodeURIComponent(name)}/restore`
+  );
+  return data;
+}
+
+/**
+ * Where the restore has got to.
+ *
+ * While the swap is happening every endpoint - this one included - answers 503 with the
+ * stage in the body, because the database that would otherwise be asked is the file
+ * being replaced. So a refusal here is progress, not an error, and the caller reads the
+ * stage out of it.
+ */
+export async function fetchRestoreStatus(): Promise<RestoreStatus> {
+  const { data } = await api.get<RestoreStatus>("/admin/restore/status");
+  return data;
+}
+
+/** The stage carried by a 503, or null when the failure was something else. */
+export function maintenanceStage(err: unknown): string | null {
+  const response = (err as { response?: { status?: number; data?: { code?: string; stage?: string } } })
+    ?.response;
+  if (response?.status !== 503 || response?.data?.code !== "maintenance") return null;
+  return response.data.stage ?? "";
+}
+
+export async function fetchKeptStates(): Promise<KeptState[]> {
+  const { data } = await api.get<KeptState[]>("/admin/restore/kept");
+  return data;
+}
+
+export async function deleteKeptState(name: string): Promise<void> {
+  await api.delete(`/admin/restore/kept/${encodeURIComponent(name)}`);
+}
+
 // ---- login lockouts ----
 
 export interface Lockout {

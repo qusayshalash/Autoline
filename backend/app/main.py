@@ -25,6 +25,7 @@ from app.routers import (
 )
 from app.services import backup as backup_service
 from app.services import housekeeping
+from app.services import restore as restore_service
 from app.services import storage
 from app.services.security import bootstrap_admin
 
@@ -72,6 +73,36 @@ app.add_middleware(
     # without this it can only guess, and would report a minute for an hour-long wait.
     expose_headers=["Retry-After"],
 )
+
+
+@app.middleware("http")
+async def _maintenance_gate(request: Request, call_next):
+    """Stops answering while a restore is swapping the files underneath us.
+
+    A restore closes the catalog and renames it out of the way. A request arriving in
+    that window would reopen the catalog on a file mid-rename, and on Windows would also
+    hold a handle that makes the rename fail - so the failure mode is not a stale read,
+    it is a half-finished restore.
+
+    The refusal carries the stage, which is what lets the screen watching the restore
+    follow it: any endpoint answers the question "what is happening", so no endpoint has
+    to read the database being replaced in order to report on replacing it.
+
+    Registered after the CORS middleware and therefore inside it, so this response gets
+    the same headers as any other - a 503 the browser cannot read is a hang.
+    """
+    if request.url.path.startswith("/api/") and restore_service.is_active():
+        state = restore_service.status()
+        return JSONResponse(
+            status_code=503,
+            content={
+                "detail": "A restore is in progress",
+                "code": "maintenance",
+                "stage": state["stage"],
+            },
+            headers={"Retry-After": "5"},
+        )
+    return await call_next(request)
 
 
 @app.on_event("startup")
@@ -152,6 +183,10 @@ _SCHEDULE_CHECK_SECONDS = 60 * 30
 
 
 def _backup_if_due() -> None:
+    # a scheduled backup landing in the middle of a restore would snapshot a data
+    # directory that is half one state and half another, and call the result verified
+    if restore_service.is_active():
+        return
     try:
         manifest = backup_service.run_if_due(admin_db.get_setting)
         if manifest is None:

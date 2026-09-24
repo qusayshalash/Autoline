@@ -2,17 +2,19 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import type { Backup } from "../../../api/admin";
+import type { Backup, KeptState } from "../../../api/admin";
 import {
   deleteBackup,
+  deleteKeptState,
   fetchBackupSummary,
   fetchBackups,
+  fetchKeptStates,
   setBackupSchedule,
   startBackup,
 } from "../../../api/admin";
 import { apiErrorMessage, cancelJob, getJob } from "../../../api/client";
 import { useAuth } from "../../../auth/AuthContext";
-import { IconArchive, IconTrash } from "../../../components/admin/AdminIcons";
+import { IconArchive, IconRefresh, IconTrash } from "../../../components/admin/AdminIcons";
 import { formatBytes } from "../../../components/admin/AdminUI";
 import {
   Choice,
@@ -29,6 +31,7 @@ import { useToast } from "../../../components/admin/Toaster";
 import ErrorBanner from "../../../components/ErrorBanner";
 import QueryState from "../../../components/QueryState";
 import { formatDate, formatDateTime } from "../../../data/datetime";
+import RestoreDialog from "./RestoreDialog";
 
 const POLL_MS = 700;
 
@@ -62,6 +65,8 @@ export default function BackupsSection() {
   const [jobId, setJobId] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<Backup | null>(null);
+  const [restoring, setRestoring] = useState<string | null>(null);
+  const [pendingForget, setPendingForget] = useState<KeptState | null>(null);
   const timer = useRef<number | null>(null);
 
   const {
@@ -72,11 +77,13 @@ export default function BackupsSection() {
     refetch: refetchSummary,
   } = useQuery({ queryKey: ["admin-backup-summary"], queryFn: fetchBackupSummary });
   const { data: backups } = useQuery({ queryKey: ["admin-backups"], queryFn: fetchBackups });
+  const { data: kept } = useQuery({ queryKey: ["admin-kept-states"], queryFn: fetchKeptStates });
 
   const refresh = () => {
     queryClient.invalidateQueries({ queryKey: ["admin-backups"] });
     queryClient.invalidateQueries({ queryKey: ["admin-backup-summary"] });
     queryClient.invalidateQueries({ queryKey: ["admin-storage"] });
+    queryClient.invalidateQueries({ queryKey: ["admin-kept-states"] });
   };
 
   // the poll is cleared on unmount: navigating away mid-backup should stop the polling,
@@ -148,6 +155,19 @@ export default function BackupsSection() {
       );
     },
     onError: (e) => setError(apiErrorMessage(e, t("common.error_generic"))),
+  });
+
+  const forget = useMutation({
+    mutationFn: deleteKeptState,
+    onSuccess: () => {
+      setPendingForget(null);
+      refresh();
+      toast("success", t("settings.restore.forgotten"));
+    },
+    onError: (e) => {
+      setPendingForget(null);
+      setError(apiErrorMessage(e, t("common.error_generic")));
+    },
   });
 
   const remove = useMutation({
@@ -336,6 +356,7 @@ export default function BackupsSection() {
                   <th className="num">{t("admin.backup.contents")}</th>
                   <th className="num">{t("admin.storage.size")}</th>
                   <th className="shrink" />
+                  <th className="shrink" />
                 </tr>
               </thead>
               <tbody>
@@ -346,6 +367,9 @@ export default function BackupsSection() {
                     expanded={expanded === b.name}
                     onToggle={() => setExpanded(expanded === b.name ? null : b.name)}
                     onDelete={mayManage ? () => setPendingDelete(b) : undefined}
+                    onRestore={
+                      mayManage && b.intact ? () => setRestoring(b.name) : undefined
+                    }
                   />
                 ))}
               </tbody>
@@ -353,6 +377,71 @@ export default function BackupsSection() {
           </div>
         )}
       </SettingsCard>
+
+      {kept && kept.length > 0 && (
+        <SettingsCard
+          icon={<IconArchive />}
+          title={t("settings.restore.kept_title")}
+          description={t("settings.restore.kept_desc")}
+          bodyless
+        >
+          <div className="set-table-wrap">
+            <table className="set-table">
+              <thead>
+                <tr>
+                  <th>{t("settings.restore.replaced_at")}</th>
+                  <th>{t("settings.restore.replaced_by")}</th>
+                  <th className="num">{t("admin.storage.size")}</th>
+                  <th className="shrink" />
+                </tr>
+              </thead>
+              <tbody>
+                {kept.map((k) => (
+                  <tr key={k.name}>
+                    <td>{k.at ? formatDateTime(k.at, i18n.language) : k.name}</td>
+                    <td>
+                      <bdi>{k.restored || "—"}</bdi>
+                    </td>
+                    <td className="num">{formatBytes(k.bytes)}</td>
+                    <td className="shrink">
+                      {mayManage && (
+                        <button
+                          type="button"
+                          className="set-btn ghost"
+                          onClick={() => setPendingForget(k)}
+                          aria-label={t("common.delete") ?? ""}
+                          title={t("common.delete") ?? ""}
+                        >
+                          <IconTrash />
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </SettingsCard>
+      )}
+
+      {restoring && (
+        <RestoreDialog
+          name={restoring}
+          onClose={() => setRestoring(null)}
+          onFinished={refresh}
+        />
+      )}
+
+      <ConfirmDialog
+        open={pendingForget !== null}
+        danger
+        busy={forget.isPending}
+        title={t("settings.restore.forget_title")}
+        body={t("settings.restore.forget_body")}
+        confirmLabel={t("common.delete")}
+        onCancel={() => setPendingForget(null)}
+        onConfirm={() => pendingForget && forget.mutate(pendingForget.name)}
+      />
 
       <ConfirmDialog
         open={pendingDelete !== null}
@@ -377,11 +466,14 @@ function BackupRow({
   expanded,
   onToggle,
   onDelete,
+  onRestore,
 }: {
   backup: Backup;
   expanded: boolean;
   onToggle: () => void;
   onDelete?: () => void;
+  /** absent for a backup that was never verified: there is nothing safe to put back */
+  onRestore?: () => void;
 }) {
   const { t, i18n } = useTranslation();
   const rows = backup.items.reduce(
@@ -412,6 +504,19 @@ function BackupRow({
         </td>
         <td className="num">{formatBytes(backup.bytes_on_disk)}</td>
         <td className="shrink">
+          {onRestore && (
+            <button
+              type="button"
+              className="set-btn ghost"
+              onClick={onRestore}
+              aria-label={t("admin.restore.action") ?? ""}
+              title={t("admin.restore.action") ?? ""}
+            >
+              <IconRefresh />
+            </button>
+          )}
+        </td>
+        <td className="shrink">
           {onDelete && (
             <button
               type="button"
@@ -427,7 +532,7 @@ function BackupRow({
       </tr>
       {expanded && (
         <tr className="detail">
-          <td colSpan={5}>
+          <td colSpan={6}>
             {backup.errors.length > 0 && (
               <ul className="set-detail-errors">
                 {backup.errors.map((e) => (

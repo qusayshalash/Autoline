@@ -6,7 +6,7 @@ never requires opening every dataset's (potentially huge) database.
 import json
 import threading
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 
 import duckdb
@@ -247,6 +247,22 @@ def get_connection() -> duckdb.DuckDBPyConnection:
     return _connection()
 
 
+def close() -> None:
+    """Lets go of the catalog file, so it can be replaced.
+
+    Only a restore needs this. Windows will not rename a file that a process still has
+    open, and DuckDB holds the handle for as long as the connection lives - so the file
+    cannot be swapped underneath a running server without this. The next call to any
+    function here reopens it, which is why the caller must have stopped serving requests
+    first: reopening halfway through a swap would open the file being replaced.
+    """
+    global _conn
+    with _lock:
+        if _conn is not None:
+            _conn.close()
+            _conn = None
+
+
 # the catalog is a single DuckDB file with one writer, so every module that touches it
 # serialises on this lock
 db_lock = _lock
@@ -342,6 +358,38 @@ def update_job(job_id: str, **fields: Any) -> None:
     conn = _connection()
     with _lock:
         conn.execute(f"UPDATE jobs SET {set_clause} WHERE id = ?", [*fields.values(), job_id])
+
+
+# How long a job may go without being touched before it is read as dead rather than busy.
+#
+# There is no heartbeat: a job row says "running" because something set it so, and a
+# process killed mid-import leaves that row saying it forever. Without a window, one
+# crashed import would block every restore from then on, with nothing in the interface
+# able to clear it - which is what happened the first time a restore was tried against a
+# QA instance carrying eleven-day-old corpses.
+#
+# Half an hour is chosen against the other error: a genuinely running job read as dead
+# would let a restore rename the file it is writing into. The longest a live job goes
+# without updating is one DuckDB statement over the whole table, minutes rather than
+# tens of minutes, so this leaves a wide margin on the side that matters.
+STALE_JOB_MINUTES = 30
+
+
+def active_job_count() -> int:
+    """How many jobs are plausibly still running.
+
+    Asked before a restore: an import writing into a dataset file that is about to be
+    renamed away would carry on writing into a file nothing points at any more, and
+    report success.
+    """
+    cutoff = _now() - timedelta(minutes=STALE_JOB_MINUTES)
+    conn = _connection()
+    with _lock:
+        return conn.execute(
+            "SELECT COUNT(*) FROM jobs"
+            " WHERE status IN ('pending', 'running', 'cancelling') AND updated_at >= ?",
+            [cutoff],
+        ).fetchone()[0]
 
 
 def get_job(job_id: str) -> Optional[dict]:

@@ -360,7 +360,11 @@
       "dataset.key_cleared": "cleared the record key of",
       "dataset.row_corrected": "corrected a record in",
       "dataset.row_reverted": "reverted a correction in",
-      "system.arrival_window_set": "changed how long new arrivals stay marked in"
+      "system.arrival_window_set": "changed how long new arrivals stay marked in",
+      "backup.restore_started": "Restore started",
+      "backup.restored": "Backup restored",
+      "backup.restore_failed": "Restore failed",
+      "backup.kept_deleted": "Replaced state deleted"
     },
     "time": {
       "just_now": "just now",
@@ -705,7 +709,10 @@
       "arrival_window_zero": "no window",
       "arrival_window_few": "{{count}} days",
       "arrival_window_many": "{{count}} days",
-      "arrival_window_other": "{{count}} days"
+      "arrival_window_other": "{{count}} days",
+      "restore_started": "before the swap",
+      "restore_ok": "completed and verified",
+      "restore_failed": "did not complete"
     },
     "fields": {
       "description": "description",
@@ -716,6 +723,45 @@
       "permissions": "permissions",
       "role": "role",
       "status": "status"
+    },
+    "restore": {
+      "action": "Restore",
+      "title": "Restore from a backup",
+      "lead": "The app goes back to how it was on {{when}}. Everything since is replaced.",
+      "will_remove": "Datasets that disappear",
+      "will_return": "Datasets that come back",
+      "will_change": "Datasets whose row count changes",
+      "becomes": "{{from}} becomes {{to}}",
+      "accounts": "Accounts go back to what they were: {{then}} instead of the {{now}} there are now.",
+      "sessions_end": "Every open session ends, including yours, so you will be asked to sign in again.",
+      "no_originals": "This backup does not include the original files, so the current uploads are left alone.",
+      "kept_at": "The current state is moved, not deleted, to:",
+      "size": "Backup size: {{size}}",
+      "understood": "I understand the current state will be replaced by this backup's.",
+      "confirm": "Restore this backup",
+      "running_title": "Restoring",
+      "running_warning": "Do not close this window or stop the server until it finishes.",
+      "done_title": "Restored",
+      "done_body": "The app is now in that backup's state. The page will reload, and you may need to sign in.",
+      "failed_title": "Not restored",
+      "failed_body": "Nothing was touched, or what was moved has been put back. Your current data is as it was.",
+      "reload": "Reload the page",
+      "stage": {
+        "checking": "Checking",
+        "staging": "Copying the files aside",
+        "verifying": "Reading the copies back",
+        "closing": "Closing the databases",
+        "swapping": "Swapping",
+        "undoing": "Undoing",
+        "reopening": "Reopening"
+      },
+      "blocked": {
+        "backup_not_found": "This backup is no longer there.",
+        "backup_not_verified": "This backup was never verified, and an unread backup is not restored.",
+        "jobs_running": "A job is running. Wait for it to finish.",
+        "restore_in_progress": "A restore is already running.",
+        "not_enough_disk": "There is not enough free space to stage the backup first."
+      }
     }
   },
   "statistics": {
@@ -994,6 +1040,15 @@
       "title": "Marking new arrivals",
       "desc": "How many days a record from a new batch stays marked in the table before it reads like every other row.",
       "hint": "A badge that never fades stops being read within a week. The window exists so the mark keeps meaning something, not so it lasts."
+    },
+    "restore": {
+      "kept_title": "Replaced states",
+      "kept_desc": "What was there before each restore. Kept rather than swept, because a restore can itself be the mistake.",
+      "replaced_at": "Replaced at",
+      "replaced_by": "Replaced by",
+      "forget_title": "Delete the replaced state",
+      "forget_body": "This is the last copy of what was there before the restore. Deleting it is permanent.",
+      "forgotten": "Replaced state deleted"
     }
   },
   "errors": {
@@ -1042,7 +1097,12 @@
     "append_columns_repeated": "The file repeats a column name",
     "append_width_differs": "The file has a different number of columns",
     "append_unreadable": "Could not read the file",
-    "key_max_columns": "A key may use at most four columns"
+    "key_max_columns": "A key may use at most four columns",
+    "restore_not_verified": "This backup was never verified, and an unread backup is not restored.",
+    "restore_in_progress": "A restore is already running.",
+    "restore_jobs_running": "Wait for the running jobs to finish first.",
+    "restore_no_disk_space": "Not enough free space to stage this backup before swapping it in.",
+    "kept_state_not_found": "There is no replaced state by that name."
   },
   "record_key": {
     "title": "Record key",

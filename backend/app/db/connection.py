@@ -174,6 +174,21 @@ class _DatasetConnections:
             if conn is not None:
                 conn.close()
 
+    def close_all(self) -> list[str]:
+        """Lets go of every open dataset file. Returns the ids that were closed.
+
+        For a restore, which renames the whole datasets directory. Closing only the
+        datasets the catalog lists is not enough: a file whose catalog row was deleted
+        can still have a live connection behind it, and on Windows one open handle
+        anywhere under the directory is enough to make the rename fail - halfway through,
+        with the catalog already swapped.
+        """
+        with self._lock:
+            ids = list(self._connections)
+        for dataset_id in ids:
+            self.close(dataset_id)
+        return ids
+
     def dataset_file_size(self, dataset_id: str) -> int:
         path = self._path_for(dataset_id)
         return path.stat().st_size if path.exists() else 0

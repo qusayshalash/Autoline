@@ -450,6 +450,64 @@ class BackupPruneResult(BaseModel):
     freed_bytes: int
 
 
+class RestoreDataset(BaseModel):
+    """One dataset a restore would bring back, change or take away."""
+
+    dataset_id: str
+    name: str
+    rows_in_backup: int = 0
+    rows_now: int = 0
+
+
+class RestorePlan(BaseModel):
+    """What restoring a backup would do, answered before anyone confirms it.
+
+    Three lists rather than one count, because they are three different sentences: a
+    dataset that comes back, a dataset whose row count changes, and a dataset that
+    disappears. The last is the one somebody needs to see.
+    """
+
+    found: bool
+    name: str
+    created_at: str = ""
+    verified: bool = False
+    include_originals: bool = False
+    total_bytes: int = 0
+    datasets_restored: list[RestoreDataset] = []
+    datasets_changed: list[RestoreDataset] = []
+    datasets_removed: list[RestoreDataset] = []
+    # the catalog is one file: the accounts, roles, activity log and settings come back
+    # with the dataset list, so an account created since the backup will be gone
+    users_now: int = 0
+    users_in_backup: Optional[int] = None
+    ends_sessions: bool = False
+    pre_restore_dir: str = ""
+    disk_free_bytes: int = 0
+    # empty means it can go ahead; anything here is a reason it cannot
+    blockers: list[str] = []
+
+
+class RestoreStatus(BaseModel):
+    active: bool = False
+    stage: str = ""
+    name: str = ""
+    started_at: str = ""
+    finished_at: str = ""
+    ok: Optional[bool] = None
+    error: str = ""
+    # where the replaced files were put; nothing deletes them automatically
+    pre_restore_dir: str = ""
+
+
+class KeptState(BaseModel):
+    """A state that a restore replaced and set aside."""
+
+    name: str
+    restored: str = ""
+    at: str = ""
+    bytes: int = 0
+
+
 class RetentionRequest(Incoming):
     # 0 disables expiry entirely
     hours: int = Field(ge=0, le=24 * 365)

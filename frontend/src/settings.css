@@ -1256,3 +1256,196 @@
 [dir="rtl"] .set-quick .set-btn svg {
   transform: scaleX(-1);
 }
+
+/* --- restoring a backup ------------------------------------------------------
+   Wider than a confirm dialog and scrollable, because what it has to say is a list:
+   which datasets disappear, which come back, which change. A restore that showed a
+   sentence instead would be asking somebody to agree to something they cannot see. */
+.set-dialog.restore-dialog {
+  max-width: 560px;
+}
+
+.restore-lead {
+  margin-bottom: 14px !important;
+}
+
+.restore-body {
+  max-height: min(52vh, 460px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-inline-end: 4px;
+}
+
+.restore-blockers {
+  margin: 0;
+  padding: 10px 12px;
+  padding-inline-start: 28px;
+  list-style: disc;
+  border-radius: 10px;
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+/* The stripe is the whole of the colour coding: a coloured panel behind a list of file
+   names would fight the names for attention, and the names are the information.
+
+   Named "stripe-" and not "tone-": a bare `.tone-danger` already exists in admin.css and
+   fills an element with the danger colour, so `tone-danger` here painted every group
+   solid red. Measured, not spotted - the computed background said rgb(220, 38, 38) for a
+   rule none of these set. */
+.restore-group {
+  border: 1px solid var(--border);
+  border-inline-start: 3px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.restore-group.stripe-danger {
+  border-inline-start-color: var(--danger);
+}
+
+.restore-group.stripe-good {
+  border-inline-start-color: var(--success);
+}
+
+.restore-group.stripe-warn {
+  border-inline-start-color: var(--warning);
+}
+
+.restore-group h4 {
+  margin: 0;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--text);
+  background: var(--surface-2);
+}
+
+.restore-group ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.restore-group li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 12px;
+  font-size: 13px;
+  color: var(--text);
+  border-top: 1px solid var(--border);
+}
+
+.restore-group li .num {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.restore-facts {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+
+.restore-facts .set-path {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  word-break: break-all;
+}
+
+.restore-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text);
+  cursor: pointer;
+  padding-top: 4px;
+}
+
+.restore-check input {
+  margin-top: 3px;
+  flex: none;
+}
+
+/* The stages, as a list that fills in rather than a bar: the steps are named, and the
+   name is what says whether stopping now would be safe. */
+.restore-stages {
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: restore-stage;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.restore-stages li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text-muted);
+  opacity: 0.55;
+}
+
+.restore-stages li::before {
+  counter-increment: restore-stage;
+  content: counter(restore-stage);
+  width: 20px;
+  height: 20px;
+  flex: none;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.restore-stages li.past {
+  opacity: 1;
+}
+
+.restore-stages li.past::before {
+  background: var(--primary-soft);
+  border-color: var(--primary-soft);
+  color: var(--primary);
+}
+
+.restore-stages li.now {
+  opacity: 1;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.restore-stages li.now::before {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+.restore-error {
+  margin-top: 10px !important;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--danger-soft);
+  color: var(--danger) !important;
+  font-size: 12px;
+  word-break: break-word;
+}
