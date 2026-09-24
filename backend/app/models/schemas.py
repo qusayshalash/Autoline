@@ -707,6 +707,12 @@ class GroupQuery(Incoming):
     search: Optional[str] = None
     search_columns: Optional[list[str]] = None
     search_alternatives: Optional[list[str]] = None
+    # Narrows the grouped column's own values, as opposed to `search`, which narrows
+    # the rows. The value picker needs both at once: the list must be counted over what
+    # the grid is showing *and* filtered by what is typed into the list's own search
+    # box, and those are two different questions about two different things.
+    value_search: Optional[str] = None
+    value_search_alternatives: Optional[list[str]] = None
     filters: list[FilterRule] = []
     source: Literal["raw", "cleaned"] = "cleaned"
 

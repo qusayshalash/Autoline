@@ -14,6 +14,9 @@ interface Props {
   datasetId: string;
   source: "raw" | "cleaned";
   kindByColumn?: Map<string, ColumnKind>;
+  /** the grid's free-text search, so suggestions match the view being filtered */
+  search?: string | null;
+  searchColumns?: string[];
   onApply: (filters: FilterRule[]) => void;
   onClose: () => void;
 }
@@ -25,6 +28,8 @@ export default function FilterDialog({
   datasetId,
   source,
   kindByColumn,
+  search,
+  searchColumns,
   onApply,
   onClose,
 }: Props) {
@@ -133,6 +138,8 @@ export default function FilterDialog({
             datasetId={datasetId}
             source={source}
             kindByColumn={kindByColumn}
+            search={search}
+            searchColumns={searchColumns}
           />
 
           <button

@@ -36,6 +36,9 @@ interface Props {
   source?: "raw" | "cleaned";
   /** used for the type icons in the dialog variant's column picker */
   kindByColumn?: Map<string, ColumnKind>;
+  /** the grid's free-text search, so suggestions match the view being filtered */
+  search?: string | null;
+  searchColumns?: string[];
 }
 
 export default function FilterBuilder({
@@ -47,6 +50,8 @@ export default function FilterBuilder({
   datasetId,
   source = "cleaned",
   kindByColumn,
+  search,
+  searchColumns,
 }: Props) {
   const { t, i18n } = useTranslation();
   const isDialog = variant === "dialog";
@@ -113,6 +118,10 @@ export default function FilterBuilder({
                 value={String(f.value ?? "")}
                 onChange={(v) => update(i, { value: v })}
                 placeholder={t("cleaning.value") ?? ""}
+                // every rule but this one: a rule cannot narrow its own suggestions
+                context={filters.filter((_, other) => other !== i)}
+                search={search}
+                searchColumns={searchColumns}
               />
             ) : (
               <input

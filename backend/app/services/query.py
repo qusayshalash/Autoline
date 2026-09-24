@@ -151,6 +151,18 @@ def fetch_groups(dataset_id: str, q: GroupQuery) -> GroupPage:
     )
     table_sql = sql_utils.quote_ident(table)
     col_sql = sql_utils.quote_ident(q.column)
+
+    # The picker's own search box, which asks about this column's values rather than
+    # about the rows. It goes through the same builder as any other search, so a typed
+    # term reaches a translated value through the dictionary and a literal % stays a
+    # character.
+    if q.value_search:
+        v_sql, v_params = sql_utils.build_search_sql(
+            q.value_search, [q.column], q.value_search_alternatives
+        )
+        where_sql = f"({where_sql}) AND {v_sql}" if where_sql else v_sql
+        params = [*params, *v_params]
+
     where_clause = f" WHERE {where_sql}" if where_sql else ""
 
     page_size = min(max(q.page_size, 1), settings.max_page_size)

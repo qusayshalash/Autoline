@@ -862,6 +862,8 @@ export default function ExplorerPage() {
         datasetId={datasetId}
         source={source}
         kindByColumn={kindByColumn}
+        search={search}
+        searchColumns={searchColumns}
         onApply={(next) => {
           setFilters(next);
           setPage(1);

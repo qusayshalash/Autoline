@@ -132,3 +132,60 @@ def test_the_menu_asks_the_endpoint_that_knows_about_filters():
     assert "fetchDistinctValues" not in source
     # and that it drops its own column's filter before asking
     assert "filters.filter((f) => f.column !== column)" in source
+
+# ---- the picker's own search box ------------------------------------------------------
+
+
+def test_the_value_box_narrows_the_values_not_the_rows(admin, fleet):
+    """Typing in the list's search box asks about this column's values. Sending it as a
+    row search would ask a different question - which rows contain that text anywhere -
+    and on a wide table that is almost every row."""
+    assert offered(admin, fleet, "engine", value_search="G4") == {"G4LA": 2}
+    assert offered(admin, fleet, "engine", value_search="G") == {"G4LA": 2, "G3LA": 1}
+
+
+def test_the_two_searches_compose(admin, fleet):
+    """The row search says what is on screen; the value search says what is being looked
+    for in the list. Both at once is the normal case - a narrowed view, and a long list
+    being searched."""
+    assert offered(admin, fleet, "engine", search="KIA", value_search="G3") == {"G3LA": 1}
+
+
+def test_a_typed_wildcard_is_a_character_here_too(admin, fleet):
+    assert offered(admin, fleet, "engine", value_search="%") == {}
+
+
+def test_the_value_box_reaches_a_translated_value(admin, fleet):
+    """It goes through the same builder as every other search, so the alternatives the
+    screen derives from the dictionary apply: what is typed is the translation, what is
+    stored is the original."""
+    assert offered(admin, fleet, "engine", value_search="motor") == {}
+    assert offered(
+        admin, fleet, "engine", value_search="motor", value_search_alternatives=["Z6"]
+    ) == {"Z6": 3}
+
+
+def test_the_suggestion_box_asks_with_the_other_conditions(admin, fleet):
+    """The filter dialog, building "make = KIA and engine = ...". Offering the engines
+    of every other make there means picking one and getting no rows back."""
+    from pathlib import Path
+
+    source = (
+        Path(__file__).resolve().parent.parent.parent
+        / "frontend"
+        / "src"
+        / "components"
+        / "ValueAutocomplete.tsx"
+    ).read_text(encoding="utf-8")
+    assert "fetchGroups" in source
+    assert "fetchDistinctValues" not in source
+
+    builder = (
+        Path(__file__).resolve().parent.parent.parent
+        / "frontend"
+        / "src"
+        / "components"
+        / "FilterBuilder.tsx"
+    ).read_text(encoding="utf-8")
+    # each rule is handed every rule but itself
+    assert "filters.filter((_, other) => other !== i)" in builder

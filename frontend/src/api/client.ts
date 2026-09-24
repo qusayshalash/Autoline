@@ -378,6 +378,8 @@ export async function fetchGroups(
     page_size?: number;
     search?: string | null;
     search_columns?: string[];
+    /** narrows the grouped column's own values - the value picker's search box */
+    value_search?: string | null;
     filters?: FilterRule[];
     source?: "raw" | "cleaned";
   }
@@ -389,6 +391,8 @@ export async function fetchGroups(
     search: params.search ?? null,
     search_columns: params.search_columns ?? [],
     search_alternatives: hebrewAlternatives(params.search ?? ""),
+    value_search: params.value_search ?? null,
+    value_search_alternatives: hebrewAlternatives(params.value_search ?? ""),
     filters: params.filters ?? [],
     source: params.source ?? "cleaned",
   });

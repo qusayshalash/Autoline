@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 
-import { fetchDistinctValues } from "../api/client";
+import { fetchGroups, type FilterRule } from "../api/client";
 import { translateValue } from "../data/valueDictionary";
 
 interface Props {
@@ -13,6 +13,15 @@ interface Props {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  /** The conditions already written, so the values offered are ones that still exist
+   *  under them. Building "make = KIA and engine = ..." should not offer the engines of
+   *  every other make, because picking one of those returns nothing. The caller leaves
+   *  out this rule's own column, or the list could only ever offer back what is in the
+   *  box already. */
+  context?: FilterRule[];
+  /** the grid's free-text search, which is also part of what is on screen */
+  search?: string | null;
+  searchColumns?: string[];
 }
 
 const SUGGESTION_LIMIT = 50;
@@ -27,6 +36,9 @@ export default function ValueAutocomplete({
   value,
   onChange,
   placeholder,
+  context,
+  search,
+  searchColumns,
 }: Props) {
   const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -43,18 +55,33 @@ export default function ValueAutocomplete({
   }, [value]);
 
   const { data, isFetching, isError } = useQuery({
-    queryKey: ["distinct-values", datasetId, source, column, debounced, "suggest"],
+    queryKey: [
+      "distinct-values",
+      datasetId,
+      source,
+      column,
+      debounced,
+      search ?? "",
+      JSON.stringify(context ?? []),
+      "suggest",
+    ],
     queryFn: () =>
-      fetchDistinctValues(datasetId, {
+      fetchGroups(datasetId, {
         column,
         source,
-        search: debounced,
-        limit: SUGGESTION_LIMIT,
+        page_size: SUGGESTION_LIMIT,
+        value_search: debounced || null,
+        search: search || null,
+        search_columns: searchColumns,
+        filters: context ?? [],
       }),
     enabled: open && !!column,
   });
 
-  const items = data?.values ?? [];
+  // Blank and missing are not values to pick; the operator list has is_null for those.
+  const items = (data?.groups ?? []).filter(
+    (v): v is { value: string; count: number } => !!v.value
+  );
 
   function place() {
     const r = inputRef.current?.getBoundingClientRect();

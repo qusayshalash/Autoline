@@ -154,9 +154,6 @@ export default function ColumnHeaderMenu({
    * the same question with the view's filters and search already applied.
    */
   const otherFilters = filters.filter((f) => f.column !== column);
-  const listFilters: FilterRule[] = debouncedSearch
-    ? [...otherFilters, { column, op: "contains", value: debouncedSearch }]
-    : otherFilters;
 
   const {
     data: distinct,
@@ -179,7 +176,10 @@ export default function ColumnHeaderMenu({
         page_size: 500,
         search: gridSearch || null,
         search_columns: searchColumns,
-        filters: listFilters,
+        // the box inside this menu asks about this column's values, not about rows,
+        // and goes through the dictionary so a translated value can be typed back
+        value_search: debouncedSearch || null,
+        filters: otherFilters,
       }),
     enabled: open,
   });
