@@ -14,7 +14,8 @@ from fastapi import APIRouter, Depends, HTTPException, Response
 from pydantic import ValidationError
 
 from app.errors import ApiError
-from app.auth import require_permission
+from app.services.rate_limit import ANALYSIS, EXPORT
+from app.auth import rate_limited, require_permission
 from app.db import catalog
 from app.models.schemas import (
     ColumnSuggestion,
@@ -46,7 +47,8 @@ def _compute(dataset_id: str, q: StatisticsQuery) -> StatisticsOut:
         raise HTTPException(400, str(exc)) from exc
 
 
-@router.post("/{dataset_id}/statistics", response_model=StatisticsOut)
+@router.post("/{dataset_id}/statistics", response_model=StatisticsOut,
+             dependencies=[Depends(rate_limited(ANALYSIS))])
 def post_statistics(
     dataset_id: str,
     q: StatisticsQuery,
@@ -55,7 +57,8 @@ def post_statistics(
     return _compute(dataset_id, q)
 
 
-@router.get("/{dataset_id}/statistics", response_model=StatisticsOut)
+@router.get("/{dataset_id}/statistics", response_model=StatisticsOut,
+            dependencies=[Depends(rate_limited(ANALYSIS))])
 def get_statistics(
     dataset_id: str,
     group_by: str,
@@ -96,7 +99,8 @@ def get_statistics(
     return _compute(dataset_id, q)
 
 
-@router.post("/{dataset_id}/pivot", response_model=PivotOut)
+@router.post("/{dataset_id}/pivot", response_model=PivotOut,
+             dependencies=[Depends(rate_limited(ANALYSIS))])
 def post_pivot(
     dataset_id: str,
     q: PivotQuery,
@@ -110,7 +114,8 @@ def post_pivot(
         raise HTTPException(400, str(exc)) from exc
 
 
-@router.post("/{dataset_id}/statistics/export")
+@router.post("/{dataset_id}/statistics/export",
+             dependencies=[Depends(rate_limited(EXPORT))])
 def export_statistics(
     dataset_id: str,
     req: StatisticsExportRequest,

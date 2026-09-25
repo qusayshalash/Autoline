@@ -4,7 +4,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import FileResponse
 
 from app.errors import ApiError
-from app.auth import require_permission
+from app.services.rate_limit import EXPORT
+from app.auth import rate_limited, require_permission
 from app.config import settings
 from app.db import catalog
 from app.models.schemas import ExportRequest, JobOut
@@ -19,7 +20,8 @@ _MEDIA_TYPES = {
 }
 
 
-@router.post("/{dataset_id}/export", response_model=JobOut)
+@router.post("/{dataset_id}/export", response_model=JobOut,
+             dependencies=[Depends(rate_limited(EXPORT))])
 def request_export(dataset_id: str, req: ExportRequest, user: dict = Depends(require_permission("datasets.view", "datasets.export"))) -> JobOut:
     row = catalog.get_dataset(dataset_id)
     if row is None:

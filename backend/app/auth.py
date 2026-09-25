@@ -11,6 +11,7 @@ from fastapi import Depends, HTTPException, Request
 from app.errors import ApiError
 from app.db import admin as admin_db
 from app.db import catalog
+from app.services import rate_limit
 from app.services import security
 
 COOKIE_NAME = "access_token"
@@ -33,6 +34,34 @@ def get_current_user(request: Request) -> dict:
     # waiting for the token to expire
     user["permissions"] = admin_db.permissions_for_role(user["role"])
     return user
+
+
+def rate_limited(bucket: rate_limit.Bucket):
+    """Refuses this endpoint when the caller has been asking too often.
+
+    Used as a dependency beside `require_permission`, on the endpoints that cost real
+    work - the grid, the statistics, the exports. Cheap endpoints are left alone: a limit
+    on listing datasets protects nothing and is one more thing to meet by accident.
+
+    The refusal carries Retry-After, which the interface already knows how to read from
+    the login lockout - the one header exposed through CORS.
+    """
+
+    def dependency(request: Request) -> None:
+        key = rate_limit.key_for(
+            request.cookies.get(COOKIE_NAME),
+            request.client.host if request.client else None,
+        )
+        wait = rate_limit.check(bucket, key)
+        if wait > 0:
+            raise ApiError(
+                429,
+                "too_many_requests",
+                "Too many requests - slow down and try again shortly",
+                headers={"Retry-After": str(max(1, int(wait + 0.999)))},
+            )
+
+    return dependency
 
 
 def require_permission(*keys: str):

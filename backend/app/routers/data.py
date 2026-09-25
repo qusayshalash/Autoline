@@ -3,7 +3,8 @@ from typing import Annotated, Literal, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.errors import ApiError
-from app.auth import require_permission
+from app.services.rate_limit import ANALYSIS, QUERY
+from app.auth import rate_limited, require_permission
 from app.db import catalog
 from app.models.schemas import (
     ColumnProfile,
@@ -37,7 +38,8 @@ def _require_ready(dataset_id: str) -> dict:
     return row
 
 
-@router.post("/{dataset_id}/data", response_model=DataPage)
+@router.post("/{dataset_id}/data", response_model=DataPage,
+             dependencies=[Depends(rate_limited(QUERY))])
 def get_data(dataset_id: str, q: DataQuery, user: dict = Depends(require_permission("datasets.view"))) -> DataPage:
     _require_ready(dataset_id)
     try:
@@ -46,7 +48,8 @@ def get_data(dataset_id: str, q: DataQuery, user: dict = Depends(require_permiss
         raise HTTPException(400, str(exc)) from exc
 
 
-@router.get("/{dataset_id}/data", response_model=DataPage)
+@router.get("/{dataset_id}/data", response_model=DataPage,
+            dependencies=[Depends(rate_limited(QUERY))])
 def get_data_get(
     dataset_id: str,
     page: int = 1,
@@ -74,7 +77,8 @@ def get_data_get(
         raise HTTPException(400, str(exc)) from exc
 
 
-@router.get("/{dataset_id}/data/distinct-values", response_model=DistinctValuesOut)
+@router.get("/{dataset_id}/data/distinct-values", response_model=DistinctValuesOut,
+            dependencies=[Depends(rate_limited(ANALYSIS))])
 def get_distinct_values(
     dataset_id: str,
     column: str,
@@ -93,7 +97,8 @@ def get_distinct_values(
         raise HTTPException(400, str(exc)) from exc
 
 
-@router.post("/{dataset_id}/group", response_model=GroupPage)
+@router.post("/{dataset_id}/group", response_model=GroupPage,
+             dependencies=[Depends(rate_limited(ANALYSIS))])
 def get_groups(dataset_id: str, q: GroupQuery, user: dict = Depends(require_permission("datasets.view"))) -> GroupPage:
     _require_ready(dataset_id)
     try:
@@ -125,7 +130,8 @@ def get_stats(dataset_id: str, user: dict = Depends(require_permission("datasets
 # table and is fetched only for the column somebody actually opened.
 
 
-@router.get("/{dataset_id}/profile", response_model=ProfileOverview)
+@router.get("/{dataset_id}/profile", response_model=ProfileOverview,
+            dependencies=[Depends(rate_limited(ANALYSIS))])
 def get_profile_overview(
     dataset_id: str,
     source: str = "cleaned",
@@ -135,7 +141,8 @@ def get_profile_overview(
     return ProfileOverview(**profiling.profile_overview(dataset_id, source))
 
 
-@router.get("/{dataset_id}/profile/{column}", response_model=ColumnProfile)
+@router.get("/{dataset_id}/profile/{column}", response_model=ColumnProfile,
+            dependencies=[Depends(rate_limited(ANALYSIS))])
 def get_column_profile(
     dataset_id: str,
     column: str,

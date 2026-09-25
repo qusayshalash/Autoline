@@ -25,6 +25,7 @@ from app.routers import (
 )
 from app.services import backup as backup_service
 from app.services import housekeeping
+from app.services import rate_limit
 from app.services import restore as restore_service
 from app.services import storage
 from app.services.security import bootstrap_admin
@@ -73,6 +74,39 @@ app.add_middleware(
     # without this it can only guess, and would report a minute for an hour-long wait.
     expose_headers=["Retry-After"],
 )
+
+
+@app.middleware("http")
+async def _flood_gate(request: Request, call_next):
+    """A ceiling on how fast one address may ask for anything at all.
+
+    Deliberately in front of everything, and deliberately in memory, because of where the
+    cost actually is. The protection against password guessing writes a row to
+    `login_attempts` on every failed attempt, and the catalog is one DuckDB file behind
+    one lock - so a few hundred concurrent wrong passwords do not just fail, they put
+    every other catalog read in the application in a queue behind them. The guard against
+    guessing is the cheapest way to stall the whole app, and it is reached before any
+    endpoint has decided anything.
+
+    So this is checked first and touches nothing but a dictionary. The per-endpoint limits
+    in `auth.rate_limited` sit inside it and are about cost rather than volume.
+
+    Health is exempt: whatever is watching the process must not be told to go away, and it
+    is the one request that proves nothing about the caller.
+    """
+    if request.url.path.startswith("/api/") and request.url.path != "/api/health":
+        key = rate_limit.key_for(None, request.client.host if request.client else None)
+        wait = rate_limit.check(rate_limit.GLOBAL, key)
+        if wait > 0:
+            return JSONResponse(
+                status_code=429,
+                content={
+                    "detail": "Too many requests - slow down and try again shortly",
+                    "code": "too_many_requests",
+                },
+                headers={"Retry-After": str(max(1, int(wait + 0.999)))},
+            )
+    return await call_next(request)
 
 
 @app.middleware("http")

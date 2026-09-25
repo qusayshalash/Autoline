@@ -1118,7 +1118,8 @@
     "restore_in_progress": "שחזור כבר רץ.",
     "restore_jobs_running": "יש להמתין לסיום המשימות הרצות.",
     "restore_no_disk_space": "אין מספיק מקום פנוי כדי להכין את הגיבוי לפני ההחלפה.",
-    "kept_state_not_found": "אין מצב שהוחלף בשם הזה."
+    "kept_state_not_found": "אין מצב שהוחלף בשם הזה.",
+    "too_many_requests": "יותר מדי בקשות בזמן קצר. האט מעט ונסה שוב בקרוב."
   },
   "record_key": {
     "title": "מפתח הרשומה",

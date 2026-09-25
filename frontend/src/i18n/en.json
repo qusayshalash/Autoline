@@ -1102,7 +1102,8 @@
     "restore_in_progress": "A restore is already running.",
     "restore_jobs_running": "Wait for the running jobs to finish first.",
     "restore_no_disk_space": "Not enough free space to stage this backup before swapping it in.",
-    "kept_state_not_found": "There is no replaced state by that name."
+    "kept_state_not_found": "There is no replaced state by that name.",
+    "too_many_requests": "Too many requests in a short time. Slow down and try again shortly."
   },
   "record_key": {
     "title": "Record key",

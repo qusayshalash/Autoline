@@ -52,6 +52,12 @@ os.environ["ADMIN_PASSWORD"] = "test-admin-pw"
 # instead - see test_housekeeping.py.
 os.environ["DISABLE_BACKGROUND_SCHEDULES"] = "1"
 
+# A suite is indistinguishable from the thing the rate limiter exists to stop: hundreds
+# of requests a second, from one client, at one address. Left on, it would fail tests
+# about something else entirely, and the failures would move around as the suite grew.
+# test_rate_limit.py switches it back on and checks it against the real endpoints.
+os.environ["RATE_LIMIT_ENABLED"] = "0"
+
 # Hebrew values reach stdout through job-progress prints; on a Windows console that
 # defaults to cp1252 those prints raise and would be reported as a test failure in a
 # completely unrelated place.

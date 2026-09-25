@@ -53,6 +53,17 @@ class Settings(BaseSettings):
     # How many verified backups to keep. Older ones are pruned after a successful run.
     backup_keep: int = 3
 
+    # How often one caller may ask for something expensive. Not a defence against a
+    # distributed attack - nothing in an application is - but against one caller with a
+    # loop, which is the likelier problem and the one measurable here: a search across
+    # 4.1M rows costs about 2.5 seconds, and twenty at once is the whole server.
+    #
+    # On by default, because a limit that has to be remembered is one that gets left off.
+    # The tests switch it off, since a suite hammering one endpoint from one client looks
+    # exactly like the thing this exists to stop - see tests/test_rate_limit.py, which
+    # turns it back on to check it.
+    rate_limit_enabled: bool = True
+
     # ---- session cookie -------------------------------------------------------
     #
     # The cookie is the whole session: whoever holds it is signed in, without a
