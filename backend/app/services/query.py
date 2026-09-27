@@ -14,7 +14,7 @@ from app.models.schemas import (
     GroupPage,
     GroupQuery,
 )
-from app.services import arrivals, row_identity, sql_utils
+from app.services import arrivals, row_identity, sql_utils, view
 
 # Rows sampled when guessing a column's display type. Only affects the T/# icon in the
 # grid header, so a cheap head-of-table sample is plenty.
@@ -33,56 +33,22 @@ _DATE_RE = r"^\d{4}[-/](0?[1-9]|1[0-2])([-/](0?[1-9]|[12][0-9]|3[01]))?$"
 _MAX_CATEGORY_VALUES = 12
 
 
-def _build_where(
-    search: str | None,
-    filters: list,
-    columns: list[str],
-    search_columns: list[str] | None = None,
-    search_alternatives: list[str] | None = None,
-) -> tuple[str, list]:
-    """Shared WHERE builder for the row, group and count queries.
-
-    Returns the SQL fragment (without the WHERE keyword, empty when unconstrained) and
-    the bound parameters in matching order.
-    """
-    clauses: list[str] = []
-    params: list = []
-
-    if search:
-        looked_in = sql_utils.resolve_search_columns(search_columns, columns)
-        s_sql, s_params = sql_utils.build_search_sql(search, looked_in, search_alternatives)
-        clauses.append(s_sql)
-        params.extend(s_params)
-
-    if filters:
-        f_sql, f_params = sql_utils.build_filter_sql(filters, set(columns))
-        if f_sql:
-            clauses.append(f_sql)
-            params.extend(f_params)
-
-    return " AND ".join(f"({c})" for c in clauses), params
-
-
 @read_locked
 def fetch_page(dataset_id: str, q: DataQuery) -> DataPage:
     table = sql_utils.resolve_source_table(dataset_id, q.source)
     columns = sql_utils.table_columns(dataset_id, table)
     valid = set(columns)
 
-    where_sql, params = _build_where(
-        q.search, q.filters, columns, q.search_columns, q.search_alternatives
+    where_sql, params = view.where(
+        dataset_id,
+        columns,
+        search=q.search,
+        search_columns=q.search_columns,
+        search_alternatives=q.search_alternatives,
+        filters=q.filters,
+        only_recent=q.only_recent,
     )
-
-    # "only what arrived recently" is not a statement about a column, so it joins the
-    # WHERE here rather than going through the filter builder. It costs nothing when it
-    # is not asked for, which is almost always.
     key_cols = row_identity.key_columns(catalog.get_dataset(dataset_id) or {})
-    if q.only_recent:
-        recent = arrivals.recent_filter_sql(dataset_id, key_cols)
-        # No arrivals table and no key both mean the same thing here: nothing is known
-        # to have arrived, which is not the same as everything having arrived.
-        recent = recent or "FALSE"
-        where_sql = f"({where_sql}) AND ({recent})" if where_sql else recent
     table_sql = sql_utils.quote_ident(table)
 
     started = time.perf_counter()
@@ -146,8 +112,16 @@ def fetch_groups(dataset_id: str, q: GroupQuery) -> GroupPage:
     if q.column not in columns:
         raise ValueError(f"Unknown column: {q.column}")
 
-    where_sql, params = _build_where(
-        q.search, q.filters, columns, q.search_columns, q.search_alternatives
+    # the same rows the grid is showing - including "only the latest batch", which is
+    # the case that was missing: see services/view.py
+    where_sql, params = view.where(
+        dataset_id,
+        columns,
+        search=q.search,
+        search_columns=q.search_columns,
+        search_alternatives=q.search_alternatives,
+        filters=q.filters,
+        only_recent=q.only_recent,
     )
     table_sql = sql_utils.quote_ident(table)
     col_sql = sql_utils.quote_ident(q.column)

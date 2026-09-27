@@ -286,7 +286,11 @@ def profile_overview(dataset_id: str, source: str = "cleaned") -> dict:
                 "filled": filled,
                 "missing": total - filled,
                 "fill_pct": _pct(filled, total),
-                "approx_distinct": approx_distinct,
+                # HyperLogLog overshoots by a few percent either way, and on a column
+                # where every value is different the overshoot lands above the number
+                # of values there are: "≈33,314 distinct" in a column of 30,300 rows.
+                # The ≈ excuses being approximate, not being impossible.
+                "approx_distinct": min(approx_distinct, filled),
             }
         )
     return {

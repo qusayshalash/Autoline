@@ -688,6 +688,12 @@ class FilterRule(Incoming):
     op: FilterOp
     value: Optional[Any] = None
     values: Optional[list[str]] = None  # used only when op == "in"
+    # Other spellings of what was typed, derived by the screen from the value dictionary
+    # exactly as it does for the search box. The grid shows Hebrew values translated, so
+    # somebody filtering types what they read - "كيا" - and without this the comparison
+    # is against the stored "קיה" and returns no rows. Picking a suggestion always worked
+    # because it selects the stored value; typing did not.
+    alternatives: Optional[list[str]] = None
 
 
 class DistinctValueItem(BaseModel):
@@ -765,6 +771,9 @@ class GroupQuery(Incoming):
     search: Optional[str] = None
     search_columns: Optional[list[str]] = None
     search_alternatives: Optional[list[str]] = None
+    # "only the latest batch", which is a statement about the view rather than about a
+    # column - carried here so this answers about the rows the grid is showing
+    only_recent: bool = False
     # Narrows the grouped column's own values, as opposed to `search`, which narrows
     # the rows. The value picker needs both at once: the list must be counted over what
     # the grid is showing *and* filtered by what is typed into the list's own search
@@ -820,6 +829,9 @@ class StatisticsQuery(Incoming):
     search: Optional[str] = None
     search_columns: Optional[list[str]] = None
     search_alternatives: Optional[list[str]] = None
+    # "only the latest batch", which is a statement about the view rather than about a
+    # column - carried here so this answers about the rows the grid is showing
+    only_recent: bool = False
     source: Literal["raw", "cleaned"] = "cleaned"
     limit: int = Field(default=50, ge=1, le=200)
     # how ties between buckets are ordered: by popularity, or by the value itself
@@ -885,6 +897,9 @@ class PivotQuery(Incoming):
     search: Optional[str] = None
     search_columns: Optional[list[str]] = None
     search_alternatives: Optional[list[str]] = None
+    # "only the latest batch", which is a statement about the view rather than about a
+    # column - carried here so this answers about the rows the grid is showing
+    only_recent: bool = False
     source: Literal["raw", "cleaned"] = "cleaned"
     # A matrix wider than a dozen columns stops being readable, and taller than ~50 rows
     # stops being scannable; whatever falls outside is aggregated rather than dropped.
@@ -955,6 +970,9 @@ class ExportRequest(Incoming):
     search: Optional[str] = None
     search_columns: Optional[list[str]] = None
     search_alternatives: Optional[list[str]] = None
+    # "only the latest batch", which is a statement about the view rather than about a
+    # column - carried here so this answers about the rows the grid is showing
+    only_recent: bool = False
     filters: list[FilterRule] = []
     sort_by: Optional[str] = None
     sort_dir: Literal["asc", "desc"] = "asc"

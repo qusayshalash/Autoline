@@ -31,7 +31,7 @@ from app.models.schemas import (
     StatisticsOut,
     StatisticsQuery,
 )
-from app.services import sql_utils
+from app.services import sql_utils, view
 from app.services.query import column_kind, column_types
 
 # Buckets returned by default. Anything past the cut is folded into a single "other" row
@@ -109,24 +109,20 @@ def _bucket_expr(column: str, mode: str, granularity: str, date_parse: str = "")
     return f"NULLIF(TRIM({col}), '')"
 
 
-def _build_where(q: StatisticsQuery | PivotQuery, columns: list[str]) -> tuple[str, list[Any]]:
-    """Shared by both breakdown shapes - they carry the same `search` and `filters`, so a
-    cross-tab always describes the same subset a one-dimensional breakdown would."""
-    clauses: list[str] = []
-    params: list[Any] = []
-    if q.search:
-        looked_in = sql_utils.resolve_search_columns(q.search_columns, columns)
-        s_sql, s_params = sql_utils.build_search_sql(
-            q.search, looked_in, q.search_alternatives
-        )
-        clauses.append(s_sql)
-        params.extend(s_params)
-    if q.filters:
-        f_sql, f_params = sql_utils.build_filter_sql(q.filters, set(columns))
-        if f_sql:
-            clauses.append(f_sql)
-            params.extend(f_params)
-    return " AND ".join(f"({c})" for c in clauses), params
+def _build_where(
+    dataset_id: str, q: StatisticsQuery | PivotQuery, columns: list[str]
+) -> tuple[str, list[Any]]:
+    """Shared by both breakdown shapes, and by now just a call to the one builder every
+    view uses - see services/view.py for why there is only one."""
+    return view.where(
+        dataset_id,
+        columns,
+        search=q.search,
+        search_columns=q.search_columns,
+        search_alternatives=q.search_alternatives,
+        filters=q.filters,
+        only_recent=q.only_recent,
+    )
 
 
 @read_locked
@@ -142,7 +138,7 @@ def compute(dataset_id: str, q: StatisticsQuery) -> StatisticsOut:
 
     kind = column_kind(dataset_id, q.source, q.group_by)
 
-    where_sql, params = _build_where(q, columns)
+    where_sql, params = _build_where(dataset_id, q, columns)
     where_clause = f" WHERE {where_sql}" if where_sql else ""
     table_sql = sql_utils.quote_ident(table)
     col_sql = sql_utils.quote_ident(q.group_by)
@@ -408,7 +404,7 @@ def compute_pivot(dataset_id: str, q: PivotQuery) -> PivotOut:
     row_kind = column_kind(dataset_id, q.source, q.row_column)
     col_kind = column_kind(dataset_id, q.source, q.column_column)
 
-    where_sql, params = _build_where(q, columns)
+    where_sql, params = _build_where(dataset_id, q, columns)
     where_clause = f" WHERE {where_sql}" if where_sql else ""
     table_sql = sql_utils.quote_ident(table)
 

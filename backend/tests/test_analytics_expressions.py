@@ -36,7 +36,7 @@ def test_an_unknown_granularity_falls_back_to_year_rather_than_breaking_the_quer
 
 
 def test_where_is_empty_when_nothing_was_asked_for():
-    sql, params = analytics._build_where(StatisticsQuery(group_by="tozeret_nm"), ["tozeret_nm"])
+    sql, params = analytics._build_where("no-dataset", StatisticsQuery(group_by="tozeret_nm"), ["tozeret_nm"])
     assert sql == ""
     assert params == []
 
@@ -49,7 +49,7 @@ def test_search_and_filters_are_both_applied_and_parenthesised():
         search="kia",
         filters=[FilterRule(column="ramat_gimur", op="is_null")],
     )
-    sql, params = analytics._build_where(q, ["tozeret_nm", "ramat_gimur"])
+    sql, params = analytics._build_where("no-dataset", q, ["tozeret_nm", "ramat_gimur"])
     assert sql.startswith("(") and ") AND (" in sql
     assert params[0] == "%kia%"
 
@@ -60,9 +60,11 @@ def test_a_pivot_and_a_breakdown_build_the_same_subset():
     filters = [FilterRule(column="tozeret_nm", op="starts_with", value="kia")]
     columns = ["tozeret_nm", "sug_delek_nm"]
     a = analytics._build_where(
+        "no-dataset",
         StatisticsQuery(group_by="tozeret_nm", search="x", filters=filters), columns
     )
     b = analytics._build_where(
+        "no-dataset",
         PivotQuery(row_column="tozeret_nm", column_column="sug_delek_nm", search="x", filters=filters),
         columns,
     )
@@ -72,6 +74,7 @@ def test_a_pivot_and_a_breakdown_build_the_same_subset():
 def test_a_filter_on_an_unlisted_column_is_refused():
     with pytest.raises(ValueError, match="Unknown column"):
         analytics._build_where(
+            "no-dataset",
             StatisticsQuery(
                 group_by="tozeret_nm", filters=[FilterRule(column="secret", op="eq", value="x")]
             ),

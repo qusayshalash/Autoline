@@ -67,6 +67,20 @@ def validate_columns(columns: list[str], valid: set[str]) -> None:
         raise ValueError(f"Unknown column(s): {', '.join(invalid)}")
 
 
+# Bounds the OR chain a single filter can grow into, for the reason MAX_SEARCH_TERMS bounds
+# the search's: each spelling is another comparison against every row.
+MAX_FILTER_ALTERNATIVES = 8
+
+
+def _spellings(value, alternatives) -> list[str]:
+    """The typed value first, then its other spellings, without repeats."""
+    out = [str(value if value is not None else "")]
+    for a in (alternatives or [])[:MAX_FILTER_ALTERNATIVES]:
+        if a not in out:
+            out.append(a)
+    return out
+
+
 def build_filter_sql(filters: list[FilterRule], valid_columns: set[str]) -> tuple[str, list[Any]]:
     clauses: list[str] = []
     params: list[Any] = []
@@ -82,22 +96,38 @@ def build_filter_sql(filters: list[FilterRule], valid_columns: set[str]) -> tupl
             # starts_with matters on this data: the manufacturer column pairs a maker
             # with its country, and "טורקיה" (Turkey) ends in the same three letters as
             # "קיה" (Kia) - so `contains` on Kia also returns Toyota Turkey.
-            clauses.append(f"{col} ILIKE ? ESCAPE '{_LIKE_ESCAPE}'")
-            params.append(_LIKE_PATTERNS[f.op].format(escape_like(str(f.value or ""))))
+            spellings = _spellings(f.value, f.alternatives)
+            like = f"{col} ILIKE ? ESCAPE '{_LIKE_ESCAPE}'"
+            # one spelling keeps the plain form, so the query text for the ordinary case
+            # is what it always was
+            clauses.append(like if len(spellings) == 1 else "(" + " OR ".join(like for _ in spellings) + ")")
+            params.extend(_LIKE_PATTERNS[f.op].format(escape_like(v)) for v in spellings)
         elif f.op in _NUMERIC_OPS:
+            # a number has one spelling; alternatives are about words
             op_sql = {"gt": ">", "gte": ">=", "lt": "<", "lte": "<="}[f.op]
             clauses.append(f"TRY_CAST({col} AS DOUBLE) {op_sql} TRY_CAST(? AS DOUBLE)")
             params.append(f.value)
         elif f.op == "eq":
-            clauses.append(f"{col} = ?")
-            params.append(f.value)
+            spellings = _spellings(f.value, f.alternatives)
+            if len(spellings) == 1:
+                clauses.append(f"{col} = ?")
+            else:
+                clauses.append(f"{col} IN ({', '.join('?' for _ in spellings)})")
+            params.extend(spellings)
         elif f.op == "neq":
-            clauses.append(f"{col} != ?")
-            params.append(f.value)
+            # every spelling is excluded, not just the typed one: "not Kia" typed in
+            # Arabic has to leave out the Hebrew Kias too, or it excludes nothing
+            spellings = _spellings(f.value, f.alternatives)
+            if len(spellings) == 1:
+                clauses.append(f"{col} != ?")
+            else:
+                clauses.append(f"{col} NOT IN ({', '.join('?' for _ in spellings)})")
+            params.extend(spellings)
         elif f.op == "in":
-            values = f.values or []
+            values = list(f.values or [])
             if not values:
                 continue  # no values selected - contributes no constraint
+            values += [a for a in (f.alternatives or [])[:MAX_FILTER_ALTERNATIVES] if a not in values]
             placeholders = ", ".join("?" for _ in values)
             clauses.append(f"{col} IN ({placeholders})")
             params.extend(values)

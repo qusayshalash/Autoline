@@ -36,6 +36,34 @@ export function formatNumber(value: number | null | undefined, language: string)
 }
 
 /**
+ * A share as a percentage, rounded without ever contradicting the counts beside it.
+ *
+ * 29,997 filled of 30,300 is 99.990%, which one decimal rounds to "100.0%" - printed on
+ * the column profile right next to "3 missing". The same happens at the other end: 3
+ * rows of 30,300 rounds to "0.0%" beside a count of 3. Rounding is fine; rounding onto
+ * the one value that means "all" or "none" is a claim the counts disprove. So a share
+ * that is neither all nor none is kept strictly between them.
+ */
+export function formatShare(part: number, whole: number, language: string): string {
+  if (!whole) return "—";
+  let pct = (part * 100) / whole;
+  if (part > 0 && part < whole) pct = Math.min(Math.max(pct, 0.1), 99.9);
+  return `${shareFormatter(language).format(pct)}%`;
+}
+
+const shareCache = new Map<string, Intl.NumberFormat>();
+
+function shareFormatter(language: string): Intl.NumberFormat {
+  const key = language || "en";
+  let found = shareCache.get(key);
+  if (!found) {
+    found = new Intl.NumberFormat(key, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    shareCache.set(key, found);
+  }
+  return found;
+}
+
+/**
  * A byte count as a number and a unit: "2.1 KB", "826 MB".
  *
  * Wrapped in a directional isolate, because the unit is Latin and most of this app is

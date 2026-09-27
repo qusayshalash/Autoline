@@ -1136,7 +1136,8 @@
     "blank_two": "2 rows have no value in these columns",
     "blank_few": "{{count}} rows have no value in these columns",
     "blank_many": "{{count}} rows have no value in these columns",
-    "blank_other": "{{count}} rows have no value in these columns"
+    "blank_other": "{{count}} rows have no value in these columns",
+    "not_in_view": "Cells cannot be corrected here: the record key ({{columns}}) was removed from the cleaned data. Switch to the original data to correct."
   },
   "corrections": {
     "edit_cell": "Correct {{column}}",

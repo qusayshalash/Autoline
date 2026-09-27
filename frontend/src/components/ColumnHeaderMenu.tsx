@@ -24,6 +24,9 @@ interface Props {
   /** the grid's free-text search, so the values offered are the ones on screen */
   search: string;
   searchColumns: string[];
+  /** the grid's "only the latest batch" toggle - with it on and this left out, the
+   *  list counted the whole table while the grid showed 400 rows */
+  onlyRecent: boolean;
   onHide: () => void;
   canDelete: boolean;
   onDeleteColumn: () => void;
@@ -45,6 +48,7 @@ export default function ColumnHeaderMenu({
   onFiltersChange,
   search: gridSearch,
   searchColumns,
+  onlyRecent,
   onHide,
   canDelete,
   onDeleteColumn,
@@ -169,7 +173,9 @@ export default function ColumnHeaderMenu({
       column,
       debouncedSearch,
       gridSearch,
+      searchColumns,
       JSON.stringify(otherFilters),
+      onlyRecent,
     ],
     queryFn: () =>
       fetchGroups(datasetId, {
@@ -182,6 +188,7 @@ export default function ColumnHeaderMenu({
         // and goes through the dictionary so a translated value can be typed back
         value_search: debouncedSearch || null,
         filters: otherFilters,
+        only_recent: onlyRecent,
       }),
     enabled: open,
   });

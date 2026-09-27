@@ -71,6 +71,30 @@ export interface FilterRule {
   op: FilterOp;
   value?: string | null;
   values?: string[] | null;
+  /** other spellings of what was typed - filled in by `withSpellings`, never by hand */
+  alternatives?: string[];
+}
+
+/**
+ * The filters as sent: each rule carrying the stored spellings of what was typed.
+ *
+ * The grid shows Hebrew values translated, so a person filtering types what they read.
+ * "Contains كيا" was compared against the stored "קיה" and returned no rows, while the
+ * grid beside it was full of rows reading كيا. The search box had this solved already -
+ * the spellings are derived here, once, from the same dictionary - and a filter is the
+ * same question asked about one column. Picking a suggestion always worked, because it
+ * selects the stored value; typing is what did not.
+ *
+ * Applied in every call that sends filters, which is the point of it living here rather
+ * than in the screens: a screen that forgot would answer "no rows" to a filter for
+ * something plainly on it.
+ */
+export function withSpellings(filters: FilterRule[] | undefined | null): FilterRule[] {
+  return (filters ?? []).map((rule) => {
+    const typed = rule.op === "in" ? rule.values ?? [] : [rule.value ?? ""];
+    const alternatives = [...new Set(typed.flatMap((v) => hebrewAlternatives(String(v))))];
+    return alternatives.length ? { ...rule, alternatives } : rule;
+  });
 }
 
 /** The blank rule a "+ Add filter" button appends. Lives here rather than in
@@ -347,7 +371,7 @@ export async function fetchData(
     // translated term is what gets typed, and a screen that forgot to say so would
     // answer "no rows" to a search for something plainly on it.
     search_alternatives: hebrewAlternatives(params.search ?? ""),
-    filters: params.filters ?? [],
+    filters: withSpellings(params.filters),
     source: params.source ?? "cleaned",
     only_recent: params.only_recent ?? false,
   });
@@ -382,6 +406,9 @@ export async function fetchGroups(
     value_search?: string | null;
     filters?: FilterRule[];
     source?: "raw" | "cleaned";
+    /** only the rows a recent batch brought - the grid's toggle, which every question
+     *  about the rows on screen has to carry or it answers about a different table */
+    only_recent?: boolean;
   }
 ): Promise<GroupPage> {
   const { data } = await api.post<GroupPage>(`/datasets/${datasetId}/group`, {
@@ -393,8 +420,9 @@ export async function fetchGroups(
     search_alternatives: hebrewAlternatives(params.search ?? ""),
     value_search: params.value_search ?? null,
     value_search_alternatives: hebrewAlternatives(params.value_search ?? ""),
-    filters: params.filters ?? [],
+    filters: withSpellings(params.filters),
     source: params.source ?? "cleaned",
+    only_recent: params.only_recent ?? false,
   });
   return data;
 }
@@ -450,7 +478,11 @@ export async function getStats(datasetId: string): Promise<StatsOut> {
 }
 
 export async function applyCleaning(datasetId: string, config: CleaningConfig): Promise<CleaningResult> {
-  const { data } = await api.post<CleaningResult>(`/datasets/${datasetId}/clean`, config);
+  const { data } = await api.post<CleaningResult>(`/datasets/${datasetId}/clean`, {
+    ...config,
+    // a cleaning rule typed in Arabic would otherwise match nothing and remove nothing
+    filters: withSpellings(config.filters),
+  });
   return data;
 }
 
@@ -608,6 +640,8 @@ export interface ExportRequest {
   filters?: FilterRule[];
   sort_by?: string | null;
   sort_dir?: "asc" | "desc";
+  /** with scope current_view: only the rows a recent batch brought, as on screen */
+  only_recent?: boolean;
 }
 
 export async function requestExport(datasetId: string, req: ExportRequest): Promise<JobOut> {
@@ -615,6 +649,7 @@ export async function requestExport(datasetId: string, req: ExportRequest): Prom
     ...req,
     // so that exporting "the current view" exports the rows that were on screen
     search_alternatives: hebrewAlternatives(req.search ?? ""),
+    filters: withSpellings(req.filters),
   });
   return data;
 }

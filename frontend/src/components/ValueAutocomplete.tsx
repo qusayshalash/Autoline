@@ -24,6 +24,8 @@ interface Props {
   /** the grid's free-text search, which is also part of what is on screen */
   search?: string | null;
   searchColumns?: string[];
+  /** the grid's "only the latest batch" toggle */
+  onlyRecent?: boolean;
 }
 
 const SUGGESTION_LIMIT = 50;
@@ -41,6 +43,7 @@ export default function ValueAutocomplete({
   context,
   search,
   searchColumns,
+  onlyRecent = false,
 }: Props) {
   const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -64,7 +67,11 @@ export default function ValueAutocomplete({
       column,
       debounced,
       search ?? "",
+      // every input to the fetch belongs in the key: the search scope was missing, so
+      // narrowing it could show the previous scope's list until the refetch landed
+      searchColumns ?? [],
       JSON.stringify(context ?? []),
+      onlyRecent,
       "suggest",
     ],
     queryFn: () =>
@@ -76,6 +83,7 @@ export default function ValueAutocomplete({
         search: search || null,
         search_columns: searchColumns,
         filters: context ?? [],
+        only_recent: onlyRecent,
       }),
     enabled: open && !!column,
   });

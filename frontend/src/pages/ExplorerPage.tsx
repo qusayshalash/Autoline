@@ -183,7 +183,10 @@ export default function ExplorerPage() {
 
   // top level of the group tree; the pager drives its paging just like rows
   const { data: groupPage, isFetching: groupsFetching } = useQuery({
-    queryKey: ["group", datasetId, source, groupBy[0], filters, search, searchColumns, page, pageSize],
+    queryKey: [
+      "group", datasetId, source, groupBy[0], filters, search, searchColumns, page, pageSize,
+      onlyRecent,
+    ],
     queryFn: () =>
       fetchGroups(datasetId, {
         column: groupBy[0],
@@ -193,6 +196,7 @@ export default function ExplorerPage() {
         search: search || null,
         search_columns: searchColumns,
         source,
+        only_recent: onlyRecent,
       }),
     enabled: isGrouped,
     placeholderData: (prev) => prev,
@@ -235,11 +239,6 @@ export default function ExplorerPage() {
   });
   const hasArrivals = !!arrivals && arrivals.new + arrivals.updated > 0;
 
-  // A filter that survives the batch it was filtering to would leave somebody looking at
-  // an empty table with no way to see why.
-  useEffect(() => {
-    if (!hasArrivals && onlyRecent) setOnlyRecent(false);
-  }, [hasArrivals, onlyRecent]);
 
   const [exportError, setExportError] = useState<string | null>(null);
 
@@ -254,6 +253,7 @@ export default function ExplorerPage() {
         filters: exportScope === "current_view" ? filters : [],
         sort_by: exportScope === "current_view" ? sortBy : null,
         sort_dir: sortDir,
+        only_recent: exportScope === "current_view" && onlyRecent,
       }),
     onSuccess: (job) => {
       setExportJobId(job.id);
@@ -293,7 +293,22 @@ export default function ExplorerPage() {
   const [keyDialogOpen, setKeyDialogOpen] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
   const keyColumns = dataset?.key_columns ?? [];
-  const canCorrect = canEdit && keyColumns.length > 0 && !isGrouped;
+  // The key has to be in the table being shown, not merely declared. Cleaning can drop
+  // a column, and when it drops the key the cleaned view - the default one - has nothing
+  // to say which row a cell belongs to. The cells used to stay editable anyway and every
+  // edit came back "no record with this key". Unknown (nothing loaded yet) counts as
+  // present, so this never flickers the screen into read-only while a page is loading.
+  const keyInView = !page_ || keyColumns.every((c) => page_.columns.includes(c));
+  const canCorrect = canEdit && keyColumns.length > 0 && keyInView && !isGrouped;
+  // "only the latest batch" is answered through the key too, so it has the same
+  // condition: with the key gone from this table the answer would always be no rows
+  const canShowRecent = hasArrivals && keyInView;
+
+  // A filter that survives the batch it was filtering to - or the key it was answered
+  // through - would leave somebody looking at an empty table with no way to see why.
+  useEffect(() => {
+    if (!canShowRecent && onlyRecent) setOnlyRecent(false);
+  }, [canShowRecent, onlyRecent]);
 
   // Fetched once per dataset rather than per page: it is small, it changes only when
   // somebody edits, and joining it server-side would cost every reader a join over
@@ -638,7 +653,7 @@ export default function ExplorerPage() {
           <IconStats />
           {t("sheet.stats")}
         </button>
-        {hasArrivals && (
+        {canShowRecent && (
           <button
             type="button"
             className={`sheet-tool arrivals-tool${onlyRecent ? " active" : ""}`}
@@ -835,7 +850,11 @@ export default function ExplorerPage() {
                 type="button"
                 // functional update: two chips removed in the same tick would otherwise
                 // both read the pre-update array and one removal would be lost
-                onClick={() => setGroupBy((prev) => prev.filter((g) => g !== c))}
+                onClick={() => {
+                  setGroupBy((prev) => prev.filter((g) => g !== c));
+                  // a different listing: page 5 of the old one means nothing in it
+                  setPage(1);
+                }}
                 aria-label={t("cleaning.remove")}
               >
                 <IconClose />
@@ -866,6 +885,7 @@ export default function ExplorerPage() {
         kindByColumn={kindByColumn}
         search={search}
         searchColumns={searchColumns}
+        onlyRecent={onlyRecent}
         onApply={(next) => {
           setFilters(next);
           setPage(1);
@@ -905,6 +925,11 @@ export default function ExplorerPage() {
 
       <ErrorBanner message={deleteColumnError} />
       <ErrorBanner message={editError} />
+      {canEdit && keyColumns.length > 0 && !keyInView && (
+        <p className="sheet-note" role="note">
+          {t("record_key.not_in_view", { columns: keyColumns.map(labelFor).join(" + ") })}
+        </p>
+      )}
       <ErrorBanner message={exportError} />
       {exportJob?.status === "error" && <ErrorBanner message={exportJob.error_message} />}
 
@@ -947,7 +972,7 @@ export default function ExplorerPage() {
                 {showRowNumbers && <th className="rownum-col">#</th>}
                 {/* Appears only when it has something to say, so it costs no width on
                     the datasets that never take a batch. */}
-                {hasArrivals && (
+                {canShowRecent && (
                   <th className="arrival-col">
                     <span className="sr-only">{t("arrivals.only_recent")}</span>
                   </th>
@@ -1006,6 +1031,7 @@ export default function ExplorerPage() {
                         filters={filters}
                         search={search}
                         searchColumns={searchColumns}
+                        onlyRecent={onlyRecent}
                         onFiltersChange={(f) => {
                           setFilters(f);
                           setPage(1);
@@ -1035,7 +1061,7 @@ export default function ExplorerPage() {
                   {showRowNumbers && (
                     <td className="rownum-col">{formatNumber(firstRowIndex + i, i18n.language)}</td>
                   )}
-                  {hasArrivals && (
+                  {canShowRecent && (
                     <td className="arrival-col">
                       {page_.arrivals?.[i] && (
                         <ArrivalMark

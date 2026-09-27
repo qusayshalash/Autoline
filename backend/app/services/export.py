@@ -17,7 +17,7 @@ from app.db import catalog
 from app.db.connection import datasets
 from app.jobs import JobCancelled, check_cancelled, submit
 from app.models.schemas import ExportRequest
-from app.services import sql_utils
+from app.services import sql_utils, view
 from app.services.pdf_fonts import data_font
 from app.services.query import sorts_numerically
 
@@ -65,24 +65,20 @@ def build_export_query(
     columns = sql_utils.table_columns(dataset_id, table)
     valid = set(columns)
 
-    where_clauses: list[str] = []
-    params: list = []
-
+    # "The current view" is whatever the grid is showing, asked of the same builder the
+    # grid asks. It used to be rebuilt here, and when "only the latest batch" arrived it
+    # did not: with 400 rows on screen, this exported 30,300.
+    where_sql, params = "", []
     if req.scope == "current_view":
-        if req.search:
-            looked_in = sql_utils.resolve_search_columns(req.search_columns, columns)
-            s_sql, s_params = sql_utils.build_search_sql(
-                req.search, looked_in, req.search_alternatives
-            )
-            where_clauses.append(s_sql)
-            params.extend(s_params)
-        if req.filters:
-            f_sql, f_params = sql_utils.build_filter_sql(req.filters, valid)
-            if f_sql:
-                where_clauses.append(f_sql)
-                params.extend(f_params)
-
-    where_sql = " AND ".join(f"({c})" for c in where_clauses)
+        where_sql, params = view.where(
+            dataset_id,
+            columns,
+            search=req.search,
+            search_columns=req.search_columns,
+            search_alternatives=req.search_alternatives,
+            filters=req.filters,
+            only_recent=req.only_recent,
+        )
 
     order_sql = ""
     if req.scope == "current_view" and req.sort_by:

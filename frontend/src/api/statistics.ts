@@ -1,4 +1,4 @@
-import { api } from "./client";
+import { api, withSpellings } from "./client";
 import type { ColumnKind, FilterRule } from "./client";
 import { hebrewAlternatives } from "../data/valueDictionary";
 
@@ -75,7 +75,7 @@ export async function fetchStatistics(
   const started = performance.now();
   const { data } = await api.post<StatisticsOut>(`/datasets/${datasetId}/statistics`, {
     group_by: params.group_by,
-    filters: params.filters ?? [],
+    filters: withSpellings(params.filters),
     search: params.search ?? null,
     search_alternatives: hebrewAlternatives(params.search ?? ""),
     source: params.source ?? "cleaned",
@@ -152,7 +152,7 @@ export async function fetchPivot(datasetId: string, params: PivotParams): Promis
   const { data } = await api.post<PivotOut>(`/datasets/${datasetId}/pivot`, {
     row_column: params.row_column,
     column_column: params.column_column,
-    filters: params.filters ?? [],
+    filters: withSpellings(params.filters),
     search: params.search ?? null,
     search_alternatives: hebrewAlternatives(params.search ?? ""),
     source: params.source ?? "cleaned",

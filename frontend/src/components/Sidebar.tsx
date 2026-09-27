@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import i18n from "../i18n";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../auth/AuthContext";
@@ -72,6 +73,25 @@ function IconPanel() {
       <path d="M8 3.5v13" />
     </svg>
   );
+}
+
+/**
+ * A role as the sidebar names it.
+ *
+ * Only admin, editor and viewer have a translation. Every other role - the protected
+ * super_admin, and any role created at runtime - fell through to i18next's default,
+ * which is the key itself: "auth.role_super_admin" under the account name. Roles are
+ * named in English by decision (BUG-012, left as Qusay chose), so the fallback is the
+ * English name the slug stands for - "Super Admin", exactly as the built-in is stored,
+ * and "Data Analyst" for the custom role that already exists - not a new translation.
+ */
+function roleLabel(slug: string): string {
+  const english = slug
+    .split("_")
+    .filter(Boolean)
+    .map((w) => w[0].toUpperCase() + w.slice(1))
+    .join(" ");
+  return i18n.t(`auth.role_${slug}`, { defaultValue: english || slug });
 }
 
 export default function Sidebar() {
@@ -163,12 +183,12 @@ export default function Sidebar() {
           ))}
         </div>
 
-        <div className="sidebar-user" title={`${user.username} · ${t(`auth.role_${user.role}`)}`}>
+        <div className="sidebar-user" title={`${user.username} · ${roleLabel(user.role)}`}>
           <span className="sidebar-avatar">{initial}</span>
           {!collapsed && (
             <span className="sidebar-user-text">
               <strong>{user.username}</strong>
-              <small>{t(`auth.role_${user.role}`)}</small>
+              <small>{roleLabel(user.role)}</small>
             </span>
           )}
           <button

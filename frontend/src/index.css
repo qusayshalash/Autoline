@@ -3191,3 +3191,16 @@ td:hover > .cell-edit-wrap > .cell-revert,
   font-weight: 600;
   color: var(--warning);
 }
+
+/* Why the cells cannot be edited right now. A notice rather than an error: nothing
+   failed, the view simply lacks the column that says which row is which - and the way
+   out (switch to the original data) is in the sentence. */
+.sheet-note {
+  margin: 0;
+  padding: 8px 14px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text);
+  background: var(--warning-soft);
+  border-bottom: 1px solid var(--border);
+}

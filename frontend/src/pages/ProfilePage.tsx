@@ -9,6 +9,7 @@ import Breadcrumb from "../components/Breadcrumb";
 import ColumnKindIcon from "../components/ColumnKindIcon";
 import QueryState from "../components/QueryState";
 import { columnLabel } from "../data/columnDictionary";
+import { formatShare } from "../data/numbers";
 import { translateValue } from "../data/valueDictionary";
 
 /**
@@ -90,7 +91,7 @@ export default function ProfilePage() {
                       style={{ width: `${Math.max(c.fill_pct, 0.5)}%` }}
                     />
                   </span>
-                  <span className="fill-pct num">{c.fill_pct.toFixed(1)}%</span>
+                  <span className="fill-pct num">{formatShare(c.filled, total, i18n.language)}</span>
                 </td>
                 <td className="num">≈{c.approx_distinct.toLocaleString(i18n.language)}</td>
                 <td className="num">
@@ -159,7 +160,7 @@ function ColumnDetail({ datasetId, column }: { datasetId: string; column: string
         <div>
           <dt>{t("profile.filled")}</dt>
           <dd>
-            {n(p.filled)} <span className="muted">({p.fill_pct.toFixed(1)}%)</span>
+            {n(p.filled)} <span className="muted">({formatShare(p.filled, p.total, lang)})</span>
           </dd>
         </div>
         <div>
@@ -219,7 +220,7 @@ function ColumnDetail({ datasetId, column }: { datasetId: string; column: string
               <span style={{ width: `${Math.max(v.pct, 0.5)}%` }} />
             </span>
             <span className="value-count num">{n(v.count)}</span>
-            <span className="value-pct num muted">{v.pct.toFixed(1)}%</span>
+            <span className="value-pct num muted">{formatShare(v.count, p.total, lang)}</span>
           </li>
         ))}
       </ul>
@@ -235,7 +236,7 @@ function ColumnDetail({ datasetId, column }: { datasetId: string; column: string
                   <span style={{ width: `${Math.max(l.pct, 0.5)}%` }} />
                 </span>
                 <span className="value-count num">{n(l.count)}</span>
-                <span className="value-pct num muted">{l.pct.toFixed(1)}%</span>
+                <span className="value-pct num muted">{formatShare(l.count, p.filled, lang)}</span>
               </li>
             ))}
           </ul>

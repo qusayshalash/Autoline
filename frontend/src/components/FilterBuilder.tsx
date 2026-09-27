@@ -39,6 +39,8 @@ interface Props {
   /** the grid's free-text search, so suggestions match the view being filtered */
   search?: string | null;
   searchColumns?: string[];
+  /** the grid's "only the latest batch" toggle; absent where there is no such view */
+  onlyRecent?: boolean;
 }
 
 export default function FilterBuilder({
@@ -52,6 +54,7 @@ export default function FilterBuilder({
   kindByColumn,
   search,
   searchColumns,
+  onlyRecent = false,
 }: Props) {
   const { t, i18n } = useTranslation();
   const isDialog = variant === "dialog";
@@ -122,6 +125,7 @@ export default function FilterBuilder({
                 context={filters.filter((_, other) => other !== i)}
                 search={search}
                 searchColumns={searchColumns}
+                onlyRecent={onlyRecent}
               />
             ) : (
               <input

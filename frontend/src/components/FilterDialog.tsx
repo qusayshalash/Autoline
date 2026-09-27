@@ -17,6 +17,8 @@ interface Props {
   /** the grid's free-text search, so suggestions match the view being filtered */
   search?: string | null;
   searchColumns?: string[];
+  /** the grid's "only the latest batch" toggle, also part of what is on screen */
+  onlyRecent?: boolean;
   onApply: (filters: FilterRule[]) => void;
   onClose: () => void;
 }
@@ -30,6 +32,7 @@ export default function FilterDialog({
   kindByColumn,
   search,
   searchColumns,
+  onlyRecent,
   onApply,
   onClose,
 }: Props) {
@@ -140,6 +143,7 @@ export default function FilterDialog({
             kindByColumn={kindByColumn}
             search={search}
             searchColumns={searchColumns}
+            onlyRecent={onlyRecent}
           />
 
           <button
