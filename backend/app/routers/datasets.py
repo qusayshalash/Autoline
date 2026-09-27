@@ -79,7 +79,7 @@ async def upload_dataset(
         saved_path = await ingestion.save_upload_stream(dataset_id, file, ext)
     except ingestion.InsufficientDiskSpace as exc:
         catalog.update_dataset(dataset_id, status="error", error_message=str(exc))
-        raise HTTPException(413, str(exc)) from exc
+        raise ApiError(413, "upload_no_room", "Not enough free disk space for this upload") from exc
 
     encoding = ingestion.detect_encoding(saved_path)
     delimiter = ingestion.detect_delimiter(saved_path, encoding)

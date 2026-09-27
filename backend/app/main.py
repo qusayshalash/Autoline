@@ -3,9 +3,9 @@ import threading
 import time
 
 from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from app import gates
 from app.config import settings
 from app.db import admin as admin_db
 from app.db import timestamp_migration
@@ -25,7 +25,6 @@ from app.routers import (
 )
 from app.services import backup as backup_service
 from app.services import housekeeping
-from app.services import rate_limit
 from app.services import restore as restore_service
 from app.services import storage
 from app.services.security import bootstrap_admin
@@ -63,80 +62,9 @@ if settings.public_origin:
     if origin not in _ALLOWED_ORIGINS:
         _ALLOWED_ORIGINS.append(origin)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=_ALLOWED_ORIGINS,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-    # A cross-origin response hides every header from JavaScript unless it is named here.
-    # The login screen reads Retry-After to tell somebody how long they are locked out;
-    # without this it can only guess, and would report a minute for an hour-long wait.
-    expose_headers=["Retry-After"],
-)
-
-
-@app.middleware("http")
-async def _flood_gate(request: Request, call_next):
-    """A ceiling on how fast one address may ask for anything at all.
-
-    Deliberately in front of everything, and deliberately in memory, because of where the
-    cost actually is. The protection against password guessing writes a row to
-    `login_attempts` on every failed attempt, and the catalog is one DuckDB file behind
-    one lock - so a few hundred concurrent wrong passwords do not just fail, they put
-    every other catalog read in the application in a queue behind them. The guard against
-    guessing is the cheapest way to stall the whole app, and it is reached before any
-    endpoint has decided anything.
-
-    So this is checked first and touches nothing but a dictionary. The per-endpoint limits
-    in `auth.rate_limited` sit inside it and are about cost rather than volume.
-
-    Health is exempt: whatever is watching the process must not be told to go away, and it
-    is the one request that proves nothing about the caller.
-    """
-    if request.url.path.startswith("/api/") and request.url.path != "/api/health":
-        key = rate_limit.key_for(None, request.client.host if request.client else None)
-        wait = rate_limit.check(rate_limit.GLOBAL, key)
-        if wait > 0:
-            return JSONResponse(
-                status_code=429,
-                content={
-                    "detail": "Too many requests - slow down and try again shortly",
-                    "code": "too_many_requests",
-                },
-                headers={"Retry-After": str(max(1, int(wait + 0.999)))},
-            )
-    return await call_next(request)
-
-
-@app.middleware("http")
-async def _maintenance_gate(request: Request, call_next):
-    """Stops answering while a restore is swapping the files underneath us.
-
-    A restore closes the catalog and renames it out of the way. A request arriving in
-    that window would reopen the catalog on a file mid-rename, and on Windows would also
-    hold a handle that makes the rename fail - so the failure mode is not a stale read,
-    it is a half-finished restore.
-
-    The refusal carries the stage, which is what lets the screen watching the restore
-    follow it: any endpoint answers the question "what is happening", so no endpoint has
-    to read the database being replaced in order to report on replacing it.
-
-    Registered after the CORS middleware and therefore inside it, so this response gets
-    the same headers as any other - a 503 the browser cannot read is a hang.
-    """
-    if request.url.path.startswith("/api/") and restore_service.is_active():
-        state = restore_service.status()
-        return JSONResponse(
-            status_code=503,
-            content={
-                "detail": "A restore is in progress",
-                "code": "maintenance",
-                "stage": state["stage"],
-            },
-            headers={"Retry-After": "5"},
-        )
-    return await call_next(request)
+# CORS and the three gates in front of every endpoint, in the one order that works - see
+# app/gates.py for why the order was wrong before and what that hid.
+gates.install(app, _ALLOWED_ORIGINS)
 
 
 @app.on_event("startup")
