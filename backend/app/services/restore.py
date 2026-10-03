@@ -378,10 +378,6 @@ def run(name: str, *, actor_note: str = "") -> dict:
                 put_aside(settings.data_dir / "secret_key", "secret_key")
             put_aside(settings.datasets_dir, "datasets")
             settings.datasets_dir.mkdir(parents=True, exist_ok=True)
-            # always, like the datasets: the restored catalog's photo table describes the
-            # backup's photos, and a photo taken since would otherwise stay on disk with
-            # nothing pointing at it - or, worse, one deleted since would not come back
-            put_aside(settings.data_dir / "vehicle_photos", "vehicle_photos")
             if b.get("include_originals"):
                 put_aside(settings.uploads_dir, "uploads")
                 settings.uploads_dir.mkdir(parents=True, exist_ok=True)

@@ -26,7 +26,7 @@ LANGUAGES = ("ar", "en", "he")
 # ApiError, so scanning only for that reads them as codes nobody raises - and the reverse
 # check would then delete perfectly live translations. Their first argument is the code
 # and their second the English sentence, exactly like ApiError's second and third.
-CODE_CARRYING_EXCEPTIONS = ("KeyProblem", "AppendProblem", "CorrectionProblem", "PhotoProblem")
+CODE_CARRYING_EXCEPTIONS = ("KeyProblem", "AppendProblem", "CorrectionProblem")
 
 
 def raised_codes() -> dict[str, str]:

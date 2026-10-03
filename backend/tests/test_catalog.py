@@ -184,6 +184,9 @@ THUMB = "//upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Kia_Picanto.jpg/60p
 @pytest.fixture(autouse=True)
 def fresh_photo_cache(tmp_path, monkeypatch):
     monkeypatch.setattr(settings, "catalog_photos", True)
+    # the spacing between Wikimedia calls is real time; the stand-in needs none of it
+    monkeypatch.setattr(vehicle_photo, "MIN_INTERVAL_S", 0.0)
+    monkeypatch.setattr(vehicle_photo, "ANONYMOUS_INTERVAL_S", 0.0)
     vehicle_photo.clear()
     yield
     vehicle_photo.clear()
@@ -327,8 +330,11 @@ def test_a_saved_photo_at_another_width_is_not_served(monkeypatch, tmp_path):
     (tmp_path / "photo_cache.json").write_text(
         json.dumps(
             {
-                "kia|picanto": {"url": "https://thumb.wikimedia.org/a/640px-old.jpg", "title": "Kia Picanto"},
-                "toyota|corolla": {"url": f"https://thumb.wikimedia.org/a/{vehicle_photo.WIDTH}px-ok.jpg", "title": "Toyota Corolla"},
+                "_version": vehicle_photo.CACHE_VERSION,
+                "entries": {
+                    "kia|picanto": {"url": "https://thumb.wikimedia.org/a/640px-old.jpg", "title": "Kia Picanto"},
+                    "toyota|corolla": {"url": f"https://thumb.wikimedia.org/a/{vehicle_photo.WIDTH}px-ok.jpg", "title": "Toyota Corolla"},
+                },
             }
         ),
         encoding="utf-8",
@@ -339,3 +345,234 @@ def test_a_saved_photo_at_another_width_is_not_served(monkeypatch, tmp_path):
     vehicle_photo.find("Toyota", "COROLLA", client=client)
     vehicle_photo.find("Kia", "PICANTO", client=client)
     assert calls == ["Kia PICANTO"], "the stale 640px entry was served instead of looked up again"
+
+
+# ---- the right car, and the right generation of it -----------------------------------
+#
+# Every response below was captured from the real service while this was being built,
+# not written from what it was expected to look like. Twice on this feature a test mocked
+# with an assumed shape passed while the real thing failed.
+
+
+def wikimedia(search_pages, wikitext="", thumb_for=None):
+    """A stand-in for the three Wikimedia calls: the page search, an article's source,
+    and a file's address. Records every call as (kind, detail)."""
+    calls = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        params = request.url.params
+        if request.url.path.endswith("/search/page"):
+            calls.append(("search", params.get("q")))
+            return httpx.Response(200, json={"pages": search_pages})
+        if params.get("prop") == "revisions":
+            calls.append(("source", params.get("titles")))
+            return httpx.Response(
+                200,
+                json={"query": {"pages": [{"revisions": [{"slots": {"main": {"content": wikitext}}}]}]}},
+            )
+        if params.get("prop") == "imageinfo":
+            name = params.get("titles").removeprefix("File:")
+            calls.append(("file", name))
+            slug = name.replace(" ", "_")
+            url = (thumb_for or {}).get(name, f"//thumb.wikimedia.org/x/{slug}/500px-{slug}")
+            return httpx.Response(200, json={"query": {"pages": [{"imageinfo": [{"thumburl": url}]}]}})
+        return httpx.Response(404)
+
+    return httpx.Client(transport=httpx.MockTransport(handler)), calls
+
+
+GC_THUMB = "//thumb.wikimedia.org/wikipedia/commons/thumb/a/aa/Jeep_GC.jpg/60px-Jeep_GC.jpg"
+HEMI_THUMB = "//thumb.wikimedia.org/wikipedia/commons/thumb/8/84/Hemi_in_300C.jpg/60px-Hemi_in_300C.jpg"
+GC_SEARCH = [
+    {"title": "Jeep Grand Cherokee", "description": "Large American 4WD off road sport utility vehicle", "thumbnail": {"url": GC_THUMB}},
+    {"title": "Jeep Grand Cherokee (ZJ)", "description": "American car model"},
+    {"title": "Chrysler Hemi engine", "description": "Series of V8 engines built by Chrysler", "thumbnail": {"url": HEMI_THUMB}},
+]
+
+
+def test_an_engine_is_never_shown_as_the_car():
+    """Found on a real installation: "Chrysler GRAND CHEROKEE" was shown the photo from
+    "Chrysler Hemi engine", because the old rule only asked for the make in the title.
+    The Grand Cherokee is sold as a Jeep - and was the search's own first answer."""
+    client, _ = wikimedia(GC_SEARCH)
+    out = vehicle_photo.find("Chrysler", "GRAND CHEROKEE", client=client)
+    assert out["title"] == "Jeep Grand Cherokee"
+    assert "Hemi" not in (out["url"] or "")
+
+
+def test_with_only_the_engine_on_offer_there_is_no_photo():
+    client, _ = wikimedia([GC_SEARCH[2]])
+    assert vehicle_photo.find("Chrysler", "GRAND CHEROKEE", client=client)["url"] is None
+
+
+def test_a_model_sold_under_another_name_is_found_through_the_article_text():
+    """The Attrage is the Mirage sedan; Wikipedia's page is "Mitsubishi Mirage", and the
+    search found it because the article's text names the Attrage."""
+    client, _ = wikimedia(
+        [
+            {
+                "title": "Mitsubishi Mirage",
+                "description": "Range of automobiles",
+                "excerpt": 'sold as the Mitsubishi <span class="searchmatch">Attrage</span> in some markets',
+                "thumbnail": {"url": THUMB},
+            },
+            {"title": "Mitsubishi 3A9 engine", "description": "Reciprocating internal combustion engine", "thumbnail": {"url": THUMB}},
+            {"title": "Mitsubishi Motors (Thailand)", "description": "Thai subsidiary of Mitsubishi Motors", "thumbnail": {"url": THUMB}},
+        ]
+    )
+    assert vehicle_photo.find("Mitsubishi", "ATTRAGE", client=client)["title"] == "Mitsubishi Mirage"
+
+
+def test_a_short_model_name_needs_its_make():
+    """"3" or "208" alone could be in any title; with the make beside it, it is the car."""
+    client, _ = wikimedia([{"title": "BMW 3 Series", "description": "Compact executive car", "thumbnail": {"url": THUMB}}])
+    assert vehicle_photo.find("Mazda", "3", client=client)["url"] is None
+
+
+def test_a_car_page_described_with_the_word_brand_is_still_a_car():
+    client, _ = wikimedia(
+        [{"title": "Kia Picanto", "description": "City car sold under the Kia brand", "thumbnail": {"url": THUMB}}]
+    )
+    assert vehicle_photo.find("Kia", "PICANTO", client=client)["url"]
+
+
+# The Hyundai i10 article's real layout: anchors inside the headings, one infobox image per
+# generation, a rear view first in one of them and the front view further down.
+I10_SOURCE = """Intro text.
+== <span class="anchor" id="PA"></span>First generation (PA; 2007) ==
+{{Infobox automobile
+| image = Hyundai i10 front 20100328.jpg
+}}
+== <span class="anchor" id="IA"></span><span class="anchor" id="BA"></span>Second generation (IA/BA; 2013) ==
+{{Infobox automobile
+| image = Hyundai i10 1.2 Style (II) – Heckansicht, 26. Dezember 2013, Düsseldorf.jpg
+}}
+[[File:Hyundai i10 1.2 Style (II) – Frontansicht, 26. Dezember 2013, Düsseldorf.jpg|thumb]]
+== Third generation (AC3/AI3; 2019) ==
+{{Infobox automobile
+| image = 2022 Hyundai i10 SE Connect MPi 1.0 Front.jpg
+}}
+== References ==
+"""
+
+I10_LEAD = [{"title": "Hyundai i10", "description": "City car manufactured by Hyundai", "thumbnail": {"url": THUMB}}]
+
+
+def test_the_photo_is_of_the_vehicle_s_own_generation():
+    """The article's lead image is its newest generation. A 2015 car is a 2013-2018 car."""
+    client, _ = wikimedia(I10_LEAD, I10_SOURCE)
+    out = vehicle_photo.find("Hyundai", "i10", 2015, client=client)
+    assert out["years"] == "2013–2018"
+    assert "Frontansicht" in out["url"], "a rear view was chosen over the front one in its section"
+    assert out["page"].endswith("#Second_generation_(IA/BA;_2013)")
+
+
+@pytest.mark.parametrize(
+    "year,years,word",
+    [(2008, "2007–2012", "20100328"), (2013, "2013–2018", "Frontansicht"), (2024, "2019–", "SE_Connect")],
+)
+def test_each_year_finds_its_generation(year, years, word):
+    client, _ = wikimedia(I10_LEAD, I10_SOURCE)
+    out = vehicle_photo.find("Hyundai", "i10", year, client=client)
+    assert out["years"] == years and word in out["url"]
+
+
+def test_a_year_before_the_first_generation_falls_back_to_the_model():
+    client, _ = wikimedia(I10_LEAD, I10_SOURCE)
+    out = vehicle_photo.find("Hyundai", "i10", 1990, client=client)
+    assert out["url"] and out["years"] is None
+
+
+def test_a_gallery_s_numbered_images_are_read():
+    """The Corolla shows its later generations in galleries - "| image1 = ...". Missed at
+    first, and every Corolla from 2012 on fell back to the newest generation."""
+    source = """== Eleventh generation (E160, E170, E180; 2012) ==
+=== International (E170/E180; 2013) ===
+{{multiple image
+| image1            = 2014 Toyota Corolla 1.8 LE (ZRE172), front left.jpg
+| image2            = 2014 Toyota Corolla 1.8 LE (ZRE172), rear left.jpg
+}}
+== Twelfth generation (E210; 2018) ==
+| image = Toyota Corolla Hybrid (E210) IMG 4338.jpg
+"""
+    client, _ = wikimedia([{"title": "Toyota Corolla", "description": "Compact car", "thumbnail": {"url": THUMB}}], source)
+    out = vehicle_photo.find("Toyota", "COROLLA", 2012, client=client)
+    assert out["years"] == "2012–2017" and "ZRE172" in out["url"] and "front" in out["url"]
+
+
+def test_an_article_is_read_once_for_every_year_of_it():
+    """The spacing Wikimedia asks for is paid per article and per file, not per lookup."""
+    client, calls = wikimedia(I10_LEAD, I10_SOURCE)
+    for year in (2014, 2015, 2016, 2017):
+        vehicle_photo.find("Hyundai", "i10", year, client=client)
+    assert [c for c in calls if c[0] == "source"] == [("source", "Hyundai i10")]
+    assert len([c for c in calls if c[0] == "file"]) == 1
+
+
+def test_the_generation_failing_still_leaves_the_model_photo(monkeypatch):
+    """A refinement that fails is not an answer of "no photo"."""
+    monkeypatch.setattr(vehicle_photo.time, "sleep", lambda s: None)
+
+    def handler(request):
+        if request.url.path.endswith("/search/page"):
+            return httpx.Response(200, json={"pages": I10_LEAD})
+        return httpx.Response(429, headers={"retry-after": "60"})
+
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+    out = vehicle_photo.find("Hyundai", "i10", 2015, client=client)
+    assert out["url"] and out["years"] is None
+
+
+# ---- being told to slow down ------------------------------------------------------------
+
+
+def test_a_short_wait_is_waited_and_retried(monkeypatch):
+    slept = []
+    monkeypatch.setattr(vehicle_photo.time, "sleep", lambda s: slept.append(s))
+    answers = iter(
+        [httpx.Response(429, headers={"retry-after": "2"}), httpx.Response(200, json={"pages": I10_LEAD})]
+    )
+    client = httpx.Client(transport=httpx.MockTransport(lambda r: next(answers)))
+    assert vehicle_photo.find("Hyundai", "i10", client=client)["url"]
+    assert 2.0 in slept
+
+
+def test_a_long_wait_is_not_waited_and_not_remembered(monkeypatch):
+    """Wikimedia asked for 24 seconds once a burst had gone through. Nobody looking at the
+    card should wait that long; and the refusal says nothing about the model."""
+    monkeypatch.setattr(vehicle_photo.time, "sleep", lambda s: None)
+    refuse = httpx.Client(transport=httpx.MockTransport(lambda r: httpx.Response(429, headers={"retry-after": "24"})))
+    assert vehicle_photo.find("Hyundai", "i10", client=refuse)["url"] is None
+    client, _ = wikimedia(I10_LEAD)
+    assert vehicle_photo.find("Hyundai", "i10", client=client)["url"], "the refusal was remembered as no photo"
+
+
+def test_the_contact_goes_in_the_user_agent(monkeypatch):
+    """Wikimedia gives a client naming a contact 200 requests a minute, one that does not
+    10 - which is exactly where the photos stopped arriving when this was first run."""
+    monkeypatch.setattr(settings, "catalog_photo_contact", "https://autoline.example")
+    assert "https://autoline.example" in vehicle_photo._user_agent()
+    assert vehicle_photo._interval() == vehicle_photo.MIN_INTERVAL_S
+    monkeypatch.setattr(settings, "catalog_photo_contact", None)
+    assert vehicle_photo._user_agent() == vehicle_photo.USER_AGENT
+    assert vehicle_photo._interval() == vehicle_photo.ANONYMOUS_INTERVAL_S
+
+
+def test_answers_saved_by_an_older_rule_are_dropped(monkeypatch, tmp_path):
+    """The engine was saved as the Grand Cherokee's photo in a real cache file, and saved
+    answers outlive restarts. A file without the current version is not read at all."""
+    import json
+
+    monkeypatch.setattr(settings, "data_dir", tmp_path)
+    (tmp_path / "photo_cache.json").write_text(
+        json.dumps(
+            {"chrysler|grand cherokee": {"url": "https://thumb.wikimedia.org/a/500px-Hemi_in_300C.jpg", "title": "Chrysler Hemi engine"}}
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(vehicle_photo, "_loaded", False)
+    vehicle_photo._cache.clear()
+    client, calls = wikimedia([GC_SEARCH[0]])
+    out = vehicle_photo.find("Chrysler", "GRAND CHEROKEE", client=client)
+    assert out["title"] == "Jeep Grand Cherokee"
+    assert calls and calls[0][0] == "search", "the stale engine was served from disk"

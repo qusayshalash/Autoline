@@ -1,20 +1,10 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router-dom";
 
-import {
-  deleteVehiclePhoto,
-  fetchVehiclePhoto,
-  lookupVehicle,
-  uploadVehiclePhoto,
-  vehiclePhotoUrl,
-  type VehicleMatch,
-  type VehiclePhotoInfo,
-} from "../api/catalog";
+import { fetchVehiclePhoto, lookupVehicle, type VehicleMatch } from "../api/catalog";
 import { apiErrorMessage } from "../api/client";
-import { useAuth } from "../auth/AuthContext";
-import { ConfirmDialog } from "../components/ConfirmDialog";
 import { columnLabel } from "../data/columnDictionary";
 import { formatDate, formatYearMonth, isBeforeToday } from "../data/datetime";
 import { makeName, translateValue } from "../data/valueDictionary";
@@ -234,10 +224,9 @@ function VehicleCard({ match }: { match: VehicleMatch }) {
           )}
         </div>
         <VehiclePicture
-          plate={get(PLATE)}
-          photo={match.photo ?? null}
           make={make ? makeName(make, "en") : ""}
           model={model}
+          year={get(YEAR)}
           alt={title}
         />
       </div>
@@ -284,79 +273,28 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-/**
- * The vehicle's picture: its own photo when somebody has uploaded one, the model's photo
- * from Wikipedia when not - each captioned as exactly what it is.
- *
- * The real photo wins. It is the reason the upload exists, and a blue Picanto from
- * Wikipedia beside a dark silver car that has its own photo would be a wrong picture
- * chosen over a right one.
- */
 function VehiclePicture({
-  plate,
-  photo,
   make,
   model,
+  year,
   alt,
 }: {
-  plate: string;
-  photo: VehiclePhotoInfo | null;
   make: string;
   model: string;
+  year: string;
   alt: string;
 }) {
-  const { t, i18n } = useTranslation();
-  const { can } = useAuth();
-  const qc = useQueryClient();
+  const { t } = useTranslation();
   const [broken, setBroken] = useState(false);
-  const [progress, setProgress] = useState<number | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [confirmDelete, setConfirmDelete] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
-  const mayUpload = can("datasets.upload") && /^\d{8}$/.test(plate);
-
-  // only asked for when there is no real photo: it would never be shown otherwise
-  const model_ = useQuery({
-    queryKey: ["catalog-photo", make, model],
-    queryFn: () => fetchVehiclePhoto(make, model),
-    enabled: !!make && !photo,
+  const photo = useQuery({
+    queryKey: ["catalog-photo", make, model, year],
+    queryFn: () => fetchVehiclePhoto(make, model, year),
+    enabled: !!make,
     staleTime: Infinity,
     retry: false,
   });
 
-  // the lookup carries the photo, so refreshing it is what shows the new one
-  const refresh = () => qc.invalidateQueries({ queryKey: ["catalog"] });
-
-  const upload = useMutation({
-    mutationFn: (file: File) => uploadVehiclePhoto(plate, file, setProgress),
-    onMutate: () => {
-      setError(null);
-      setProgress(0);
-    },
-    onSuccess: () => {
-      setBroken(false);
-      refresh();
-    },
-    onError: (e) => setError(apiErrorMessage(e, t("common.error_generic"))),
-    onSettled: () => setProgress(null),
-  });
-
-  const remove = useMutation({
-    mutationFn: () => deleteVehiclePhoto(plate),
-    onSuccess: () => {
-      setConfirmDelete(false);
-      refresh();
-    },
-    onError: (e) => {
-      setConfirmDelete(false);
-      setError(apiErrorMessage(e, t("common.error_generic")));
-    },
-  });
-
-  const real = photo && !broken ? vehiclePhotoUrl(plate, photo.photo_id) : null;
-  const representative = !photo && !broken ? model_.data?.url ?? null : null;
-  const url = real ?? representative;
-  const busy = upload.isPending || remove.isPending;
+  const url = !broken ? photo.data?.url : null;
 
   return (
     <figure className="vehicle-photo">
@@ -368,90 +306,28 @@ function VehiclePicture({
           alt={alt}
           referrerPolicy="no-referrer"
           onError={() => setBroken(true)}
-          className={real ? "is-real" : undefined}
         />
       ) : (
-        <div className={`vehicle-photo-empty${model_.isFetching ? " loading" : ""}`} aria-hidden="true">
+        <div className={`vehicle-photo-empty${photo.isFetching ? " loading" : ""}`} aria-hidden="true">
           <CarGlyph />
         </div>
       )}
-
       <figcaption>
-        {real && photo ? (
-          <span className="photo-real-badge">
-            {t("catalog.photo_real", {
-              who: photo.uploaded_by || "—",
-              date: formatDate(photo.uploaded_at, i18n.language),
-            })}
-          </span>
-        ) : representative ? (
+        {url ? (
           <>
-            {t("catalog.photo_caption")}{" "}
-            <a href={model_.data?.page ?? "#"} target="_blank" rel="noreferrer noopener">
+            {photo.data?.years
+              ? t("catalog.photo_caption_generation", { years: photo.data.years })
+              : t("catalog.photo_caption")}{" "}
+            <a href={photo.data?.page ?? "#"} target="_blank" rel="noreferrer noopener">
               {t("catalog.photo_source")}
             </a>
           </>
-        ) : model_.isFetching ? (
+        ) : photo.isFetching ? (
           t("catalog.photo_loading")
         ) : (
           t("catalog.photo_none")
         )}
       </figcaption>
-
-      {mayUpload && (
-        <div className="photo-actions">
-          <input
-            ref={fileRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            hidden
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              // cleared so choosing the same file again still fires a change
-              e.target.value = "";
-              if (file) upload.mutate(file);
-            }}
-          />
-          <button
-            type="button"
-            className="photo-btn primary"
-            disabled={busy}
-            onClick={() => fileRef.current?.click()}
-          >
-            {progress !== null
-              ? t("catalog.photo_uploading", { pct: progress })
-              : photo
-                ? t("catalog.photo_replace")
-                : t("catalog.photo_upload")}
-          </button>
-          {photo && (
-            <button
-              type="button"
-              className="photo-btn"
-              disabled={busy}
-              onClick={() => setConfirmDelete(true)}
-            >
-              {t("catalog.photo_delete")}
-            </button>
-          )}
-        </div>
-      )}
-      {error && (
-        <p className="photo-error" role="alert">
-          {error}
-        </p>
-      )}
-
-      <ConfirmDialog
-        open={confirmDelete}
-        danger
-        busy={remove.isPending}
-        title={t("catalog.photo_delete_title")}
-        body={t("catalog.photo_delete_body")}
-        confirmLabel={t("common.delete")}
-        onCancel={() => setConfirmDelete(false)}
-        onConfirm={() => remove.mutate()}
-      />
     </figure>
   );
 }

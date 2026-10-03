@@ -12,6 +12,3 @@ python-bidi==0.6.11
 pytest==9.1.1
 httpx==0.28.1
 PyJWT==2.13.0
-# imported directly by the vehicle photos (it also arrives with reportlab, which is not a
-# reason to depend on that)
-Pillow==12.3.0

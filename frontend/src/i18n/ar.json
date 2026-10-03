@@ -372,10 +372,7 @@
       "backup.restore_started": "بدء استعادة نسخة",
       "backup.restored": "استعادة نسخة احتياطية",
       "backup.restore_failed": "فشل استعادة نسخة",
-      "backup.kept_deleted": "حذف حالة مستبدَلة",
-      "vehicle.photo_added": "رفع صورة مركبة",
-      "vehicle.photo_replaced": "استبدال صورة مركبة",
-      "vehicle.photo_removed": "حذف صورة مركبة"
+      "backup.kept_deleted": "حذف حالة مستبدَلة"
     },
     "time": {
       "just_now": "الآن",
@@ -645,8 +642,7 @@
         "dataset": "قاعدة بيانات",
         "key": "مفتاح الجلسات",
         "original": "الملف الأصلي",
-        "batch": "دفعة مُلحقة",
-        "photo": "صورة مركبة"
+        "batch": "دفعة مُلحقة"
       },
       "schedule": "النسخ التلقائي",
       "schedule_hint": "يفحص النظام كل نصف ساعة: إن كانت أحدث نسخة موثّقة أقدم من المدة المختارة، يأخذ نسخة. الجهاز المطفأ لا يفوّت موعده — يأخذ نسخة فور عودته.",
@@ -662,8 +658,7 @@
       "verified_count_two": "نسختان موثّقتان",
       "verified_count_few": "{{count}} نسخ موثّقة",
       "verified_count_many": "{{count}} نسخة موثّقة",
-      "verified_count_other": "{{count}} نسخة موثّقة",
-      "progress_photos": "نسخ صور المركبات"
+      "verified_count_other": "{{count}} نسخة موثّقة"
     },
     "lockouts": {
       "title": "الحسابات المقفلة مؤقتًا",
@@ -1174,12 +1169,7 @@
     "kept_state_not_found": "لا توجد حالة مستبدَلة بهذا الاسم.",
     "too_many_requests": "طلباتٌ كثيرة في وقتٍ قصير. تمهّل قليلًا ثم أعِد المحاولة.",
     "request_too_large": "حجم الطلب أكبر من المسموح.",
-    "upload_no_room": "لا توجد مساحة كافية على القرص لهذا الملف. حرّر مساحة ثم أعِد الرفع.",
-    "photo_not_an_image": "الملف ليس صورة JPEG أو PNG أو WebP.",
-    "photo_too_many_pixels": "أبعاد الصورة أكبر من أن تُعالَج.",
-    "photo_bad_plate": "هذا ليس رقم لوحة صالحًا.",
-    "photo_too_large": "حجم الصورة أكبر من ١٥ ميجا.",
-    "photo_not_found": "لا توجد صورة لهذه المركبة."
+    "upload_no_room": "لا توجد مساحة كافية على القرص لهذا الملف. حرّر مساحة ثم أعِد الرفع."
   },
   "record_key": {
     "title": "معرّف السجلّ",
@@ -1302,12 +1292,6 @@
       "P": "خصوصي",
       "M": "تجاري"
     },
-    "photo_real": "صورة هذه المركبة — رفعها {{who}} في {{date}}",
-    "photo_upload": "رفع صورة حقيقية",
-    "photo_replace": "استبدال الصورة",
-    "photo_delete": "حذف الصورة",
-    "photo_uploading": "جارٍ الرفع… {{pct}}٪",
-    "photo_delete_title": "حذف صورة المركبة",
-    "photo_delete_body": "ستُحذف صورة هذه المركبة، وتعود الصفحة إلى عرض صورة تمثيلية للطراز. هذه الصورة لا توجد في مكان آخر إلّا في النسخ الاحتياطية."
+    "photo_caption_generation": "صورة لهذا الطراز من جيل {{years}}، وليست صورة هذه المركبة. اللون قد يختلف."
   }
 }

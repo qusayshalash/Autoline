@@ -27,7 +27,7 @@ from typing import Optional
 
 from app.db import catalog
 from app.db.connection import datasets
-from app.services import sql_utils, vehicle_photos
+from app.services import sql_utils
 
 PLATE_COLUMN = "mispar_rechev"
 CHASSIS_COLUMN = "misgeret"
@@ -93,12 +93,6 @@ def lookup(query: str) -> dict:
             )
         if len(matches) >= MAX_MATCHES:
             break
-
-    # the real photo is per plate, whichever dataset the row came from - it is a photo of
-    # the car - so it is attached by reading the plate out of each row found
-    for m in matches:
-        if PLATE_COLUMN in m["columns"]:
-            m["photo"] = vehicle_photos.get(m["values"][m["columns"].index(PLATE_COLUMN)])
 
     return {
         "query": query,

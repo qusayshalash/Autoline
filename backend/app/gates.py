@@ -43,14 +43,6 @@ MAX_BODY_BYTES = 1024 * 1024
 # the runaway uploads - but the room on the disk that has to hold it.
 _UPLOAD_PATHS = re.compile(r"^/api/datasets/(upload|[0-9a-f]{32}/append)$")
 
-# A vehicle's photo: neither a JSON body nor a dataset. A phone photo is 3 to 8 MB, so
-# the megabyte every other request gets would refuse all of them; the disk-sized room a
-# dataset gets would let one request fill the disk with "a photo". It gets its own
-# ceiling, and the service re-encodes what arrives, so this bounds the upload, not what
-# is kept.
-_PHOTO_PATHS = re.compile(r"^/api/catalog/vehicles/[0-9]{8}/photo$")
-MAX_PHOTO_BYTES = 15 * 1024 * 1024
-
 # How often an upload in progress re-checks the disk. Every chunk would be a system call
 # per 64 KB; this is one per 64 MB, which on an 867 MB file is fourteen checks.
 _RECHECK_EVERY = 64 * 1024 * 1024
@@ -218,13 +210,7 @@ class BodyLimit:
             return
 
         upload = scope.get("method") == "POST" and bool(_UPLOAD_PATHS.match(scope["path"]))
-        photo = scope.get("method") == "POST" and bool(_PHOTO_PATHS.match(scope["path"]))
-        if upload:
-            limit = upload_room()
-        elif photo:
-            limit = MAX_PHOTO_BYTES
-        else:
-            limit = MAX_BODY_BYTES
+        limit = upload_room() if upload else MAX_BODY_BYTES
 
         declared = _header(scope, b"content-length")
         if declared is not None:
@@ -237,8 +223,6 @@ class BodyLimit:
             if size > limit:
                 if upload:
                     await _refuse(send, 413, "upload_no_room", "Not enough free disk space for this upload")
-                elif photo:
-                    await _refuse(send, 413, "photo_too_large", "The photo is larger than allowed")
                 else:
                     await _refuse(send, 413, "request_too_large", "Request body is too large")
                 return
@@ -251,9 +235,7 @@ class BodyLimit:
             message = await receive()
             if message["type"] == "http.request":
                 received += len(message.get("body", b""))
-                if photo and received > MAX_PHOTO_BYTES:
-                    raise ApiError(413, "photo_too_large", "The photo is larger than allowed")
-                if not upload and not photo and received > MAX_BODY_BYTES:
+                if not upload and received > MAX_BODY_BYTES:
                     raise ApiError(413, "request_too_large", "Request body is too large")
                 if upload and received >= next_check:
                     next_check += _RECHECK_EVERY

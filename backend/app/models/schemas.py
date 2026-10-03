@@ -391,7 +391,7 @@ class LockoutOut(BaseModel):
 class BackupItem(BaseModel):
     """One file inside a backup, with what it was found to contain."""
 
-    kind: str                       # catalog | dataset | key | original | batch | photo
+    kind: str                       # catalog | dataset | key | original
     file: str
     bytes: int
     dataset_id: Optional[str] = None
@@ -978,19 +978,6 @@ class ExportRequest(Incoming):
     sort_dir: Literal["asc", "desc"] = "asc"
 
 
-class VehiclePhotoInfo(BaseModel):
-    """A real photo somebody uploaded of this vehicle - not the model photo."""
-
-    plate: str
-    # part of the photo's address, so a replaced photo is never served from a stale cache
-    photo_id: str
-    bytes: int = 0
-    width: int = 0
-    height: int = 0
-    uploaded_by: str = ""
-    uploaded_at: str = ""
-
-
 class VehicleMatch(BaseModel):
     """One vehicle the catalog found, as a row of the dataset it was found in."""
 
@@ -998,7 +985,6 @@ class VehicleMatch(BaseModel):
     dataset_name: str
     columns: list[str]
     values: list[str]
-    photo: Optional[VehiclePhotoInfo] = None
 
 
 class VehicleLookup(BaseModel):
@@ -1016,3 +1002,6 @@ class VehiclePhoto(BaseModel):
     url: Optional[str] = None
     title: Optional[str] = None
     page: Optional[str] = None
+    # the generation the photo is of, as "2011–2016"; None when it is the article's lead
+    # photo, whose generation is not known
+    years: Optional[str] = None

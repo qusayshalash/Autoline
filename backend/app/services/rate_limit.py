@@ -89,10 +89,6 @@ ANALYSIS = Bucket("analysis", burst=20, per_second=2)
 # row, and each one that starts is disk that has to be swept up later.
 EXPORT = Bucket("export", burst=4, per_second=1 / 30)
 
-# Uploading a vehicle's photo: each one is decoded and re-encoded, which is real work, and
-# somebody photographing a row of cars at a lot does a handful in a minute - not hundreds.
-PHOTO = Bucket("photo", burst=12, per_second=1 / 5)
-
 # Everything else, per address, checked before anything touches the database. This is the
 # one that stands in front of the login endpoint, so it has to be generous enough for a
 # whole office behind one address and still far below what a flood looks like.

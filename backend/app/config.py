@@ -70,6 +70,13 @@ class Settings(BaseSettings):
     # the catalog shows no picture instead of waiting on a timeout.
     catalog_photos: bool = True
 
+    # How Wikimedia can reach whoever runs this installation: an email address or the
+    # site's URL. Wikimedia's rules give an API client that names a contact 200 requests a
+    # minute and one that does not 10 - measured here as photos refused from the twelfth
+    # lookup on. Left empty, the catalog spaces its calls to fit under 10 a minute, so it
+    # still works, only slowly for a model nobody has looked up before.
+    catalog_photo_contact: Optional[str] = None
+
     # ---- session cookie -------------------------------------------------------
     #
     # The cookie is the whole session: whoever holds it is signed in, without a
