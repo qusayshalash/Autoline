@@ -571,7 +571,7 @@ function describe(progress: string, t: Translate): string {
     const [done, total] = progress.slice("dataset:".length).split("/");
     return t("admin.backup.progress_dataset", { done, total });
   }
-  const known = ["catalog", "key", "originals", "done", "starting"];
+  const known = ["catalog", "key", "photos", "originals", "done", "starting"];
   return known.includes(progress)
     ? t(`admin.backup.progress_${progress}`)
     : t("admin.backup.running");

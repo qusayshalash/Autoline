@@ -210,6 +210,22 @@ def run(*, include_originals: bool = False, progress: Progress = None) -> dict:
             shutil.copy2(settings.data_dir / "secret_key", root / "secret_key")
             items.append({"kind": "key", "file": "secret_key", "bytes": 64, "tables": {}})
 
+        # Vehicle photos, always - not behind the originals checkbox. An original can be
+        # uploaded again from wherever it came from; a photo somebody took at the counter
+        # exists nowhere else. They are small once re-encoded, and copied as plain files
+        # because they are: nothing writes to one after it is renamed into place.
+        photos = settings.data_dir / "vehicle_photos"
+        if photos.is_dir():
+            say("photos")
+            for src in sorted(photos.glob("*/*.jpg")):
+                rel = src.relative_to(settings.data_dir).as_posix()
+                dest = root / rel
+                dest.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(src, dest)
+                if dest.stat().st_size != src.stat().st_size:
+                    errors.append(f"{rel}: copied size does not match the original")
+                items.append({"kind": "photo", "file": rel, "bytes": dest.stat().st_size, "tables": {}})
+
         if include_originals:
             say("originals")
             # The uploaded file stopped being the whole truth the day a dataset could

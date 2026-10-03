@@ -163,6 +163,23 @@ def _init_schema(conn: duckdb.DuckDBPyConnection) -> None:
         )
         """
     )
+    # A real photo of a vehicle, one per plate. Keyed by the plate rather than by a
+    # dataset row because it is a photo of the car, not of a line in a file: it has to
+    # survive the row being re-imported, appended over or corrected. The file itself
+    # lives under data_dir/vehicle_photos; see services/vehicle_photos.py.
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS vehicle_photos (
+            plate VARCHAR PRIMARY KEY,    -- the registry's form: eight digits, zero-padded
+            photo_id VARCHAR,             -- also the file name, so a replaced photo is a new URL
+            bytes BIGINT,
+            width INTEGER,
+            height INTEGER,
+            uploaded_by VARCHAR,
+            uploaded_at TIMESTAMP
+        )
+        """
+    )
     _migrate_users(conn)
     _migrate_datasets(conn)
     _migrate_activity_log(conn)

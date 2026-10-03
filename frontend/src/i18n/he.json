@@ -366,7 +366,10 @@
       "backup.restore_started": "שחזור החל",
       "backup.restored": "גיבוי שוחזר",
       "backup.restore_failed": "השחזור נכשל",
-      "backup.kept_deleted": "מצב שהוחלף נמחק"
+      "backup.kept_deleted": "מצב שהוחלף נמחק",
+      "vehicle.photo_added": "תמונת רכב הועלתה",
+      "vehicle.photo_replaced": "תמונת רכב הוחלפה",
+      "vehicle.photo_removed": "תמונת רכב נמחקה"
     },
     "time": {
       "just_now": "עכשיו",
@@ -606,7 +609,9 @@
         "catalog": "קטלוג",
         "dataset": "מסד נתונים",
         "key": "מפתח הפעלות",
-        "original": "קובץ מקור"
+        "original": "קובץ מקור",
+        "batch": "אצווה שנוספה",
+        "photo": "תמונת רכב"
       },
       "schedule": "גיבוי אוטומטי",
       "schedule_hint": "נבדק כל חצי שעה: אם הגיבוי המאומת האחרון ישן מהמרווח שנבחר, נלקח גיבוי. מכונה שהייתה כבויה אינה מפספסת את חלונה — היא מגבה מיד עם חזרתה.",
@@ -619,7 +624,8 @@
       "fresh_since": "הגיבוי האחרון לפני {{hours}} שעות",
       "verified_count_one": "גיבוי אחד מאומת",
       "verified_count_two": "שני גיבויים מאומתים",
-      "verified_count_other": "{{count}} מאומתים"
+      "verified_count_other": "{{count}} מאומתים",
+      "progress_photos": "מעתיק תמונות רכבים"
     },
     "lockouts": {
       "title": "נעולים זמנית",
@@ -1121,7 +1127,12 @@
     "kept_state_not_found": "אין מצב שהוחלף בשם הזה.",
     "too_many_requests": "יותר מדי בקשות בזמן קצר. האט מעט ונסה שוב בקרוב.",
     "request_too_large": "הבקשה גדולה מהמותר.",
-    "upload_no_room": "אין מספיק מקום פנוי בדיסק לקובץ הזה. יש לפנות מקום ולהעלות שוב."
+    "upload_no_room": "אין מספיק מקום פנוי בדיסק לקובץ הזה. יש לפנות מקום ולהעלות שוב.",
+    "photo_not_an_image": "הקובץ אינו תמונת JPEG, PNG או WebP.",
+    "photo_too_many_pixels": "מידות התמונה גדולות מכדי לעבד אותה.",
+    "photo_bad_plate": "זה אינו מספר רכב תקין.",
+    "photo_too_large": "התמונה גדולה מ-15 MB.",
+    "photo_not_found": "לרכב הזה אין תמונה."
   },
   "record_key": {
     "title": "מפתח הרשומה",
@@ -1240,6 +1251,13 @@
     "kind": {
       "P": "פרטי",
       "M": "מסחרי"
-    }
+    },
+    "photo_real": "התמונה של הרכב הזה - הועלתה על ידי {{who}} ב-{{date}}",
+    "photo_upload": "העלאת תמונה אמיתית",
+    "photo_replace": "החלפת תמונה",
+    "photo_delete": "מחיקת תמונה",
+    "photo_uploading": "מעלה… {{pct}}%",
+    "photo_delete_title": "מחיקת תמונת הרכב",
+    "photo_delete_body": "תמונת הרכב תימחק והדף יחזור להציג תמונה מייצגת של הדגם. התמונה אינה קיימת בשום מקום אחר מלבד הגיבויים."
   }
 }

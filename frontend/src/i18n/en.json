@@ -364,7 +364,10 @@
       "backup.restore_started": "Restore started",
       "backup.restored": "Backup restored",
       "backup.restore_failed": "Restore failed",
-      "backup.kept_deleted": "Replaced state deleted"
+      "backup.kept_deleted": "Replaced state deleted",
+      "vehicle.photo_added": "Vehicle photo uploaded",
+      "vehicle.photo_replaced": "Vehicle photo replaced",
+      "vehicle.photo_removed": "Vehicle photo deleted"
     },
     "time": {
       "just_now": "just now",
@@ -594,7 +597,9 @@
         "catalog": "Catalogue",
         "dataset": "Database",
         "key": "Session key",
-        "original": "Original file"
+        "original": "Original file",
+        "batch": "appended batch",
+        "photo": "vehicle photo"
       },
       "schedule": "Automatic backups",
       "schedule_hint": "Checked every half hour: if the newest verified backup is older than the chosen interval, one is taken. A machine that was switched off does not miss its window - it backs up as soon as it returns.",
@@ -606,7 +611,8 @@
       "stale_since": "Last backup {{hours}}h ago",
       "fresh_since": "Last backup {{hours}}h ago",
       "verified_count_one": "1 verified",
-      "verified_count_other": "{{count}} verified"
+      "verified_count_other": "{{count}} verified",
+      "progress_photos": "Copying vehicle photos"
     },
     "lockouts": {
       "title": "Temporarily locked",
@@ -1105,7 +1111,12 @@
     "kept_state_not_found": "There is no replaced state by that name.",
     "too_many_requests": "Too many requests in a short time. Slow down and try again shortly.",
     "request_too_large": "The request is larger than allowed.",
-    "upload_no_room": "There is not enough free disk space for this file. Free some space and upload again."
+    "upload_no_room": "There is not enough free disk space for this file. Free some space and upload again.",
+    "photo_not_an_image": "The file is not a JPEG, PNG or WebP image.",
+    "photo_too_many_pixels": "The image's dimensions are too large to process.",
+    "photo_bad_plate": "That is not a valid plate number.",
+    "photo_too_large": "The photo is larger than 15 MB.",
+    "photo_not_found": "This vehicle has no photo."
   },
   "record_key": {
     "title": "Record key",
@@ -1223,6 +1234,13 @@
     "kind": {
       "P": "Private",
       "M": "Commercial"
-    }
+    },
+    "photo_real": "This vehicle's own photo - uploaded by {{who}} on {{date}}",
+    "photo_upload": "Upload a real photo",
+    "photo_replace": "Replace photo",
+    "photo_delete": "Delete photo",
+    "photo_uploading": "Uploading… {{pct}}%",
+    "photo_delete_title": "Delete the vehicle's photo",
+    "photo_delete_body": "This vehicle's photo will be deleted and the page will show a representative photo of the model again. The photo exists nowhere else except in backups."
   }
 }
