@@ -13,6 +13,7 @@ from app.errors import ApiError
 from app.routers import (
     admin,
     auth,
+    catalog,
     cleaning,
     data,
     datasets,
@@ -122,6 +123,7 @@ app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(roles.router)
 app.include_router(admin.router)
+app.include_router(catalog.router)
 app.include_router(datasets.router)
 app.include_router(jobs.router)
 app.include_router(cleaning.router)

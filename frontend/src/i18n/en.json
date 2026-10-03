@@ -1187,5 +1187,42 @@
     "within_few": "in the last {{count}} days",
     "within_many": "in the last {{count}} days",
     "within_other": "in the last {{count}} days"
+  },
+  "catalog": {
+    "title": "Vehicle catalog",
+    "back": "Back to the data",
+    "heading": "Look up a vehicle",
+    "label": "Plate or chassis number",
+    "placeholder": "Plate or chassis number",
+    "search": "Search",
+    "hint": "For example 49-107-66 or 4910766, or the full chassis number. Press Enter to search.",
+    "searching": "Searching…",
+    "unreadable": "That looks like neither a plate nor a chassis number. A plate is digits only; a chassis number is Latin letters and digits.",
+    "not_found_title": "No vehicle with this number",
+    "not_found_plate": "Plate {{plate}} is not in any of the files.",
+    "not_found_chassis": "Chassis number {{chassis}} is not in any of the files.",
+    "several_one": "One vehicle found",
+    "several_other": "{{count}} vehicles share this number - all of them are shown below",
+    "plate": "Plate number",
+    "unnamed": "Vehicle",
+    "licence_valid": "Licence valid until {{date}}",
+    "licence_expired": "Licence expired on {{date}}",
+    "photo_caption": "A representative photo of the model, not of this vehicle.",
+    "photo_source": "Source: Wikipedia",
+    "photo_loading": "Looking for a photo of the model…",
+    "photo_none": "No photo for this model.",
+    "from_file": "From file: {{name}}",
+    "section": {
+      "vehicle": "Vehicle",
+      "licence": "Licence and inspection",
+      "engine": "Engine, fuel and emissions",
+      "tyres": "Tyres",
+      "registration": "Registration and numbers",
+      "other": "Other information"
+    },
+    "kind": {
+      "P": "Private",
+      "M": "Commercial"
+    }
   }
 }

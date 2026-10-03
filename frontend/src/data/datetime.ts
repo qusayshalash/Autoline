@@ -146,3 +146,35 @@ export function dayLabel(
   if (key === dayKey(yesterday.toISOString())) return t("admin.time.yesterday");
   return formatter(language, { dateStyle: "full" }).format(when);
 }
+
+/**
+ * A year and a month with no day: "2016-1" -> "January 2016" in the reader's language.
+ *
+ * The registry's on-road column holds exactly that - no day, no zero padding - which no
+ * timestamp parser accepts as written, so it would otherwise reach the screen raw.
+ * Returns the value unchanged when it is not in that shape.
+ */
+export function formatYearMonth(value: string | null | undefined, language: string): string {
+  const m = /^(\d{4})-(\d{1,2})$/.exec((value ?? "").trim());
+  if (!m) return value ? value : "—";
+  const month = Number(m[2]);
+  if (month < 1 || month > 12) return value ?? "—";
+  // a local date on the 1st: the month is a calendar fact, not an instant, so there is
+  // no zone to convert from
+  return formatter(language, { year: "numeric", month: "long" }).format(
+    new Date(Number(m[1]), month - 1, 1)
+  );
+}
+
+/**
+ * Whether a calendar date ("2026-06-29") is before today, today taken in the reader's
+ * own zone. Compared as text on purpose: both sides are zero-padded YYYY-MM-DD, and
+ * turning the stored date into an instant first would move it across midnight for
+ * anyone west of UTC.
+ */
+export function isBeforeToday(dateOnly: string | null | undefined): boolean {
+  if (!dateOnly || !/^\d{4}-\d{2}-\d{2}$/.test(dateOnly)) return false;
+  const now = new Date();
+  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  return dateOnly < today;
+}

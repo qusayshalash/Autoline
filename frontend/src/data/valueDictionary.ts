@@ -59,6 +59,57 @@ const PHRASES: Record<string, Term> = {
   'שן פיל': { ar: "عاجي", en: "Ivory" },
 };
 
+/**
+ * Countries of manufacture, kept apart from the other words for one reason: the registry
+ * writes a make together with where it was built - "קיה סלובקיה", Kia Slovakia - and the
+ * catalog needs the make alone. Searching for a photo of a "Kia Slovakia Picanto" finds a
+ * list of Kia's factories; "Kia Picanto" finds the car. See `makeName`.
+ */
+const COUNTRIES: Record<string, Term> = {
+  'יפן': { ar: "اليابان", en: "Japan" },
+  'קוריאה': { ar: "كوريا", en: "Korea" },
+  'ד.קוריא': { ar: "كوريا الجنوبية", en: "South Korea" },
+  'טורקיה': { ar: "تركيا", en: "Turkey" },
+  "צ'כיה": { ar: "التشيك", en: "Czechia" },
+  'ספרד': { ar: "إسبانيا", en: "Spain" },
+  'סין': { ar: "الصين", en: "China" },
+  'צרפת': { ar: "فرنسا", en: "France" },
+  'אנגליה': { ar: "إنجلترا", en: "England" },
+  'סלובקיה': { ar: "سلوفاكيا", en: "Slovakia" },
+  'גרמניה': { ar: "ألمانيا", en: "Germany" },
+  'גרמנ': { ar: "ألمانيا", en: "Germany" },
+  'הונגריה': { ar: "المجر", en: "Hungary" },
+  'תאילנד': { ar: "تايلاند", en: "Thailand" },
+  'איטליה': { ar: "إيطاليا", en: "Italy" },
+  'ארה"ב': { ar: "أمريكا", en: "USA" },
+  'הודו': { ar: "الهند", en: "India" },
+  'רומניה': { ar: "رومانيا", en: "Romania" },
+  'פולין': { ar: "بولندا", en: "Poland" },
+  'בלגיה': { ar: "بلجيكا", en: "Belgium" },
+  'ברזיל': { ar: "البرازيل", en: "Brazil" },
+  'מקסיקו': { ar: "المكسيك", en: "Mexico" },
+  'רוסיה': { ar: "روسيا", en: "Russia" },
+  'אוסטריה': { ar: "النمسا", en: "Austria" },
+  'הולנד': { ar: "هولندا", en: "Netherlands" },
+  'שבדיה': { ar: "السويد", en: "Sweden" },
+  'ישראל': { ar: "إسرائيل", en: "Israel" },
+  // the file truncates several country names, so the abbreviations need entries too
+  'ארהב': { ar: "أمريكا", en: "USA" },
+  'ארהב"': { ar: "أمريكا", en: "USA" },
+  'הונג': { ar: "المجر", en: "Hungary" },
+  'תאילנ': { ar: "تايلاند", en: "Thailand" },
+  'מכסיקו': { ar: "المكسيك", en: "Mexico" },
+  'מכסי': { ar: "المكسيك", en: "Mexico" },
+  'מקסי': { ar: "المكسيك", en: "Mexico" },
+  'אוסט': { ar: "النمسا", en: "Austria" },
+  'פינל': { ar: "فنلندا", en: "Finland" },
+  'בריטניה': { ar: "بريطانيا", en: "Britain" },
+  'תורכיה': { ar: "تركيا", en: "Turkey" },
+  'פורטוגל': { ar: "البرتغال", en: "Portugal" },
+  'קנדה': { ar: "كندا", en: "Canada" },
+  'ד.אפ': { ar: "جنوب أفريقيا", en: "South Africa" },
+};
+
 const WORDS: Record<string, Term> = {
   // --- colours (tzeva_rechev) ---
   'לבן': { ar: "أبيض", en: "White" },
@@ -168,49 +219,7 @@ const WORDS: Record<string, Term> = {
   "ג'י.אמ.סי": { ar: "جي إم سي", en: "GMC" },
   "ג'יי.אמ.סי": { ar: "جي إم سي", en: "GMC" },
 
-  // --- countries of manufacture ---
-  'יפן': { ar: "اليابان", en: "Japan" },
-  'קוריאה': { ar: "كوريا", en: "Korea" },
-  'ד.קוריא': { ar: "كوريا الجنوبية", en: "South Korea" },
-  'טורקיה': { ar: "تركيا", en: "Turkey" },
-  "צ'כיה": { ar: "التشيك", en: "Czechia" },
-  'ספרד': { ar: "إسبانيا", en: "Spain" },
-  'סין': { ar: "الصين", en: "China" },
-  'צרפת': { ar: "فرنسا", en: "France" },
-  'אנגליה': { ar: "إنجلترا", en: "England" },
-  'סלובקיה': { ar: "سلوفاكيا", en: "Slovakia" },
-  'גרמניה': { ar: "ألمانيا", en: "Germany" },
-  'גרמנ': { ar: "ألمانيا", en: "Germany" },
-  'הונגריה': { ar: "المجر", en: "Hungary" },
-  'תאילנד': { ar: "تايلاند", en: "Thailand" },
-  'איטליה': { ar: "إيطاليا", en: "Italy" },
-  'ארה"ב': { ar: "أمريكا", en: "USA" },
-  'הודו': { ar: "الهند", en: "India" },
-  'רומניה': { ar: "رومانيا", en: "Romania" },
-  'פולין': { ar: "بولندا", en: "Poland" },
-  'בלגיה': { ar: "بلجيكا", en: "Belgium" },
-  'ברזיל': { ar: "البرازيل", en: "Brazil" },
-  'מקסיקו': { ar: "المكسيك", en: "Mexico" },
-  'רוסיה': { ar: "روسيا", en: "Russia" },
-  'אוסטריה': { ar: "النمسا", en: "Austria" },
-  'הולנד': { ar: "هولندا", en: "Netherlands" },
-  'שבדיה': { ar: "السويد", en: "Sweden" },
-  'ישראל': { ar: "إسرائيل", en: "Israel" },
-  // the file truncates several country names, so the abbreviations need entries too
-  'ארהב': { ar: "أمريكا", en: "USA" },
-  'ארהב"': { ar: "أمريكا", en: "USA" },
-  'הונג': { ar: "المجر", en: "Hungary" },
-  'תאילנ': { ar: "تايلاند", en: "Thailand" },
-  'מכסיקו': { ar: "المكسيك", en: "Mexico" },
-  'מכסי': { ar: "المكسيك", en: "Mexico" },
-  'מקסי': { ar: "المكسيك", en: "Mexico" },
-  'אוסט': { ar: "النمسا", en: "Austria" },
-  'פינל': { ar: "فنلندا", en: "Finland" },
-  'בריטניה': { ar: "بريطانيا", en: "Britain" },
-  'תורכיה': { ar: "تركيا", en: "Turkey" },
-  'פורטוגל': { ar: "البرتغال", en: "Portugal" },
-  'קנדה': { ar: "كندا", en: "Canada" },
-  'ד.אפ': { ar: "جنوب أفريقيا", en: "South Africa" },
+  ...COUNTRIES,
 
   // --- read off the registry's own distinct values, commonest first ---
   "פיג'ו": { ar: "بيجو", en: "Peugeot" },
@@ -493,4 +502,18 @@ export function hebrewAlternatives(search: string): string[] {
   }
 
   return out;
+}
+
+
+/**
+ * A manufacturer value without its country of manufacture: "קיה סלובקיה" -> "Kia".
+ *
+ * Words are dropped from the end only, and only while they are countries, so a make whose
+ * name happens to contain a country word in the middle keeps it. If nothing is left - a
+ * value that was only a country - the whole value is returned rather than nothing.
+ */
+export function makeName(value: string, language: string): string {
+  const words = value.trim().split(/\s+/);
+  while (words.length > 1 && COUNTRIES[words[words.length - 1]]) words.pop();
+  return translateValue(words.join(" "), language);
 }

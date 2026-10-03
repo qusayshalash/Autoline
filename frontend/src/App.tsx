@@ -38,6 +38,7 @@ const ImportWizardPage = lazy(() => import("./pages/ImportWizardPage"));
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const StatisticsIndexPage = lazy(() => import("./pages/StatisticsIndexPage"));
 const StatisticsPage = lazy(() => import("./pages/StatisticsPage"));
+const CatalogPage = lazy(() => import("./pages/CatalogPage"));
 
 /** The data workspace: its own sidebar and full-height content area. */
 function Workspace() {
@@ -115,6 +116,19 @@ export default function App() {
         element={
           <RequireAuth>
             <ForbiddenPage />
+          </RequireAuth>
+        }
+      />
+
+      {/* The vehicle catalog: a page of its own with no workspace chrome - a lookup used
+          with a document in hand. Read access is all it needs. */}
+      <Route
+        path="/catalog"
+        element={
+          <RequireAuth>
+            <RequirePermission all={["datasets.view"]}>
+              <CatalogPage />
+            </RequirePermission>
           </RequireAuth>
         }
       />

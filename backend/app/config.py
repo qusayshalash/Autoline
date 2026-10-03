@@ -64,6 +64,12 @@ class Settings(BaseSettings):
     # turns it back on to check it.
     rate_limit_enabled: bool = True
 
+    # Whether the vehicle catalog looks up a representative photo of the model on
+    # Wikipedia. The one outbound call the server makes on its own; an installation with
+    # no internet access, or one that would rather not make it, turns it off here and
+    # the catalog shows no picture instead of waiting on a timeout.
+    catalog_photos: bool = True
+
     # ---- session cookie -------------------------------------------------------
     #
     # The cookie is the whole session: whoever holds it is signed in, without a

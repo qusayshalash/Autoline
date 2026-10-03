@@ -46,6 +46,18 @@ function IconUsers() {
   );
 }
 
+/** A car seen side-on: the catalog looks up one vehicle. */
+function IconCar() {
+  return (
+    <svg {...icon}>
+      <path d="M2.5 13h15M4.5 13l1.6-3.6c.4-.8 1.2-1.4 2.1-1.4h3.6c.9 0 1.7.6 2.1 1.4L15.5 13" />
+      <path d="M2.5 13v2h2M15.5 15h2v-2" />
+      <circle cx="6.5" cy="15" r="1.5" />
+      <circle cx="13.5" cy="15" r="1.5" />
+    </svg>
+  );
+}
+
 function IconChart() {
   return (
     <svg {...icon}>
@@ -156,6 +168,10 @@ export default function Sidebar() {
             <NavLink to="/statistics" title={t("statistics.title") ?? ""}>
               <IconChart />
               {!collapsed && <span>{t("statistics.title")}</span>}
+            </NavLink>
+            <NavLink to="/catalog" title={t("catalog.title") ?? ""}>
+              <IconCar />
+              {!collapsed && <span>{t("catalog.title")}</span>}
             </NavLink>
           </>
         )}

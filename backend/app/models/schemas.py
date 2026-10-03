@@ -976,3 +976,29 @@ class ExportRequest(Incoming):
     filters: list[FilterRule] = []
     sort_by: Optional[str] = None
     sort_dir: Literal["asc", "desc"] = "asc"
+
+
+class VehicleMatch(BaseModel):
+    """One vehicle the catalog found, as a row of the dataset it was found in."""
+
+    dataset_id: str
+    dataset_name: str
+    columns: list[str]
+    values: list[str]
+
+
+class VehicleLookup(BaseModel):
+    query: str
+    # what the query was read as; None when it could be neither
+    kind: Optional[Literal["plate", "chassis"]] = None
+    # the form actually searched for - the zero-padded plate, the upper-cased chassis
+    normalized: str = ""
+    matches: list[VehicleMatch] = []
+
+
+class VehiclePhoto(BaseModel):
+    """A photo of the model, not of the vehicle - the screen says so under it."""
+
+    url: Optional[str] = None
+    title: Optional[str] = None
+    page: Optional[str] = None
