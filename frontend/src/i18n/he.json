@@ -1206,6 +1206,8 @@
     "within_other": "ב-{{count}} הימים האחרונים"
   },
   "catalog": {
+    "coming_soon": "בקרוב · Coming soon",
+    "coming_soon_help": "הדף בפיתוח ויהיה זמין בגרסה מאוחרת יותר.",
     "title": "קטלוג רכבים",
     "back": "חזרה לנתונים",
     "heading": "חיפוש רכב",

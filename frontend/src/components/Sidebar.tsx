@@ -58,6 +58,15 @@ function IconCar() {
   );
 }
 
+function IconLock() {
+  return (
+    <svg {...icon} width={14} height={14} className="nav-lock">
+      <rect x="4" y="8.6" width="12" height="8.4" rx="2" />
+      <path d="M6.9 8.6V6.4a3.1 3.1 0 016.2 0v2.2" />
+    </svg>
+  );
+}
+
 function IconChart() {
   return (
     <svg {...icon}>
@@ -169,9 +178,15 @@ export default function Sidebar() {
               <IconChart />
               {!collapsed && <span>{t("statistics.title")}</span>}
             </NavLink>
-            <NavLink to="/catalog" title={t("catalog.title") ?? ""}>
+            {/* on hold - the link leads to a "coming soon" page */}
+            <NavLink
+              to="/catalog"
+              className={({ isActive }) => (isActive ? "active nav-locked" : "nav-locked")}
+              title={`${t("catalog.title")} · ${t("catalog.coming_soon")}`}
+            >
               <IconCar />
               {!collapsed && <span>{t("catalog.title")}</span>}
+              {!collapsed && <IconLock />}
             </NavLink>
           </>
         )}

@@ -38,7 +38,8 @@ const ImportWizardPage = lazy(() => import("./pages/ImportWizardPage"));
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const StatisticsIndexPage = lazy(() => import("./pages/StatisticsIndexPage"));
 const StatisticsPage = lazy(() => import("./pages/StatisticsPage"));
-const CatalogPage = lazy(() => import("./pages/CatalogPage"));
+// The catalog is on hold: CatalogPage stays in the tree, the route shows ComingSoonPage.
+const ComingSoonPage = lazy(() => import("./pages/ComingSoonPage"));
 
 /** The data workspace: its own sidebar and full-height content area. */
 function Workspace() {
@@ -127,7 +128,7 @@ export default function App() {
         element={
           <RequireAuth>
             <RequirePermission all={["datasets.view"]}>
-              <CatalogPage />
+              <ComingSoonPage />
             </RequirePermission>
           </RequireAuth>
         }

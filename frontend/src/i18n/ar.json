@@ -1253,6 +1253,8 @@
     "within_other": "خلال {{count}} يوم"
   },
   "catalog": {
+    "coming_soon": "قريبًا · Coming soon",
+    "coming_soon_help": "هذه الصفحة قيد التطوير وستتوفّر في إصدار لاحق.",
     "title": "فهرس المركبات",
     "back": "العودة إلى البيانات",
     "heading": "ابحث عن مركبة",

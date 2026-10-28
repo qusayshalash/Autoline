@@ -257,6 +257,15 @@ a.sidebar-head:focus-visible {
   color: var(--primary);
 }
 
+/* an entry that is on hold: dimmed, with a lock at the end */
+.sidebar-nav a.nav-locked {
+  opacity: 0.6;
+}
+
+.sidebar-nav a.nav-locked .nav-lock {
+  margin-inline-start: auto;
+}
+
 .sidebar-foot {
   flex: none;
   display: flex;

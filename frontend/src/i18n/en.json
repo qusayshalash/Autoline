@@ -1190,6 +1190,8 @@
     "within_other": "in the last {{count}} days"
   },
   "catalog": {
+    "coming_soon": "Coming soon",
+    "coming_soon_help": "This page is under development and will be available in a later release.",
     "title": "Vehicle catalog",
     "back": "Back to the data",
     "heading": "Look up a vehicle",
