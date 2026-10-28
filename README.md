@@ -55,9 +55,14 @@ npm install
 npm run dev
 ```
 
-The app is then at `http://localhost:5173`. On first start the server creates an
+The app is then at `http://localhost:5173`, which also forwards `/api` to the backend,
+so the interface always calls its own origin. On first start the server creates an
 administrator account and prints its credentials to the log — **change that password
 immediately**.
+
+On a server it runs as two containers — the API, and Caddy serving the interface,
+forwarding `/api` and handling HTTPS. Everything is in [`deploy/`](deploy/); the
+step-by-step guide is [`deploy/DEPLOY.ar.md`](deploy/DEPLOY.ar.md).
 
 ```bash
 # the test suite

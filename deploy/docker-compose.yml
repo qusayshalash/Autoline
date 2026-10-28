@@ -1,0 +1,63 @@
+# AutoLine on one server: the API and the web server, nothing else. DuckDB runs inside
+# the API process, so there is no database service to install or look after.
+#
+#   cp .env.example .env      # then edit it
+#   docker compose up -d --build
+#
+# The full procedure, in Arabic, is in DEPLOY.ar.md next to this file.
+
+name: autoline
+
+services:
+  backend:
+    build: ../backend
+    restart: unless-stopped
+    environment:
+      PUBLIC_ORIGIN: ${PUBLIC_ORIGIN:?set PUBLIC_ORIGIN in deploy/.env}
+      BACKUP_KEEP: ${BACKUP_KEEP:-3}
+      CATALOG_PHOTO_CONTACT: ${CATALOG_PHOTO_CONTACT:-}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+    volumes:
+      # Plain folders on the host rather than Docker volumes, so a backup can be copied
+      # in and out with an ordinary file transfer - which is how the data gets here
+      # from the machine it was built on.
+      - ${DATA_PATH:-/srv/autoline/data}:/data
+      - ${BACKUP_PATH:-/srv/autoline/backups}:/backups
+    networks: [internal]
+    # No ports: the API is reached only through the web server. That is also what makes
+    # it safe for the API to trust the address the web server reports for each visitor.
+    #
+    # Room for an import or a backup in progress to reach a stopping point before the
+    # container is killed.
+    stop_grace_period: 60s
+
+  web:
+    build: ../frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:?set SITE_ADDRESS in deploy/.env}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      # the HTTPS certificate and its account; losing these means asking for a new one
+      - caddy_data:/data
+      - caddy_config:/config
+    networks: [internal]
+
+networks:
+  internal:
+    # Fixed, because the API trusts forwarded addresses from exactly this range - see
+    # --forwarded-allow-ips in backend/Dockerfile.
+    ipam:
+      config:
+        - subnet: 172.28.0.0/24
+
+volumes:
+  caddy_data:
+  caddy_config:

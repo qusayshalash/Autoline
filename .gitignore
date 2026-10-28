@@ -12,6 +12,7 @@ backend/data/
 
 # Machine-specific config (DATA_DIR, secrets). Commit backend/.env.example instead.
 backend/.env
+deploy/.env
 
 # Node / frontend
 node_modules/

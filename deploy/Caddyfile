@@ -1,0 +1,41 @@
+# The one public entry point. A domain name in SITE_ADDRESS gets an HTTPS certificate
+# from Let's Encrypt automatically, renewed on its own; ":80" serves plain http on the
+# server's IP address, for a first test before a domain exists.
+
+{$SITE_ADDRESS} {
+	encode zstd gzip
+
+	# The API. No request size limit here and no timeout: an 800 MB upload is a normal
+	# request for this app, and the API applies its own limits - which it can explain to
+	# the person uploading, where a refusal from here would be a bare error page.
+	handle /api/* {
+		reverse_proxy backend:8000
+	}
+
+	# Everything else is the interface. Its routes (/catalog, /statistics, ...) exist
+	# only in the browser, so any path that is not a file gets index.html.
+	handle {
+		root * /srv
+		try_files {path} /index.html
+		file_server
+	}
+
+	# Built assets carry a hash in their name and never change; index.html must always
+	# be fetched fresh, or a browser keeps running last week's interface after an update.
+	@assets path /assets/*
+	header @assets Cache-Control "public, max-age=31536000, immutable"
+	@page not path /assets/* /api/*
+	header @page Cache-Control "no-cache"
+
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}

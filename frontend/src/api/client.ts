@@ -3,8 +3,11 @@ import axios from "axios";
 import i18n from "../i18n";
 import { hebrewAlternatives } from "../data/valueDictionary";
 
+// Same origin as the page, always: in development Vite forwards /api to the backend
+// (see vite.config.ts), and on a server the reverse proxy does. An absolute address here
+// is what made every browser except the developer's own try to reach its own machine.
 export const api = axios.create({
-  baseURL: "http://localhost:8000/api",
+  baseURL: "/api",
   withCredentials: true,
 });
 
