@@ -1,0 +1,45 @@
+# The inner web server, behind the other system's Caddy. HTTPS and the certificate are
+# that proxy's job; this one listens on plain :80 inside the network, serves the
+# interface and forwards /api.
+
+{
+	auto_https off
+
+	# Requests arrive from the other system's proxy, on the chequeflow-edge network. It
+	# puts the visitor's address in X-Forwarded-For (overwriting whatever the visitor
+	# sent), so it is trusted for that - and only that network is.
+	servers {
+		trusted_proxies static 172.19.0.0/16
+	}
+}
+
+:80 {
+	encode zstd gzip
+
+	handle /api/* {
+		reverse_proxy backend:8000 {
+			# The visitor, not the proxy in front of this one. Without it the API's login
+			# guard and rate limiter would see one address for everyone and lock them out
+			# together.
+			header_up X-Forwarded-For {client_ip}
+		}
+	}
+
+	handle {
+		root * /srv
+		try_files {path} /index.html
+		file_server
+	}
+
+	@assets path /assets/*
+	header @assets Cache-Control "public, max-age=31536000, immutable"
+	@page not path /assets/* /api/*
+	header @page Cache-Control "no-cache"
+
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+}

@@ -1,0 +1,3 @@
+autoline.2.24.60.139.sslip.io {
+	reverse_proxy autoline-web:80
+}

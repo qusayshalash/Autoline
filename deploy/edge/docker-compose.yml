@@ -1,0 +1,60 @@
+# AutoLine on a server another system already runs - ChequeFlow, whose Caddy owns ports
+# 80 and 443 and terminates HTTPS. This publishes no ports at all: that Caddy reaches
+# autoline-web over the shared `chequeflow-edge` network, by way of one site file
+# (autoline.caddy, next to this one). deploy/docker-compose.yml is the version for a
+# server of its own.
+#
+#   cp .env.example .env      # then edit it
+#   docker compose up -d --build
+#
+# Procedure: DEPLOY.ar.md, section "سيرفر مشترك".
+
+name: autoline
+
+services:
+  backend:
+    build: ../../backend
+    restart: unless-stopped
+    environment:
+      PUBLIC_ORIGIN: ${PUBLIC_ORIGIN:?set PUBLIC_ORIGIN in deploy/edge/.env}
+      BACKUP_KEEP: ${BACKUP_KEEP:-3}
+      CATALOG_PHOTO_CONTACT: ${CATALOG_PHOTO_CONTACT:-}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+    volumes:
+      - ${DATA_PATH:-/srv/autoline/data}:/data
+      - ${BACKUP_PATH:-/srv/autoline/backups}:/backups
+    # Only on this project's own network: the other system's proxy cannot reach it.
+    networks: [default]
+    # The memory is shared with the other system. DuckDB sizes itself to the container's
+    # limit, so a large import or analysis is held to this rather than taking the RAM
+    # the other system needs - at worst it is this container that runs short.
+    mem_limit: ${BACKEND_MEMORY:-4g}
+    cpus: ${BACKEND_CPUS:-1.5}
+    stop_grace_period: 60s
+
+  # Named autoline-web, never just "web". This service joins chequeflow-edge, where its
+  # name becomes an address the other system's proxy can resolve - and that proxy
+  # already sends its own traffic to an address called "web". Two containers answering
+  # to one name on its networks would split the other site's visitors between them.
+  autoline-web:
+    build: ../../frontend
+    container_name: autoline-web
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    networks: [default, edge]
+    mem_limit: 256m
+
+networks:
+  default:
+    # Fixed, because the API trusts forwarded addresses from exactly this range - see
+    # --forwarded-allow-ips in backend/Dockerfile.
+    ipam:
+      config:
+        - subnet: 172.28.0.0/24
+  edge:
+    external: true
+    name: chequeflow-edge
