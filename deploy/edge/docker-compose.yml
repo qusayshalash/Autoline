@@ -29,7 +29,12 @@ services:
     # limit, so a large import or analysis is held to this rather than taking the RAM
     # the other system needs - at worst it is this container that runs short.
     mem_limit: ${BACKEND_MEMORY:-4g}
-    cpus: ${BACKEND_CPUS:-1.5}
+    # The processor is not capped but weighted: with nobody else busy an import gets
+    # every core, and when both systems want the CPU at once the scheduler divides it by
+    # these shares. Every other container has the default 1024, so 4096 means this one
+    # comes first - the owner's choice. Set BACKEND_CPU_SHARES=1024 for equal footing,
+    # or lower to put the other system first.
+    cpu_shares: ${BACKEND_CPU_SHARES:-4096}
     stop_grace_period: 60s
 
   # Named autoline-web, never just "web". This service joins chequeflow-edge, where its
