@@ -116,6 +116,11 @@ def test_the_correction_survives_a_re_import(admin, corrected):
 
 
 def test_reverting_puts_the_file_s_own_value_back(admin, corrected):
+    # its own correction to revert, so the test does not lean on the ones above having run
+    assert admin.patch(
+        f"/api/datasets/{corrected}/rows",
+        json={"key": [BAD_PLATE], "changes": {"year": "2013"}},
+    ).status_code == 200
     r = admin.request(
         "DELETE",
         f"/api/datasets/{corrected}/corrections",
@@ -127,6 +132,8 @@ def test_reverting_puts_the_file_s_own_value_back(admin, corrected):
 
 
 def test_reverting_what_was_never_corrected_is_a_404(admin, corrected):
+    # the same answer whether or not this file has ever had a correction - the table
+    # holding them only exists after the first
     r = admin.request(
         "DELETE",
         f"/api/datasets/{corrected}/corrections",

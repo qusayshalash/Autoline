@@ -54,6 +54,15 @@ const PHRASES: Record<string, Term> = {
   'די אס': { ar: "دي إس", en: "DS" },
   'די.אס': { ar: "دي إس", en: "DS" },
 
+  // Whole values whose last part is an abbreviation that means something only here. The
+  // two DaimlerChrysler suffixes are told apart by what was built under them: -אר holds
+  // the ML-Class, made in the USA, and -אס the G-Class, made in Graz, Austria. The Fiat
+  // is the Sedici, which Magyar Suzuki built in Hungary - "סוז" is the registry's cut-off
+  // Suzuki. Kept as whole values so the abbreviations never translate anything else.
+  'דימלרקריזלר-אר': { ar: "دايملر كرايسلر-أمريكا", en: "DaimlerChrysler-USA" },
+  'דימלרקריזלר-אס': { ar: "دايملر كرايسلر-النمسا", en: "DaimlerChrysler-Austria" },
+  'פיאט/מדייר סוז': { ar: "فيات/ماجيار سوزوكي", en: "Fiat/Magyar Suzuki" },
+
   // multi-word colour values that don't read well token by token
   'לא ידוע': { ar: "غير معروف", en: "Unknown" },
   'שן פיל': { ar: "عاجي", en: "Ivory" },
@@ -321,6 +330,16 @@ const WORDS: Record<string, Term> = {
   "פורט'": { ar: "البرتغال", en: "Portugal" },
   'רכב': { ar: "مركبة", en: "vehicle" },
   'אינדיגו': { ar: "نيلي", en: "Indigo" },
+
+  // The last Chinese makes, each identified by the models registered under it:
+  // LIMO (EVeasy), KOMI (Jiayuan), G50L/G105 (Wuling's Linxys vans), RH6/RH8 (Dayun's
+  // ReHigh), LEFU (Foton's Cavan). גמס holds only the Hummer EV, which is a GMC.
+  'איויאיסי': { ar: "إي في إيزي", en: "EVeasy" },
+  'גיאיוואן': { ar: "جيايوان", en: "Jiayuan" },
+  'לינקסיס': { ar: "لينكسيس", en: "Linxys" },
+  'ריהיי': { ar: "ريهاي", en: "ReHigh" },
+  'קוואן': { ar: "كافان", en: "Cavan" },
+  'גמס': { ar: "جي إم سي", en: "GMC" },
   'אחר': { ar: "أخرى", en: "Other" },
 };
 

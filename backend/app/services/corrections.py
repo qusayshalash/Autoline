@@ -127,7 +127,14 @@ def record(
 
 
 def forget(dataset_id: str, row_key: str, column: str) -> Optional[dict]:
-    """Removes a correction and returns it, so the caller can put the old value back."""
+    """Removes a correction and returns it, so the caller can put the old value back.
+
+    A file that has never been corrected has no corrections table at all - it is created
+    on the first edit - and asking it to forget one is a correction that is not there,
+    not a server error.
+    """
+    if not sql_utils.table_exists(dataset_id, TABLE):
+        return None
     cur = datasets.cursor(dataset_id)
     row = cur.execute(
         f"SELECT old_value, new_value FROM {TABLE} WHERE row_key = ? AND column_name = ?",
