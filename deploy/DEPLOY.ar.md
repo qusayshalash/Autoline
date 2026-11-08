@@ -215,3 +215,36 @@ scp -r root@203.0.113.10:/srv/autoline/backups "C:\AutolineServerBackups"
 | تسجيل الدخول لا يفعل شيئًا | `PUBLIC_ORIGIN` لا يطابق العنوان في المتصفح حرفيًّا (https مقابل http، أو www) |
 | `backend` ليس `healthy` | `docker compose logs backend`، وغالبًا مجلّد البيانات ليس ملك `1000`: أعد أمر `chown` من الخطوة 4 |
 | النسخة المنقولة لا تظهر في الإعدادات | أمر `chown` في الخطوة 7ج لم يُنفَّذ، أو نُسخ المجلّد داخل مجلّد آخر |
+
+---
+
+## سيرفر مشترك: بجانب نظام آخر (ChequeFlow)
+
+إن كان على السيرفر نظام آخر يملك المنفذين 80 و443 (مثل ChequeFlow)، فالإعداد في `deploy/edge` بدل `deploy`. الفرق:
+
+- **لا منافذ.** HTTPS والشهادة يتولّاهما Caddy الخاص بالنظام الآخر، وموقعنا يصله عبر شبكة `chequeflow-edge`.
+- **الخدمة الأمامية اسمها `autoline-web`، لا `web`**: النظام الآخر يرسل زوّاره إلى عنوان اسمه `web`، واسمان متطابقان على شبكته يقسمان زوّاره بين الموقعين.
+- **الأداة محدودة بـ 4 جيجا رام و1.5 نواة**، والباقي للنظام الآخر.
+- **لا جدار ناري ولا swap ولا تحديث للنظام**: هذه إعدادات السيرفر كله، وليست لنا.
+
+الخطوات (بدل الخطوات 4 إلى 6 أعلاه):
+
+```bash
+git clone https://github.com/qusayshalash/Autoline.git /root/autoline
+mkdir -p /srv/autoline/data /srv/autoline/backups && chown -R 1000:1000 /srv/autoline
+cd /root/autoline/deploy/edge && cp .env.example .env && nano .env
+docker compose up -d --build
+```
+
+ثم ملف واحد فقط في مجلّد النظام الآخر، والتحقّق منه قبل إعادة التحميل:
+
+```bash
+cp /root/autoline/deploy/edge/autoline.caddy /root/ChequeFlow/infrastructure/sites/autoline.caddy
+docker exec chequeflow-proxy-1 caddy validate --config /etc/caddy/Caddyfile && docker exec chequeflow-proxy-1 caddy reload --config /etc/caddy/Caddyfile
+```
+
+إن فشل التحقّق: احذف الملف وأعد التحميل، فيبقى النظام الآخر كما كان.
+
+التحديث لاحقًا: `bash /root/autoline/deploy/update.sh edge`
+
+**ممنوع على هذا السيرفر:** `docker compose down` داخل `/root/ChequeFlow`، وإيقاف أي حاوية `chequeflow-*`، و`docker system prune` و`volume prune` و`network prune`.
