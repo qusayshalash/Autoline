@@ -8,8 +8,10 @@ import { formatDate } from "../data/datetime";
  *
  * Two channels, not one. Colour alone excludes anybody who cannot separate these two
  * hues, and a dot alone says "something" without saying what - so the mark carries a
- * visible letter as well as a colour, and an accessible name that reads as a sentence
- * rather than as a word.
+ * shape as well as a colour, and an accessible name that reads as a sentence rather
+ * than as a word. The shapes are symbols, not letters, so they sit beside the ✎ of a
+ * hand correction as one family and read the same in every language: a plus for a
+ * record that was added, a turning arrow for one that was replaced.
  *
  * New and updated are kept apart because they answer different questions: which vehicles
  * we now have that we did not, and which of the ones we had have changed.
@@ -31,9 +33,37 @@ export default function ArrivalMark({
   return (
     <span className={`arrival-mark ${kind}`} title={label}>
       <span className="arrival-dot" aria-hidden="true">
-        {t(`arrivals.${kind}`).slice(0, 1)}
+        {kind === "new" ? <IconAdded /> : <IconReplaced />}
       </span>
       <span className="sr-only">{label}</span>
     </span>
+  );
+}
+
+const glyph = {
+  width: 11,
+  height: 11,
+  viewBox: "0 0 12 12",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: 1.8,
+  strokeLinecap: "round" as const,
+  strokeLinejoin: "round" as const,
+};
+
+function IconAdded() {
+  return (
+    <svg {...glyph}>
+      <path d="M6 2.5v7M2.5 6h7" />
+    </svg>
+  );
+}
+
+function IconReplaced() {
+  return (
+    <svg {...glyph}>
+      <path d="M9.6 4.4A4 4 0 1 0 10 7" />
+      <path d="M10 1.8v2.8H7.2" />
+    </svg>
   );
 }

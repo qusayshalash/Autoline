@@ -3089,7 +3089,8 @@ td:hover > .cell-edit-wrap > .cell-revert,
 
 /* --- records a recent batch brought ---
    Two channels on purpose: the colour separates new from updated at a glance, and the
-   letter inside the dot says which for anybody the colour does not reach. The column
+   symbol inside the dot (+ for new, a turning arrow for updated) says which for anybody
+   the colour does not reach. The column
    only exists while there is something in it, so a dataset that never takes a batch
    loses no width to it. */
 .sheet-grid .arrival-col {
