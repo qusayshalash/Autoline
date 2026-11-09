@@ -87,7 +87,7 @@ def test_text_operator_escapes_wildcards_inside_the_value():
     _, params = sql_utils.build_filter_sql(
         [FilterRule(column="tozeret_nm", op="contains", value="50%")], VALID
     )
-    assert params == ["%50\%%"]  # the user's % is escaped, the pattern's are not
+    assert params == ["%50\\%%"]  # the user's % is escaped, the pattern's are not
 
 
 def test_is_null_treats_empty_string_as_missing():

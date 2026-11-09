@@ -41,8 +41,16 @@ def test_the_restore_refusal_can_be_read(admin):
         restore._end(False, "probe")
 
 
-def test_the_rate_limit_refusal_can_be_read(anon):
-    """Somebody being rate limited should read "slow down", not "network error"."""
+def test_the_rate_limit_refusal_can_be_read(anon, monkeypatch):
+    """Somebody being rate limited should read "slow down", not "network error".
+
+    A small bucket that barely refills, rather than the real one. The real one refills
+    30 a second, so reaching its limit depended on sending requests faster than that -
+    which a fast Windows machine did and a CI runner did not, and the test failed there
+    without anything being wrong."""
+    monkeypatch.setattr(
+        rate_limit, "GLOBAL", rate_limit.Bucket("global", burst=5, per_second=0.001)
+    )
     rate_limit.clear()
     settings.rate_limit_enabled = True
     try:
