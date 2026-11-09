@@ -3153,6 +3153,51 @@ td:hover > .cell-edit-wrap > .cell-revert,
   }
 }
 
+/* both marks a row can carry, side by side when it has both */
+.row-marks {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* A row somebody corrected by hand. The pen rather than a letter: it is not a third
+   kind of arrival, and it should not read like one. */
+.correction-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.correction-pen {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 17px;
+  height: 17px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  line-height: 1;
+  background: var(--correction-bg);
+  color: var(--correction-fg);
+}
+
+.correction-mark {
+  --correction-bg: #e0e7ff;
+  --correction-fg: #4338ca;
+}
+
+:root:not([data-theme="light"]) .correction-mark {
+  --correction-bg: #312e81;
+  --correction-fg: #c7d2fe;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .correction-mark {
+    --correction-bg: #312e81;
+    --correction-fg: #c7d2fe;
+  }
+}
+
 .arrivals-tool .arrival-dot.new {
   width: 9px;
   height: 9px;

@@ -143,6 +143,35 @@ def test_reverting_what_was_never_corrected_is_a_404(admin, corrected):
     assert r.json()["code"] == "correction_not_found"
 
 
+def test_correcting_when_the_cleaned_copy_dropped_the_key(admin, corrected):
+    """Cleaning that leaves the key column out used to make every correction a 500 -
+    raised after raw_data had already taken it. The raw data takes the correction, and
+    the cleaned copy gets it from the next clean."""
+    plate = f"{5003:08d}"
+    r = admin.post(
+        f"/api/datasets/{corrected}/clean",
+        json={"keep_columns": ["make", "year", "city"], "dedupe": False},
+    )
+    assert r.status_code == 200, r.text
+
+    r = admin.patch(
+        f"/api/datasets/{corrected}/rows",
+        json={"key": [plate], "changes": {"city": "نابلس"}},
+    )
+    assert r.status_code == 200, r.text
+    assert value_of(admin, corrected, plate, "city") == "نابلس"
+
+    # put the fixture back the way the tests below expect it
+    assert admin.request(
+        "DELETE",
+        f"/api/datasets/{corrected}/corrections",
+        json={"key": [plate], "changes": {"city": ""}},
+    ).status_code == 200
+    assert admin.post(
+        f"/api/datasets/{corrected}/clean", json={"dedupe": False}
+    ).status_code == 200
+
+
 # ---- what must be refused ---------------------------------------------------------------
 
 def test_the_key_column_cannot_be_corrected(admin, corrected):

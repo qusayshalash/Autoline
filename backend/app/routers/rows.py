@@ -51,6 +51,22 @@ def _correction_out(record: dict) -> CorrectionOut:
     )
 
 
+def _addressable_cleaned_columns(dataset_id: str, key_cols: list[str]) -> set[str]:
+    """The cleaned table's columns, if a record in it can be found by its key - else none.
+
+    The cleaned table is a projection of raw_data, so it can be corrected in place only
+    where it kept every key column. Cleaning may leave the key out (the reader did not
+    want to see it), and an UPDATE naming it then fails - after raw_data has taken the
+    change, and on a revert after the correction itself was forgotten, leaving either
+    half done. Where it cannot be addressed it is left alone: the next clean rebuilds it
+    from raw_data, which is where corrections live.
+    """
+    if not sql_utils.table_exists(dataset_id, "cleaned_data"):
+        return set()
+    columns = set(sql_utils.table_columns(dataset_id, "cleaned_data"))
+    return columns if set(key_cols) <= columns else set()
+
+
 @router.patch("/{dataset_id}/rows", response_model=RowEditResult)
 def edit_row(
     dataset_id: str,
@@ -93,6 +109,8 @@ def edit_row(
     row_key = KEY_SEPARATOR.join(body.key)
     actor = user.get("username") or user.get("id") or ""
 
+    cleaned_cols = _addressable_cleaned_columns(dataset_id, key_cols)
+
     with dataset_connections.write_lock(dataset_id):
         cur = dataset_connections.cursor(dataset_id)
         where = " AND ".join(
@@ -106,11 +124,7 @@ def edit_row(
             cur.execute(
                 f"UPDATE raw_data SET {quoted} = ? WHERE {where}", [value, *body.key]
             )
-            # the cleaned table is a projection of raw_data, so it holds the column only
-            # if the reader kept it
-            if sql_utils.table_exists(dataset_id, "cleaned_data") and column in set(
-                sql_utils.table_columns(dataset_id, "cleaned_data")
-            ):
+            if column in cleaned_cols:
                 cur.execute(
                     f"UPDATE cleaned_data SET {quoted} = ? WHERE {where}",
                     [value, *body.key],
@@ -175,6 +189,7 @@ def revert_correction(
     row_key = KEY_SEPARATOR.join(body.key)
 
     reverted: list[str] = []
+    cleaned_cols = _addressable_cleaned_columns(dataset_id, key_cols)
     with dataset_connections.write_lock(dataset_id):
         cur = dataset_connections.cursor(dataset_id)
         where = " AND ".join(
@@ -189,9 +204,7 @@ def revert_correction(
                 f"UPDATE raw_data SET {quoted} = ? WHERE {where}",
                 [previous["old_value"], *body.key],
             )
-            if sql_utils.table_exists(dataset_id, "cleaned_data") and column in set(
-                sql_utils.table_columns(dataset_id, "cleaned_data")
-            ):
+            if column in cleaned_cols:
                 cur.execute(
                     f"UPDATE cleaned_data SET {quoted} = ? WHERE {where}",
                     [previous["old_value"], *body.key],

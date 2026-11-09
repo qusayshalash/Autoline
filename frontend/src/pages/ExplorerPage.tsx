@@ -37,6 +37,7 @@ import EmptyState from "../components/EmptyState";
 import ErrorBanner from "../components/ErrorBanner";
 import FilterDialog from "../components/FilterDialog";
 import ArrivalMark from "../components/ArrivalMark";
+import CorrectionMark from "../components/CorrectionMark";
 import EditableCell from "../components/EditableCell";
 import RecordKeyDialog from "../components/RecordKeyDialog";
 import GroupDialog from "../components/GroupDialog";
@@ -330,6 +331,19 @@ export default function ExplorerPage() {
     }
     return out;
   }, [corrections]);
+
+  /** row key -> how many of its cells were corrected, for the mark beside the row. */
+  const correctedRows = useMemo(() => {
+    const out = new Map<string, number>();
+    for (const c of corrections?.items ?? []) {
+      const key = JSON.stringify(c.row_key);
+      out.set(key, (out.get(key) ?? 0) + 1);
+    }
+    return out;
+  }, [corrections]);
+
+  // The marks column holds both kinds of mark, and exists while either has anything to say.
+  const showRowMarks = canShowRecent || correctedRows.size > 0;
 
   function keyOf(row: unknown[], columns: string[]): string[] {
     return keyColumns.map((c) => String(row[columns.indexOf(c)] ?? ""));
@@ -972,9 +986,9 @@ export default function ExplorerPage() {
                 {showRowNumbers && <th className="rownum-col">#</th>}
                 {/* Appears only when it has something to say, so it costs no width on
                     the datasets that never take a batch. */}
-                {canShowRecent && (
+                {showRowMarks && (
                   <th className="arrival-col">
-                    <span className="sr-only">{t("arrivals.only_recent")}</span>
+                    <span className="sr-only">{t("corrections.marks_column")}</span>
                   </th>
                 )}
                 {visibleColumns.map((c) => {
@@ -1061,14 +1075,22 @@ export default function ExplorerPage() {
                   {showRowNumbers && (
                     <td className="rownum-col">{formatNumber(firstRowIndex + i, i18n.language)}</td>
                   )}
-                  {canShowRecent && (
+                  {showRowMarks && (
                     <td className="arrival-col">
-                      {page_.arrivals?.[i] && (
-                        <ArrivalMark
-                          kind={page_.arrivals[i] as Arrival}
-                          when={arrivals.latest_at}
-                        />
-                      )}
+                      <span className="row-marks">
+                        {canShowRecent && page_.arrivals?.[i] && (
+                          <ArrivalMark
+                            kind={page_.arrivals[i] as Arrival}
+                            when={arrivals?.latest_at}
+                          />
+                        )}
+                        {correctedRows.size > 0 && keyColumns.length > 0 && (() => {
+                          const count = correctedRows.get(
+                            JSON.stringify(keyOf(row, allColumns))
+                          );
+                          return count ? <CorrectionMark count={count} /> : null;
+                        })()}
+                      </span>
                     </td>
                   )}
                   {visibleIndexes.map((colIdx) => {

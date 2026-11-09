@@ -1141,10 +1141,17 @@
     "not_in_view": "Cells cannot be corrected here: the record key ({{columns}}) was removed from the cleaned data. Switch to the original data to correct."
   },
   "corrections": {
+    "marks_column": "Row marks",
     "edit_cell": "Correct {{column}}",
     "revert_cell": "Restore {{column}} to what the file says",
     "was": "Corrected - was: {{value}}",
-    "revert_to": "Restore to: {{value}}"
+    "revert_to": "Restore to: {{value}}",
+    "row_zero": "No cells in this row were corrected by hand",
+    "row_one": "One cell in this row was corrected by hand",
+    "row_two": "2 cells in this row were corrected by hand",
+    "row_few": "{{count}} cells in this row were corrected by hand",
+    "row_many": "{{count}} cells in this row were corrected by hand",
+    "row_other": "{{count}} cells in this row were corrected by hand"
   },
   "append": {
     "action": "Add a batch",
