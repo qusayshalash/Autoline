@@ -78,6 +78,26 @@ function timingClass(ms: number): "fast" | "medium" | "slow" {
   return "slow";
 }
 
+/** A remembered view setting, or the fallback when there is none or storage refuses. */
+function readStored<T>(key: string, fallback: T): T {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as T) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+/** Remembers a view setting; null forgets it, so a reset leaves nothing behind. */
+function writeStored(key: string, value: unknown): void {
+  try {
+    if (value === null) localStorage.removeItem(key);
+    else localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // a browser refusing storage is not a reason to stop working
+  }
+}
+
 export default function ExplorerPage() {
   const { t, i18n } = useTranslation();
   const confirm = useConfirm();
@@ -120,9 +140,31 @@ export default function ExplorerPage() {
   const [exportScope, setExportScope] = useState<ExportRequest["scope"]>("all");
   const [exportJobId, setExportJobId] = useState<string | null>(null);
   const [showExportReady, setShowExportReady] = useState(false);
-  const [hiddenColumns, setHiddenColumns] = useState<Set<string>>(new Set());
-  const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
-  const [columnOrder, setColumnOrder] = useState<string[] | null>(null);
+  // The table's layout - order, hidden columns, widths - is remembered per dataset like
+  // the choices above. Arranging a wide table is real work, and losing it to a refresh
+  // read as the move not having worked.
+  const [hiddenColumns, setHiddenColumns] = useState<Set<string>>(
+    () => new Set(readStored<string[]>(`hidden-columns:${datasetId}`, []))
+  );
+  const [columnWidths, setColumnWidths] = useState<Record<string, number>>(() =>
+    readStored<Record<string, number>>(`column-widths:${datasetId}`, {})
+  );
+  const [columnOrder, setColumnOrder] = useState<string[] | null>(() =>
+    readStored<string[] | null>(`column-order:${datasetId}`, null)
+  );
+
+  useEffect(() => {
+    writeStored(`hidden-columns:${datasetId}`, hiddenColumns.size ? [...hiddenColumns] : null);
+  }, [datasetId, hiddenColumns]);
+  useEffect(() => {
+    writeStored(
+      `column-widths:${datasetId}`,
+      Object.keys(columnWidths).length ? columnWidths : null
+    );
+  }, [datasetId, columnWidths]);
+  useEffect(() => {
+    writeStored(`column-order:${datasetId}`, columnOrder);
+  }, [datasetId, columnOrder]);
   const [dragColumn, setDragColumn] = useState<string | null>(null);
   const [dropTarget, setDropTarget] = useState<string | null>(null);
   /* ---- translated values -------------------------------------------------------

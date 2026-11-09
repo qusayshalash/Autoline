@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useParams } from "react-router-dom";
 
 import LoadingState from "./components/LoadingState";
 import RequireAuth from "./components/RequireAuth";
@@ -76,7 +76,7 @@ function Workspace() {
             path="/datasets/:datasetId/explore"
             element={
               <RequirePermission all={["datasets.view"]}>
-                <ExplorerPage />
+                <ExplorerForDataset />
               </RequirePermission>
             }
           />
@@ -103,6 +103,14 @@ function AdminIndexRoute() {
 
   const destination = firstAllowedAdminPath(user?.permissions ?? []);
   return <Navigate to={destination ?? "/forbidden"} replace />;
+}
+
+/** One explorer per file. Its view settings are read from storage when it mounts and
+ *  written back under the file's id - so moving straight from one file to another must
+ *  start a fresh one, or the first file's layout is saved as the second's. */
+function ExplorerForDataset() {
+  const { datasetId } = useParams();
+  return <ExplorerPage key={datasetId} />;
 }
 
 export default function App() {
