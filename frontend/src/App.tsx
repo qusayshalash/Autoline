@@ -10,6 +10,7 @@ import { ADMIN_ACCESS_PERMISSIONS, firstAllowedAdminPath } from "./auth/permissi
 import DatasetsPage from "./pages/DatasetsPage";
 import ForbiddenPage from "./pages/ForbiddenPage";
 import LoginPage from "./pages/LoginPage";
+import { RECORD_CARD_ENABLED } from "./features";
 
 /*
  * Everything past the first screen is loaded when it is first opened, not before.
@@ -36,6 +37,7 @@ const CleaningPage = lazy(() => import("./pages/CleaningPage"));
 const ExplorerPage = lazy(() => import("./pages/ExplorerPage"));
 const ImportWizardPage = lazy(() => import("./pages/ImportWizardPage"));
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
+const RecordPage = lazy(() => import("./pages/RecordPage"));
 const StatisticsIndexPage = lazy(() => import("./pages/StatisticsIndexPage"));
 const StatisticsPage = lazy(() => import("./pages/StatisticsPage"));
 // The catalog is on hold: CatalogPage stays in the tree, the route shows ComingSoonPage.
@@ -77,6 +79,15 @@ function Workspace() {
             element={
               <RequirePermission all={["datasets.view"]}>
                 <ExplorerForDataset />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/datasets/:datasetId/record"
+            element={
+              <RequirePermission all={["datasets.view"]}>
+                {/* on hold with the catalog: see features.ts */}
+                {RECORD_CARD_ENABLED ? <RecordPage /> : <ComingSoonPage />}
               </RequirePermission>
             }
           />

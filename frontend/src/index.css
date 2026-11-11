@@ -3259,3 +3259,438 @@ td:hover > .cell-edit-wrap > .cell-revert,
   background: var(--warning-soft);
   border-bottom: 1px solid var(--border);
 }
+
+/* --- saved views ---
+   One popover: the reader's own views, and the views others shared. */
+.saved-views-label {
+  max-width: 14ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.saved-views-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.saved-views-popover {
+  z-index: 60;
+  width: 340px;
+  max-width: calc(100vw - 16px);
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius, 10px);
+  box-shadow: 0 12px 32px -12px rgba(0, 0, 0, 0.35);
+  padding: 0.75rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.saved-views-popover section { display: grid; gap: 0.35rem; }
+
+.saved-views-save { display: grid; gap: 0.4rem; }
+
+.saved-views-heading {
+  margin: 0;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+}
+
+.saved-views-note {
+  margin: 0;
+  font-size: 0.76rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.saved-views-row { display: flex; gap: 0.4rem; }
+.saved-views-row input { flex: 1; min-width: 0; }
+
+.saved-views-check {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.saved-views-error,
+.saved-views-notice {
+  margin: 0;
+  padding: 0.4rem 0.55rem;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  overflow-wrap: anywhere;
+}
+.saved-views-error { background: var(--danger-soft); color: var(--danger); }
+.saved-views-notice { background: var(--primary-soft); color: var(--primary); }
+
+.saved-views-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.15rem; }
+
+.saved-view {
+  border-radius: 6px;
+  padding: 0.2rem 0.3rem;
+}
+.saved-view:hover { background: var(--surface-muted); }
+.saved-view.is-active { background: var(--primary-soft); }
+
+.saved-view-open {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  width: 100%;
+  padding: 0.2rem 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.86rem;
+  text-align: start;
+  cursor: pointer;
+}
+
+.saved-view-name { font-weight: 600; overflow-wrap: anywhere; }
+
+.saved-view-owner { font-size: 0.74rem; color: var(--text-muted); }
+
+.saved-view-tag {
+  padding: 0 0.35rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: var(--surface-muted);
+  color: var(--text-muted);
+}
+.saved-view-tag.shared { background: var(--primary-soft); color: var(--primary); }
+
+.saved-view-actions,
+.saved-views-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.75rem;
+}
+.saved-view-actions .link-btn,
+.saved-views-actions .link-btn { padding: 0.1rem 0; font-size: 0.76rem; }
+
+
+/* --- the record card ---
+   One record on one screen: its identifier as the heading, every field as a label over
+   its value, and the hand corrections as a short history under them. */
+.rownum-link {
+  color: inherit;
+  text-decoration: none;
+  border-radius: 4px;
+  padding: 0 0.2rem;
+}
+.rownum-link:hover,
+.rownum-link:focus-visible {
+  color: var(--primary);
+  background: var(--primary-soft);
+  text-decoration: underline;
+}
+
+.record-page {
+  /* the workspace lays pages out as flex items; without a width this one shrinks to
+     its widest line instead of taking the room it is given */
+  width: 100%;
+  box-sizing: border-box;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1rem 1.25rem 2.5rem;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.record-topbar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.record-file {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+/* The card reads top to bottom: what the vehicle is, whether it is on the road legally,
+   then its details grouped from most to least read, then who changed what by hand.
+   Labels sit at the start and values at the end of each row, so the eye runs straight
+   down either edge; identifiers are set left-to-right in tabular figures wherever the
+   page runs. */
+.rc-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  padding: 1.5rem 1.6rem;
+  background:
+    radial-gradient(120% 140% at 100% 0%, color-mix(in srgb, var(--primary) 9%, transparent), transparent 55%),
+    var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+.rc-hero-text { display: grid; gap: 0.3rem; min-width: 0; flex: 1 1 320px; }
+.rc-make {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+.rc-title {
+  margin: 0;
+  font-size: clamp(1.5rem, 3.6vw, 2.15rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+.rc-subtitle {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+.rc-dot { margin-inline: 0.5rem; opacity: 0.6; }
+.rc-chips { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-top: 0.55rem; }
+.rc-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.28rem 0.7rem 0.28rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: var(--surface-muted);
+  color: var(--text);
+}
+.rc-chip.corrected { background: var(--primary-soft); color: var(--primary-soft-text); }
+
+.rc-id { display: grid; justify-items: center; gap: 0.4rem; flex: none; }
+.rc-id-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+/* The plate as it looks on the car: the same yellow and black in either theme, because
+   it is a picture of a physical thing, not a surface of the interface. */
+.rc-plate {
+  display: inline-block;
+  padding: 0.4rem 1rem;
+  border: 2px solid #1a1a1a;
+  border-radius: 7px;
+  background: #f6c90e;
+  color: #111;
+  font-size: 1.55rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  font-variant-numeric: tabular-nums;
+  box-shadow: inset 0 0 0 2px #f6c90e, inset 0 0 0 3px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.18);
+  white-space: nowrap;
+}
+.rc-key {
+  font-size: 1.35rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Six tiles: one row of six, two of three, or three of two - never five and an orphan.
+   Sized by the page's own width, which the sidebar changes, not the window's. */
+.record-page { container-type: inline-size; }
+.rc-glance {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+@container (min-width: 560px) {
+  .rc-glance { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@container (min-width: 960px) {
+  .rc-glance { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}
+.rc-fact {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas: "icon label" "icon value" "icon note";
+  align-content: start;
+  column-gap: 0.65rem;
+  row-gap: 0.15rem;
+  padding: 0.85rem 0.95rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  min-width: 0;
+}
+.rc-fact-icon {
+  grid-area: icon;
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 10px;
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+.rc-fact-label { grid-area: label; font-size: 0.74rem; color: var(--text-muted); font-weight: 600; }
+.rc-fact-value { grid-area: value; font-size: 1rem; font-weight: 700; overflow-wrap: break-word; }
+/* On a phone the tile is too narrow to spend a third of it on an icon: the word it
+   would squeeze is the thing being read. */
+@container (max-width: 480px) {
+  .rc-fact { grid-template-columns: 1fr; grid-template-areas: "label" "value" "note"; padding: 0.75rem; }
+  .rc-fact-icon { display: none; }
+}
+.rc-fact-note { grid-area: note; font-size: 0.74rem; color: var(--text-muted); }
+
+.rc-status { grid-template-columns: 1fr; grid-template-areas: "label" "value" "note"; }
+.rc-status.valid { border-color: color-mix(in srgb, var(--success) 35%, var(--border)); }
+.rc-status.due { border-color: color-mix(in srgb, var(--warning) 45%, var(--border)); }
+.rc-status.expired { border-color: color-mix(in srgb, var(--danger) 45%, var(--border)); }
+.rc-pill {
+  display: inline-block;
+  padding: 0.12rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+.rc-status.valid .rc-pill { background: var(--success-soft); color: var(--success); }
+.rc-status.due .rc-pill { background: var(--warning-soft); color: var(--warning); }
+.rc-status.expired .rc-pill { background: var(--danger-soft); color: var(--danger); }
+
+.rc-sections {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+.rc-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  padding: 0.35rem 1.1rem 0.6rem;
+  min-width: 0;
+}
+.rc-section-title {
+  margin: 0;
+  padding: 0.75rem 0 0.6rem;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+}
+.rc-rows { margin: 0; }
+.rc-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.62rem 0;
+}
+.rc-row + .rc-row { border-top: 1px dashed var(--border); }
+.rc-row dt {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.86rem;
+  flex: none;
+}
+.rc-row-icon { display: inline-flex; color: var(--text-muted); opacity: 0.75; }
+.rc-row dd {
+  margin: 0;
+  display: grid;
+  justify-items: end;
+  gap: 0.15rem;
+  min-width: 0;
+  text-align: end;
+  font-size: 0.93rem;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+.rc-value { display: inline-flex; align-items: center; gap: 0.35rem; }
+.rc-code {
+  font-family: ui-monospace, "SFMono-Regular", "Cascadia Mono", Consolas, monospace;
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+.rc-empty { color: var(--text-muted); font-weight: 400; }
+.rc-section.codes .rc-row dd { color: var(--text-muted); }
+.rc-row.is-corrected dd { color: var(--primary-soft-text); }
+.rc-pen {
+  display: inline-grid;
+  place-items: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 50%;
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+.rc-was { font-size: 0.74rem; font-weight: 400; color: var(--text-muted); }
+.rc-note { margin: 0; padding: 0.8rem 0; color: var(--text-muted); font-size: 0.86rem; }
+
+.rc-history { list-style: none; margin: 0; padding: 0.4rem 0 0.2rem; display: grid; }
+.rc-history li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1rem 1fr;
+  gap: 0.6rem;
+  padding: 0.55rem 0;
+}
+.rc-history li:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: calc(0.5rem - 1px);
+  top: 1.35rem;
+  bottom: -0.55rem;
+  width: 2px;
+  background: var(--border);
+}
+.rc-history-dot {
+  width: 0.7rem;
+  height: 0.7rem;
+  margin-top: 0.3rem;
+  margin-inline-start: 0.15rem;
+  border-radius: 50%;
+  background: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+.rc-history-body { display: grid; gap: 0.2rem; min-width: 0; }
+.rc-history-field { font-weight: 700; font-size: 0.9rem; }
+.rc-history-change { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0.45rem; font-size: 0.9rem; }
+.rc-history-change del { color: var(--text-muted); }
+.rc-history-change ins { text-decoration: none; font-weight: 700; color: var(--primary-soft-text); }
+.rc-arrow { color: var(--text-muted); }
+.rc-history-who { color: var(--text-muted); font-size: 0.78rem; }
+
+@media (max-width: 640px) {
+  .record-page { padding: 0.75rem 1rem 2rem; }
+  .rc-hero { padding: 1.15rem; }
+  .rc-id { justify-items: start; }
+  .rc-row { flex-wrap: wrap; gap: 0.2rem 1rem; }
+}
+
+/* a record the government registry no longer lists: the batch marks' family, in red */
+.arrival-mark.removed,
+.arrival-dot.removed {
+  --arrival-bg: var(--danger-soft);
+  --arrival-fg: var(--danger);
+}

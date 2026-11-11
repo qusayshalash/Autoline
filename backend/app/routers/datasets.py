@@ -26,7 +26,7 @@ from app.models.schemas import (
     QualityReport,
     UploadResponse,
 )
-from app.services import appending, arrivals, corrections, ingestion, quality, row_identity
+from app.services import appending, arrivals, corrections, ingestion, quality, removals, row_identity
 
 router = APIRouter(prefix="/api/datasets", tags=["datasets"])
 
@@ -417,6 +417,20 @@ def get_arrivals(
         latest_at=clocks.iso(found["latest_at"]),
         window_days=found["window_days"],
     )
+
+
+@router.get("/{dataset_id}/removals")
+def get_removals(
+    dataset_id: str, user: dict = Depends(require_permission("datasets.view"))
+) -> Optional[dict]:
+    """How many records the government registry no longer lists, or null when none are
+    marked - the screen offers the filter only when there is something to filter to."""
+    if catalog.get_dataset(dataset_id) is None:
+        raise ApiError(404, "dataset_not_found", "Dataset not found")
+    found = removals.summary(dataset_id)
+    if not found:
+        return None
+    return {"count": found["count"], "latest_at": clocks.iso(found["latest_at"])}
 
 
 @router.put("/arrivals/window", response_model=ArrivalWindowRequest)

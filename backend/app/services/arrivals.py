@@ -177,3 +177,14 @@ def recent_filter_sql(dataset_id: str, key_columns: list[str]) -> Optional[str]:
         return None
     key_expr = row_identity.key_expression(key_columns)
     return f"{key_expr} IN (SELECT row_key FROM {TABLE})"
+
+
+def for_row(dataset_id: str, row_key: str) -> Optional[dict]:
+    """Whether a recent batch brought this record, and when: {kind, added_at} or None."""
+    if not sql_utils.table_exists(dataset_id, TABLE):
+        return None
+    cur = datasets.cursor(dataset_id)
+    found = cur.execute(
+        f"SELECT kind, added_at FROM {TABLE} WHERE row_key = ?", [row_key]
+    ).fetchone()
+    return {"kind": found[0], "added_at": found[1]} if found else None

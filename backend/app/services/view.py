@@ -16,7 +16,7 @@ view" wrote 30,300 rows to a file. So there is now one builder, and every consum
 from typing import Optional
 
 from app.db import catalog
-from app.services import arrivals, row_identity, sql_utils
+from app.services import arrivals, removals, row_identity, sql_utils
 
 
 def where(
@@ -28,6 +28,7 @@ def where(
     search_alternatives: Optional[list[str]] = None,
     filters=None,
     only_recent: bool = False,
+    only_removed: bool = False,
 ) -> tuple[str, list]:
     """The WHERE fragment for a view (without the keyword, empty when unconstrained),
     and its parameters in matching order."""
@@ -49,6 +50,9 @@ def where(
     if only_recent:
         clauses.append(_recent(dataset_id, columns))
 
+    if only_removed:
+        clauses.append(_removed(dataset_id, columns))
+
     return " AND ".join(f"({c})" for c in clauses), params
 
 
@@ -64,3 +68,12 @@ def _recent(dataset_id: str, columns: list[str]) -> str:
     if not key_cols or not set(key_cols) <= set(columns):
         return "FALSE"
     return arrivals.recent_filter_sql(dataset_id, key_cols) or "FALSE"
+
+
+def _removed(dataset_id: str, columns: list[str]) -> str:
+    """Only the rows the government registry no longer lists. FALSE, not absent, when
+    that cannot be answered - for the same reason as _recent."""
+    key_cols = row_identity.key_columns(catalog.get_dataset(dataset_id) or {})
+    if not key_cols or not set(key_cols) <= set(columns):
+        return "FALSE"
+    return removals.filter_sql(dataset_id, key_cols) or "FALSE"

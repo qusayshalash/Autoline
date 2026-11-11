@@ -1,4 +1,4 @@
-from typing import Any, Literal, Optional
+from typing import Annotated, Any, Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -746,6 +746,8 @@ class DataQuery(Incoming):
     # Keep only records that arrived in a recent batch. Not a FilterRule because it is
     # not a statement about a column - the arrivals live beside the data, not in it.
     only_recent: bool = False
+    # keep only records the government registry no longer lists
+    only_removed: bool = False
 
 
 class DataPage(BaseModel):
@@ -759,6 +761,8 @@ class DataPage(BaseModel):
     # "new", "updated" or null for each row of this page, when the dataset has a record
     # key and a batch arrived recently. Parallel to `rows`.
     arrivals: list[Optional[str]] = []
+    # per row, whether the government registry no longer lists it (see removals.py)
+    removed: list[bool] = []
 
 
 class GroupQuery(Incoming):
@@ -774,6 +778,8 @@ class GroupQuery(Incoming):
     # "only the latest batch", which is a statement about the view rather than about a
     # column - carried here so this answers about the rows the grid is showing
     only_recent: bool = False
+    # keep only records the government registry no longer lists
+    only_removed: bool = False
     # Narrows the grouped column's own values, as opposed to `search`, which narrows
     # the rows. The value picker needs both at once: the list must be counted over what
     # the grid is showing *and* filtered by what is typed into the list's own search
@@ -832,6 +838,8 @@ class StatisticsQuery(Incoming):
     # "only the latest batch", which is a statement about the view rather than about a
     # column - carried here so this answers about the rows the grid is showing
     only_recent: bool = False
+    # keep only records the government registry no longer lists
+    only_removed: bool = False
     source: Literal["raw", "cleaned"] = "cleaned"
     limit: int = Field(default=50, ge=1, le=200)
     # how ties between buckets are ordered: by popularity, or by the value itself
@@ -900,6 +908,8 @@ class PivotQuery(Incoming):
     # "only the latest batch", which is a statement about the view rather than about a
     # column - carried here so this answers about the rows the grid is showing
     only_recent: bool = False
+    # keep only records the government registry no longer lists
+    only_removed: bool = False
     source: Literal["raw", "cleaned"] = "cleaned"
     # A matrix wider than a dozen columns stops being readable, and taller than ~50 rows
     # stops being scannable; whatever falls outside is aggregated rather than dropped.
@@ -973,6 +983,8 @@ class ExportRequest(Incoming):
     # "only the latest batch", which is a statement about the view rather than about a
     # column - carried here so this answers about the rows the grid is showing
     only_recent: bool = False
+    # keep only records the government registry no longer lists
+    only_removed: bool = False
     filters: list[FilterRule] = []
     sort_by: Optional[str] = None
     sort_dir: Literal["asc", "desc"] = "asc"
@@ -1005,3 +1017,87 @@ class VehiclePhoto(BaseModel):
     # the generation the photo is of, as "2011–2016"; None when it is the article's lead
     # photo, whose generation is not known
     years: Optional[str] = None
+
+
+# ---- saved views --------------------------------------------------------------------
+#
+# Stored as the screen sent them and handed back the same way; the server reads nothing
+# in them. The limits are there so a row in the catalog stays a small row.
+
+ColumnName = Annotated[str, Field(max_length=256)]
+
+
+class ViewState(Incoming):
+    """Which rows a saved view shows, and in what order."""
+
+    source: Literal["raw", "cleaned"] = "cleaned"
+    search: Optional[str] = Field(default=None, max_length=500)
+    search_columns: list[ColumnName] = Field(default=[], max_length=1000)
+    filters: list[FilterRule] = Field(default=[], max_length=50)
+    sort_by: Optional[ColumnName] = None
+    sort_dir: Literal["asc", "desc"] = "asc"
+    group_by: list[ColumnName] = Field(default=[], max_length=5)
+    only_recent: bool = False
+    # keep only records the government registry no longer lists
+    only_removed: bool = False
+
+
+ViewName = Annotated[str, Field(min_length=1, max_length=80)]
+
+
+class SavedViewIn(Incoming):
+    name: ViewName
+    state: ViewState
+    shared: bool = False
+
+
+class SavedViewPatch(Incoming):
+    name: Optional[ViewName] = None
+    state: Optional[ViewState] = None
+    shared: Optional[bool] = None
+
+
+class SavedViewOut(BaseModel):
+    id: str
+    dataset_id: str
+    name: str
+    state: ViewState
+    shared: bool
+    owner_username: str
+    # the reader made it, and so may change it
+    mine: bool
+    # the reader may delete it: their own, or a shared one when they can edit the data
+    can_delete: bool
+    created_at: Optional[str] = None
+    updated_at: Optional[str] = None
+
+
+class RecordArrival(BaseModel):
+    kind: Literal["new", "updated"]
+    added_at: Optional[str] = None
+
+
+class RecordOut(BaseModel):
+    """One record, whole, with what is known about how it got to be this way."""
+
+    # every column of the record, in the file's order, corrections applied
+    columns: list[str]
+    values: list[Any]
+    key_columns: list[str]
+    key: list[str]
+    # set while the batch that brought or replaced it is inside the arrivals window
+    arrival: Optional[RecordArrival] = None
+    # the hand corrections, newest first; None when the reader may not see them
+    corrections: Optional[list[CorrectionOut]] = None
+
+
+class RegistrySyncConfig(Incoming):
+    """Which dataset mirrors the government registry, and whether it syncs nightly."""
+
+    dataset_id: Optional[str] = Field(default=None, max_length=64)
+    schedule: Literal["off", "daily"] = "off"
+
+
+class RegistrySyncApply(Incoming):
+    # load the batch without marking anything new or updated - for the first sync
+    baseline: bool = False

@@ -122,6 +122,7 @@ def _build_where(
         search_alternatives=q.search_alternatives,
         filters=q.filters,
         only_recent=q.only_recent,
+        only_removed=q.only_removed,
     )
 
 

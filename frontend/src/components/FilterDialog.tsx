@@ -19,6 +19,8 @@ interface Props {
   searchColumns?: string[];
   /** the grid's "only the latest batch" toggle, also part of what is on screen */
   onlyRecent?: boolean;
+  /** the grid's "removed from the registry" toggle */
+  onlyRemoved?: boolean;
   onApply: (filters: FilterRule[]) => void;
   onClose: () => void;
 }
@@ -33,6 +35,7 @@ export default function FilterDialog({
   search,
   searchColumns,
   onlyRecent,
+  onlyRemoved = false,
   onApply,
   onClose,
 }: Props) {
@@ -144,6 +147,7 @@ export default function FilterDialog({
             search={search}
             searchColumns={searchColumns}
             onlyRecent={onlyRecent}
+            onlyRemoved={onlyRemoved}
           />
 
           <button

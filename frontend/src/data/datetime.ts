@@ -178,3 +178,52 @@ export function isBeforeToday(dateOnly: string | null | undefined): boolean {
   const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
   return dateOnly < today;
 }
+
+/* ---- calendar dates (the registry's own fields) ---------------------------------- */
+
+/**
+ * A date written as the registry writes it - 2026-02-01, or 2016-2 for a month - as a
+ * local calendar date. Read as local on purpose: these are days, not instants, and
+ * treating midnight as UTC would show the day before for anybody west of Greenwich.
+ */
+export function parseCalendarDate(value: string): { date: Date; precision: "day" | "month" } | null {
+  const day = /^(\d{4})-(\d{1,2})-(\d{1,2})(?:[T ].*)?$/.exec(value.trim());
+  if (day) {
+    const date = new Date(Number(day[1]), Number(day[2]) - 1, Number(day[3]));
+    return Number.isNaN(date.getTime()) ? null : { date, precision: "day" };
+  }
+  const month = /^(\d{4})-(\d{1,2})$/.exec(value.trim());
+  if (month) {
+    const date = new Date(Number(month[1]), Number(month[2]) - 1, 1);
+    return Number.isNaN(date.getTime()) ? null : { date, precision: "month" };
+  }
+  return null;
+}
+
+export function formatCalendarDate(value: string, language: string): string {
+  const parsed = parseCalendarDate(value);
+  if (!parsed) return value;
+  const options: Intl.DateTimeFormatOptions =
+    parsed.precision === "day"
+      ? { day: "numeric", month: "long", year: "numeric" }
+      : { month: "long", year: "numeric" };
+  return new Intl.DateTimeFormat(language, options).format(parsed.date);
+}
+
+/** Whole days from today to the date; negative once it has passed. */
+export function daysUntil(value: string, today = new Date()): number | null {
+  const parsed = parseCalendarDate(value);
+  if (!parsed) return null;
+  const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  return Math.round((parsed.date.getTime() - start.getTime()) / 86_400_000);
+}
+
+/** "3 months ago", "in 2 weeks" - in the reader's language, at a sensible unit. */
+export function relativeDays(days: number, language: string): string {
+  const rtf = new Intl.RelativeTimeFormat(language, { numeric: "auto" });
+  const abs = Math.abs(days);
+  if (abs < 14) return rtf.format(days, "day");
+  if (abs < 60) return rtf.format(Math.round(days / 7), "week");
+  if (abs < 730) return rtf.format(Math.round(days / 30.44), "month");
+  return rtf.format(Math.round(days / 365.25), "year");
+}

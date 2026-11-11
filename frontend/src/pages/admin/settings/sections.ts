@@ -8,6 +8,7 @@ export const SECTION_IDS = [
   "storage",
   "backups",
   "maintenance",
+  "registry",
   "logs",
   "security",
   "system",

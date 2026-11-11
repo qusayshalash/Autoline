@@ -78,6 +78,7 @@ def build_export_query(
             search_alternatives=req.search_alternatives,
             filters=req.filters,
             only_recent=req.only_recent,
+            only_removed=req.only_removed,
         )
 
     order_sql = ""

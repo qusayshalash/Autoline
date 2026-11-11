@@ -550,3 +550,71 @@ export async function setBackupSchedule(hours: number): Promise<BackupSummary> {
   const { data } = await api.patch<BackupSummary>("/admin/backups/schedule", { hours });
   return data;
 }
+
+/* ---- government registry sync ---------------------------------------------------- */
+
+export interface RegistryPreview {
+  dataset_id: string;
+  created_at: string;
+  source: { last_modified?: string | null; total?: number };
+  source_rows: number;
+  source_duplicates: number;
+  current_rows: number;
+  new: number;
+  changed: number;
+  removed: number;
+  returned: number;
+  changed_columns: { column: string; count: number }[];
+  new_values: { column: string; value: string; count: number }[];
+  compare_seconds: number;
+}
+
+export interface RegistryReport {
+  applied_at: string;
+  dataset_id: string;
+  baseline: boolean;
+  new: number;
+  changed: number;
+  removed: number;
+  returned: number;
+  row_count_raw: number;
+  source: { last_modified?: string | null; total?: number };
+}
+
+export interface RegistrySyncStatus {
+  dataset_id: string | null;
+  dataset_name: string | null;
+  schedule: "off" | "daily";
+  running: boolean;
+  preview: RegistryPreview | null;
+  last_report: RegistryReport | null;
+  source: { resource_id: string; page: string };
+}
+
+export async function fetchRegistrySync(): Promise<RegistrySyncStatus> {
+  const { data } = await api.get<RegistrySyncStatus>("/admin/registry-sync");
+  return data;
+}
+
+export async function setRegistrySync(body: {
+  dataset_id: string | null;
+  schedule: "off" | "daily";
+}): Promise<RegistrySyncStatus> {
+  const { data } = await api.put<RegistrySyncStatus>("/admin/registry-sync", body);
+  return data;
+}
+
+export async function startRegistryPreview(): Promise<JobOut> {
+  const { data } = await api.post<JobOut>("/admin/registry-sync/preview");
+  return data;
+}
+
+export async function startRegistryApply(baseline: boolean): Promise<JobOut> {
+  const { data } = await api.post<JobOut>("/admin/registry-sync/apply", { baseline });
+  return data;
+}
+
+export async function discardRegistryPreview(): Promise<RegistrySyncStatus> {
+  const { data } = await api.delete<RegistrySyncStatus>("/admin/registry-sync/preview");
+  return data;
+}

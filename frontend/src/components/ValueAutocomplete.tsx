@@ -26,6 +26,8 @@ interface Props {
   searchColumns?: string[];
   /** the grid's "only the latest batch" toggle */
   onlyRecent?: boolean;
+  /** the grid's "removed from the registry" toggle */
+  onlyRemoved?: boolean;
 }
 
 const SUGGESTION_LIMIT = 50;
@@ -44,6 +46,7 @@ export default function ValueAutocomplete({
   search,
   searchColumns,
   onlyRecent = false,
+  onlyRemoved = false,
 }: Props) {
   const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -72,6 +75,7 @@ export default function ValueAutocomplete({
       searchColumns ?? [],
       JSON.stringify(context ?? []),
       onlyRecent,
+      onlyRemoved,
       "suggest",
     ],
     queryFn: () =>
@@ -84,6 +88,7 @@ export default function ValueAutocomplete({
         search_columns: searchColumns,
         filters: context ?? [],
         only_recent: onlyRecent,
+        only_removed: onlyRemoved,
       }),
     enabled: open && !!column,
   });

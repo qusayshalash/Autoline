@@ -149,3 +149,11 @@ export function IconLast() {
     </svg>
   );
 }
+
+export function IconBookmark() {
+  return (
+    <svg {...base}>
+      <path d="M4 2.5h8v11L8 10.5l-4 3z" />
+    </svg>
+  );
+}

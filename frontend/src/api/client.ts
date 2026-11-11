@@ -256,6 +256,8 @@ export interface DataPage {
    * marking window; otherwise every entry is null.
    */
   arrivals: (Arrival | null)[];
+  /** per row: the government registry no longer lists it */
+  removed?: boolean[];
 }
 
 export interface StatsOut {
@@ -358,6 +360,8 @@ export async function fetchData(
     source?: "raw" | "cleaned";
     /** keep only records a recent batch brought */
     only_recent?: boolean;
+    /** keep only records the government registry no longer lists */
+    only_removed?: boolean;
   }
 ): Promise<DataPage> {
   // `duration_ms` from the server is the query time alone; timing the call here adds
@@ -377,6 +381,7 @@ export async function fetchData(
     filters: withSpellings(params.filters),
     source: params.source ?? "cleaned",
     only_recent: params.only_recent ?? false,
+    only_removed: params.only_removed ?? false,
   });
   return { ...data, elapsed_ms: Math.round(performance.now() - started) };
 }
@@ -412,6 +417,7 @@ export async function fetchGroups(
     /** only the rows a recent batch brought - the grid's toggle, which every question
      *  about the rows on screen has to carry or it answers about a different table */
     only_recent?: boolean;
+    only_removed?: boolean;
   }
 ): Promise<GroupPage> {
   const { data } = await api.post<GroupPage>(`/datasets/${datasetId}/group`, {
@@ -426,6 +432,7 @@ export async function fetchGroups(
     filters: withSpellings(params.filters),
     source: params.source ?? "cleaned",
     only_recent: params.only_recent ?? false,
+    only_removed: params.only_removed ?? false,
   });
   return data;
 }
@@ -645,6 +652,8 @@ export interface ExportRequest {
   sort_dir?: "asc" | "desc";
   /** with scope current_view: only the rows a recent batch brought, as on screen */
   only_recent?: boolean;
+  /** with scope current_view: only the rows the registry no longer lists */
+  only_removed?: boolean;
 }
 
 export async function requestExport(datasetId: string, req: ExportRequest): Promise<JobOut> {
@@ -812,4 +821,98 @@ export async function fetchColumnProfile(
     { params: { source } }
   );
   return data;
+}
+
+/* ---- saved views ------------------------------------------------ */
+
+/** Which rows a saved view shows, and in what order. */
+export interface ViewState {
+  source: "raw" | "cleaned";
+  search: string | null;
+  search_columns: string[];
+  filters: FilterRule[];
+  sort_by: string | null;
+  sort_dir: "asc" | "desc";
+  group_by: string[];
+  only_recent: boolean;
+  only_removed?: boolean;
+}
+
+export interface SavedView {
+  id: string;
+  dataset_id: string;
+  name: string;
+  state: ViewState;
+  shared: boolean;
+  owner_username: string;
+  mine: boolean;
+  can_delete: boolean;
+  created_at: string | null;
+  updated_at: string | null;
+}
+
+export async function listSavedViews(datasetId: string): Promise<SavedView[]> {
+  const { data } = await api.get<SavedView[]>(`/datasets/${datasetId}/views`);
+  return data;
+}
+
+export async function getSavedView(datasetId: string, viewId: string): Promise<SavedView> {
+  const { data } = await api.get<SavedView>(`/datasets/${datasetId}/views/${viewId}`);
+  return data;
+}
+
+export async function createSavedView(
+  datasetId: string,
+  body: { name: string; state: ViewState; shared: boolean }
+): Promise<SavedView> {
+  const { data } = await api.post<SavedView>(`/datasets/${datasetId}/views`, body);
+  return data;
+}
+
+export async function updateSavedView(
+  datasetId: string,
+  viewId: string,
+  body: { name?: string; state?: ViewState; shared?: boolean }
+): Promise<SavedView> {
+  const { data } = await api.patch<SavedView>(`/datasets/${datasetId}/views/${viewId}`, body);
+  return data;
+}
+
+export async function deleteSavedView(datasetId: string, viewId: string): Promise<void> {
+  await api.delete(`/datasets/${datasetId}/views/${viewId}`);
+}
+
+/* ---- one record (the vehicle card) ---------------------------------------------- */
+
+export interface RecordCard {
+  /** every column of the record, in the file's order, corrections applied */
+  columns: string[];
+  values: (string | number | null)[];
+  key_columns: string[];
+  key: string[];
+  arrival: { kind: Arrival; added_at: string | null } | null;
+  /** newest first; null when the reader may not see who corrected what */
+  corrections: Correction[] | null;
+}
+
+/** The address of a record's card. The key goes in the query, one `key` per column. */
+export function recordPath(datasetId: string, key: string[]): string {
+  const params = new URLSearchParams();
+  for (const k of key) params.append("key", k);
+  return `/datasets/${datasetId}/record?${params.toString()}`;
+}
+
+export async function fetchRecord(datasetId: string, key: string[]): Promise<RecordCard> {
+  const params = new URLSearchParams();
+  for (const k of key) params.append("key", k);
+  const { data } = await api.get<RecordCard>(`/datasets/${datasetId}/record?${params.toString()}`);
+  return data;
+}
+
+/** How many records the government registry no longer lists; null when none are marked. */
+export async function fetchRemovals(
+  datasetId: string
+): Promise<{ count: number; latest_at: string | null } | null> {
+  const { data } = await api.get(`/datasets/${datasetId}/removals`);
+  return data ?? null;
 }

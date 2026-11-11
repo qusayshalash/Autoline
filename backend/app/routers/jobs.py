@@ -28,6 +28,8 @@ _JOB_PERMISSIONS = {
     "export": ("datasets.view", "datasets.export"),
     "backup": ("system.manage",),
     "compact": ("system.manage",),
+    "registry_preview": ("system.manage",),
+    "registry_apply": ("system.manage",),
 }
 
 

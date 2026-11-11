@@ -5,6 +5,7 @@ import { useSearchParams } from "react-router-dom";
 
 import { fetchOverview, fetchSystemStatus } from "../../api/admin";
 import { useAuth } from "../../auth/AuthContext";
+import { REGISTRY_SYNC_ENABLED } from "../../features";
 import {
   IconActivity,
   IconArchive,
@@ -12,6 +13,7 @@ import {
   IconHardDrive,
   IconInfo,
   IconOverview,
+  IconRefresh,
   IconShield,
 } from "../../components/admin/AdminIcons";
 import { Toaster } from "../../components/admin/Toaster";
@@ -20,6 +22,7 @@ import BackupsSection from "./settings/BackupsSection";
 import LogsSection from "./settings/LogsSection";
 import MaintenanceSection from "./settings/MaintenanceSection";
 import OverviewSection from "./settings/OverviewSection";
+import RegistrySyncSection from "./settings/RegistrySyncSection";
 import SecuritySection from "./settings/SecuritySection";
 import StorageSection from "./settings/StorageSection";
 import SystemInfoSection from "./settings/SystemInfoSection";
@@ -74,6 +77,13 @@ export default function SettingsPage() {
       label: t("settings.nav.maintenance"),
       icon: <IconBroom />,
       shown: can("system.view"),
+    },
+    {
+      id: "registry",
+      label: t("settings.nav.registry"),
+      icon: <IconRefresh />,
+      // on hold: see features.ts
+      shown: REGISTRY_SYNC_ENABLED && can("system.view"),
     },
     {
       id: "logs",
@@ -153,6 +163,7 @@ export default function SettingsPage() {
             {active === "storage" && <StorageSection />}
             {active === "backups" && <BackupsSection />}
             {active === "maintenance" && <MaintenanceSection />}
+            {active === "registry" && <RegistrySyncSection />}
             {active === "logs" && <LogsSection />}
             {active === "security" && <SecuritySection />}
             {active === "system" && (

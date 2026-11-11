@@ -14,7 +14,7 @@ from app.models.schemas import (
     GroupPage,
     GroupQuery,
 )
-from app.services import arrivals, row_identity, sql_utils, view
+from app.services import arrivals, removals, row_identity, sql_utils, view
 
 # Rows sampled when guessing a column's display type. Only affects the T/# icon in the
 # grid header, so a cheap head-of-table sample is plenty.
@@ -47,6 +47,7 @@ def fetch_page(dataset_id: str, q: DataQuery) -> DataPage:
         search_alternatives=q.search_alternatives,
         filters=q.filters,
         only_recent=q.only_recent,
+        only_removed=q.only_removed,
     )
     key_cols = row_identity.key_columns(catalog.get_dataset(dataset_id) or {})
     table_sql = sql_utils.quote_ident(table)
@@ -86,6 +87,7 @@ def fetch_page(dataset_id: str, q: DataQuery) -> DataPage:
     # no row in a four-million-row table is recent, and every reader would otherwise pay
     # on every page to find that out.
     marks = arrivals.mark_page(dataset_id, key_cols, rows, columns)
+    gone = removals.mark_page(dataset_id, key_cols, rows, columns)
 
     return DataPage(
         columns=columns,
@@ -95,6 +97,7 @@ def fetch_page(dataset_id: str, q: DataQuery) -> DataPage:
         page_size=page_size,
         duration_ms=round(duration_ms, 1),
         arrivals=marks,
+        removed=gone,
     )
 
 
@@ -122,6 +125,7 @@ def fetch_groups(dataset_id: str, q: GroupQuery) -> GroupPage:
         search_alternatives=q.search_alternatives,
         filters=q.filters,
         only_recent=q.only_recent,
+        only_removed=q.only_removed,
     )
     table_sql = sql_utils.quote_ident(table)
     col_sql = sql_utils.quote_ident(q.column)

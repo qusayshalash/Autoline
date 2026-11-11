@@ -41,6 +41,8 @@ interface Props {
   searchColumns?: string[];
   /** the grid's "only the latest batch" toggle; absent where there is no such view */
   onlyRecent?: boolean;
+  /** the grid's "removed from the registry" toggle */
+  onlyRemoved?: boolean;
 }
 
 export default function FilterBuilder({
@@ -55,6 +57,7 @@ export default function FilterBuilder({
   search,
   searchColumns,
   onlyRecent = false,
+  onlyRemoved = false,
 }: Props) {
   const { t, i18n } = useTranslation();
   const isDialog = variant === "dialog";
@@ -126,6 +129,7 @@ export default function FilterBuilder({
                 search={search}
                 searchColumns={searchColumns}
                 onlyRecent={onlyRecent}
+                onlyRemoved={onlyRemoved}
               />
             ) : (
               <input

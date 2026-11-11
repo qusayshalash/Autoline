@@ -1449,3 +1449,73 @@
   font-size: 12px;
   word-break: break-word;
 }
+
+/* --- government registry sync ---
+   The preview is the one place the numbers are read before anything changes, so it is
+   laid out as a report: four counts first, then what changed and in which fields, then
+   the values the dictionary has not met yet, then the decision. */
+.registry-preview {
+  margin: 4px 22px 14px;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  display: grid;
+  gap: 16px;
+}
+.registry-preview-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; }
+.registry-preview-head span { color: var(--text-muted); font-size: 0.8rem; }
+
+.registry-numbers { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 640px) { .registry-numbers { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.registry-figure {
+  display: grid;
+  gap: 2px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--border-strong);
+}
+.registry-figure.new { border-top-color: var(--success); }
+.registry-figure.changed { border-top-color: var(--primary); }
+.registry-figure.removed { border-top-color: var(--danger); }
+.registry-figure.returned { border-top-color: var(--warning); }
+.registry-figure-value { font-size: 1.35rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.registry-figure-label { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; }
+
+.registry-block { display: grid; gap: 8px; }
+.registry-block h3 { margin: 0; font-size: 0.85rem; font-weight: 700; }
+.registry-note { margin: 0; font-size: 0.78rem; color: var(--text-muted); }
+
+.registry-bars { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.registry-bars li { display: grid; grid-template-columns: minmax(110px, 180px) 1fr auto; align-items: center; gap: 10px; font-size: 0.82rem; }
+.registry-bar-track { height: 8px; border-radius: 999px; background: var(--surface-muted); overflow: hidden; }
+.registry-bar-fill { display: block; height: 100%; border-radius: inherit; background: var(--primary); }
+.registry-bar-value { font-variant-numeric: tabular-nums; color: var(--text-muted); min-width: 5ch; text-align: end; }
+
+.registry-values { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; max-height: 260px; overflow-y: auto; }
+.registry-values li {
+  display: grid;
+  grid-template-columns: minmax(90px, 140px) minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-size: 0.82rem;
+}
+.registry-values li.untranslated { box-shadow: inset 3px 0 0 var(--warning); }
+:root[dir="rtl"] .registry-values li.untranslated,
+[dir="rtl"] .registry-values li.untranslated { box-shadow: inset -3px 0 0 var(--warning); }
+.registry-value-col { color: var(--text-muted); }
+.registry-value { font-weight: 700; }
+.registry-value-tr { color: var(--text-muted); }
+.registry-value-flag { font-size: 0.72rem; font-weight: 700; color: var(--warning); background: var(--warning-soft); padding: 1px 8px; border-radius: 999px; }
+.registry-value-count { font-variant-numeric: tabular-nums; color: var(--text-muted); }
+
+.registry-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.registry-check { display: flex; align-items: flex-start; gap: 8px; font-size: 0.84rem; font-weight: 600; cursor: pointer; max-width: 60ch; }
+.registry-check small { display: block; font-weight: 400; color: var(--text-muted); margin-top: 2px; }
+.registry-buttons { display: flex; gap: 8px; }
+.registry-source { font-size: 0.8rem; color: var(--primary); }

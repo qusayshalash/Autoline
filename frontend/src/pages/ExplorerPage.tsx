@@ -3,9 +3,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { formatNumber } from "../data/numbers";
+import { RECORD_CARD_ENABLED } from "../features";
 
 import { useConfirm } from "../components/ConfirmProvider";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 
 import {
   apiErrorMessage,
@@ -18,8 +19,11 @@ import {
   fetchColumns,
   fetchData,
   fetchGroups,
+  fetchRemovals,
   getDataset,
   getJob,
+  getSavedView,
+  recordPath,
   getStats,
   requestExport,
   revertCorrection,
@@ -27,6 +31,8 @@ import {
   type ColumnKind,
   type ExportRequest,
   type FilterRule,
+  type SavedView,
+  type ViewState,
 } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
 import ColumnHeaderMenu from "../components/ColumnHeaderMenu";
@@ -37,9 +43,11 @@ import EmptyState from "../components/EmptyState";
 import ErrorBanner from "../components/ErrorBanner";
 import FilterDialog from "../components/FilterDialog";
 import ArrivalMark from "../components/ArrivalMark";
+import RemovedMark from "../components/RemovedMark";
 import CorrectionMark from "../components/CorrectionMark";
 import EditableCell from "../components/EditableCell";
 import RecordKeyDialog from "../components/RecordKeyDialog";
+import SavedViewsMenu, { viewStateKey } from "../components/SavedViewsMenu";
 import GroupDialog from "../components/GroupDialog";
 import GroupedGrid from "../components/GroupedGrid";
 import LoadingState from "../components/LoadingState";
@@ -105,6 +113,7 @@ export default function ExplorerPage() {
   const n = (value: number) => value.toLocaleString(i18n.language);
   const { datasetId = "" } = useParams();
   const { can } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const canExport = can("datasets.export");
   const canDeleteColumn = can("datasets.clean");
   const canEdit = can("datasets.edit");
@@ -197,6 +206,7 @@ export default function ExplorerPage() {
     }
   }, [datasetId, translateChoice]);
   const [onlyRecent, setOnlyRecent] = useState(false);
+  const [onlyRemoved, setOnlyRemoved] = useState(false);
   const [panel, setPanel] = useState<Panel>(null);
   const [filterOpen, setFilterOpen] = useState(false);
   const [groupBy, setGroupBy] = useState<string[]>([]);
@@ -228,7 +238,7 @@ export default function ExplorerPage() {
   const { data: groupPage, isFetching: groupsFetching } = useQuery({
     queryKey: [
       "group", datasetId, source, groupBy[0], filters, search, searchColumns, page, pageSize,
-      onlyRecent,
+      onlyRecent, onlyRemoved,
     ],
     queryFn: () =>
       fetchGroups(datasetId, {
@@ -240,6 +250,7 @@ export default function ExplorerPage() {
         search_columns: searchColumns,
         source,
         only_recent: onlyRecent,
+        only_removed: onlyRemoved,
       }),
     enabled: isGrouped,
     placeholderData: (prev) => prev,
@@ -252,7 +263,7 @@ export default function ExplorerPage() {
   } = useQuery({
     queryKey: [
       "data", datasetId, source, search, searchColumns, filters, sortBy, sortDir, page,
-      pageSize, onlyRecent,
+      pageSize, onlyRecent, onlyRemoved,
     ],
     queryFn: () =>
       fetchData(datasetId, {
@@ -265,6 +276,7 @@ export default function ExplorerPage() {
         filters,
         source,
         only_recent: onlyRecent,
+        only_removed: onlyRemoved,
       }),
     placeholderData: (prev) => prev,
   });
@@ -282,6 +294,82 @@ export default function ExplorerPage() {
   });
   const hasArrivals = !!arrivals && arrivals.new + arrivals.updated > 0;
 
+  // records the government registry no longer lists (see the registry sync in settings)
+  const { data: removedSummary } = useQuery({
+    queryKey: ["removals", datasetId],
+    queryFn: () => fetchRemovals(datasetId),
+    staleTime: 60 * 1000,
+  });
+
+  /* ---- saved views -------------------------------------------------------------
+   *
+   * A view is opened from the menu or from its link (?view=...). The link is applied
+   * once the batch summary is in: the view's "only the latest batch" would otherwise be
+   * switched off by the check that guards it, before that check knew there was a batch.
+   */
+  const [activeView, setActiveView] = useState<SavedView | null>(null);
+  const currentViewState: ViewState = {
+    source,
+    search: search || null,
+    search_columns: searchColumns,
+    filters,
+    sort_by: sortBy,
+    sort_dir: sortDir,
+    group_by: groupBy,
+    only_recent: onlyRecent,
+    only_removed: onlyRemoved,
+  };
+  const viewModified =
+    !!activeView && viewStateKey(activeView.state) !== viewStateKey(currentViewState);
+
+  const linkedViewId = searchParams.get("view");
+  const appliedViewId = useRef<string | null>(null);
+  const { data: linkedView, error: linkedViewError } = useQuery({
+    queryKey: ["view", datasetId, linkedViewId],
+    queryFn: () => getSavedView(datasetId, linkedViewId!),
+    enabled: !!linkedViewId,
+    retry: false,
+  });
+  const arrivalsKnown = arrivals !== undefined && removedSummary !== undefined;
+
+  function rememberActive(view: SavedView | null) {
+    setActiveView(view);
+    appliedViewId.current = view?.id ?? null;
+    if (view) qc.setQueryData(["view", datasetId, view.id], view);
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (view) next.set("view", view.id);
+        else next.delete("view");
+        return next;
+      },
+      { replace: true }
+    );
+  }
+
+  function applyView(view: SavedView) {
+    const v = view.state;
+    setSource(v.source);
+    setSearch(v.search ?? "");
+    setSearchColumns(v.search_columns);
+    setFilters(v.filters);
+    setSortBy(v.sort_by);
+    setSortDir(v.sort_dir);
+    setGroupBy(v.group_by);
+    setOnlyRecent(v.only_recent);
+    setOnlyRemoved(v.only_removed ?? false);
+    setPage(1);
+    resetExport();
+    rememberActive(view);
+  }
+
+  useEffect(() => {
+    if (!linkedView || !arrivalsKnown) return;
+    if (appliedViewId.current === linkedView.id) return;
+    applyView(linkedView);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [linkedView, arrivalsKnown]);
+
 
   const [exportError, setExportError] = useState<string | null>(null);
 
@@ -297,6 +385,7 @@ export default function ExplorerPage() {
         sort_by: exportScope === "current_view" ? sortBy : null,
         sort_dir: sortDir,
         only_recent: exportScope === "current_view" && onlyRecent,
+        only_removed: exportScope === "current_view" && onlyRemoved,
       }),
     onSuccess: (job) => {
       setExportJobId(job.id);
@@ -343,6 +432,8 @@ export default function ExplorerPage() {
   // present, so this never flickers the screen into read-only while a page is loading.
   const keyInView = !page_ || keyColumns.every((c) => page_.columns.includes(c));
   const canCorrect = canEdit && keyColumns.length > 0 && keyInView && !isGrouped;
+  // a record is opened by its key, so the card needs the key in the rows on screen
+  const canOpenRecord = RECORD_CARD_ENABLED && keyColumns.length > 0 && keyInView;
   // "only the latest batch" is answered through the key too, so it has the same
   // condition: with the key gone from this table the answer would always be no rows
   const canShowRecent = hasArrivals && keyInView;
@@ -352,6 +443,13 @@ export default function ExplorerPage() {
   useEffect(() => {
     if (!canShowRecent && onlyRecent) setOnlyRecent(false);
   }, [canShowRecent, onlyRecent]);
+
+  // Records the government registry no longer lists (see the registry sync in settings).
+  // Offered, like the batch filter, only when there are some and the key is on screen.
+  const canShowRemoved = !!removedSummary && removedSummary.count > 0 && keyInView;
+  useEffect(() => {
+    if (removedSummary !== undefined && !canShowRemoved && onlyRemoved) setOnlyRemoved(false);
+  }, [removedSummary, canShowRemoved, onlyRemoved]);
 
   // Fetched once per dataset rather than per page: it is small, it changes only when
   // somebody edits, and joining it server-side would cost every reader a join over
@@ -385,7 +483,7 @@ export default function ExplorerPage() {
   }, [corrections]);
 
   // The marks column holds both kinds of mark, and exists while either has anything to say.
-  const showRowMarks = canShowRecent || correctedRows.size > 0;
+  const showRowMarks = canShowRecent || canShowRemoved || correctedRows.size > 0;
 
   function keyOf(row: unknown[], columns: string[]): string[] {
     return keyColumns.map((c) => String(row[columns.indexOf(c)] ?? ""));
@@ -562,8 +660,11 @@ export default function ExplorerPage() {
     setColumnOrder(null);
     setTranslateChoice({});
     setGroupBy([]);
+    setOnlyRecent(false);
+    setOnlyRemoved(false);
     setPage(1);
     resetExport();
+    if (activeView || linkedViewId) rememberActive(null);
   }
 
   function togglePanel(next: Panel) {
@@ -633,6 +734,9 @@ export default function ExplorerPage() {
     isGrouped ||
     Object.keys(columnWidths).length > 0 ||
     columnOrder !== null ||
+    onlyRecent ||
+    onlyRemoved ||
+    !!activeView ||
     page !== 1;
 
   return (
@@ -664,6 +768,14 @@ export default function ExplorerPage() {
           <IconReset />
           {t("sheet.reset")}
         </button>
+        <SavedViewsMenu
+          datasetId={datasetId}
+          current={currentViewState}
+          activeView={activeView}
+          modified={viewModified}
+          onApply={applyView}
+          onActiveChanged={rememberActive}
+        />
         <button
           type="button"
           ref={columnsBtnRef}
@@ -726,6 +838,21 @@ export default function ExplorerPage() {
             <span className="arrival-dot new" aria-hidden="true" />
             {onlyRecent ? t("arrivals.show_all") : t("arrivals.only_recent")}
             <span className="sheet-tool-count">{n(arrivals.new + arrivals.updated)}</span>
+          </button>
+        )}
+        {canShowRemoved && (
+          <button
+            type="button"
+            className={`sheet-tool arrivals-tool${onlyRemoved ? " active" : ""}`}
+            onClick={() => {
+              setOnlyRemoved((on) => !on);
+              setPage(1);
+            }}
+            title={t("registry.removed_tool_hint")}
+          >
+            <span className="arrival-dot removed" aria-hidden="true" />
+            {onlyRemoved ? t("arrivals.show_all") : t("registry.removed_tool")}
+            <span className="sheet-tool-count">{n(removedSummary.count)}</span>
           </button>
         )}
         {canEdit && (
@@ -942,6 +1069,7 @@ export default function ExplorerPage() {
         search={search}
         searchColumns={searchColumns}
         onlyRecent={onlyRecent}
+        onlyRemoved={onlyRemoved}
         onApply={(next) => {
           setFilters(next);
           setPage(1);
@@ -980,6 +1108,9 @@ export default function ExplorerPage() {
       )}
 
       <ErrorBanner message={deleteColumnError} />
+      {linkedViewError && (
+        <ErrorBanner message={apiErrorMessage(linkedViewError, t("common.error_generic"))} />
+      )}
       <ErrorBanner message={editError} />
       {canEdit && keyColumns.length > 0 && !keyInView && (
         <p className="sheet-note" role="note">
@@ -1088,6 +1219,7 @@ export default function ExplorerPage() {
                         search={search}
                         searchColumns={searchColumns}
                         onlyRecent={onlyRecent}
+                        onlyRemoved={onlyRemoved}
                         onFiltersChange={(f) => {
                           setFilters(f);
                           setPage(1);
@@ -1115,7 +1247,21 @@ export default function ExplorerPage() {
               {page_.rows.map((row, i) => (
                 <tr key={i}>
                   {showRowNumbers && (
-                    <td className="rownum-col">{formatNumber(firstRowIndex + i, i18n.language)}</td>
+                    <td className="rownum-col">
+                      {canOpenRecord ? (
+                        // the row number opens the record's card: every row has one, and it
+                        // is the one cell that is about the row rather than about a value
+                        <Link
+                          to={recordPath(datasetId, keyOf(row, allColumns))}
+                          className="rownum-link"
+                          title={t("record.open")}
+                        >
+                          {formatNumber(firstRowIndex + i, i18n.language)}
+                        </Link>
+                      ) : (
+                        formatNumber(firstRowIndex + i, i18n.language)
+                      )}
+                    </td>
                   )}
                   {showRowMarks && (
                     <td className="arrival-col">
@@ -1126,6 +1272,7 @@ export default function ExplorerPage() {
                             when={arrivals?.latest_at}
                           />
                         )}
+                        {canShowRemoved && page_.removed?.[i] && <RemovedMark />}
                         {correctedRows.size > 0 && keyColumns.length > 0 && (() => {
                           const count = correctedRows.get(
                             JSON.stringify(keyOf(row, allColumns))

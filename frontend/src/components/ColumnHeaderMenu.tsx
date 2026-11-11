@@ -27,6 +27,8 @@ interface Props {
   /** the grid's "only the latest batch" toggle - with it on and this left out, the
    *  list counted the whole table while the grid showed 400 rows */
   onlyRecent: boolean;
+  /** the grid's "removed from the registry" toggle */
+  onlyRemoved?: boolean;
   onHide: () => void;
   canDelete: boolean;
   onDeleteColumn: () => void;
@@ -49,6 +51,7 @@ export default function ColumnHeaderMenu({
   search: gridSearch,
   searchColumns,
   onlyRecent,
+  onlyRemoved = false,
   onHide,
   canDelete,
   onDeleteColumn,
@@ -176,6 +179,7 @@ export default function ColumnHeaderMenu({
       searchColumns,
       JSON.stringify(otherFilters),
       onlyRecent,
+      onlyRemoved,
     ],
     queryFn: () =>
       fetchGroups(datasetId, {
@@ -189,6 +193,7 @@ export default function ColumnHeaderMenu({
         value_search: debouncedSearch || null,
         filters: otherFilters,
         only_recent: onlyRecent,
+        only_removed: onlyRemoved,
       }),
     enabled: open,
   });

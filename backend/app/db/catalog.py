@@ -163,6 +163,23 @@ def _init_schema(conn: duckdb.DuckDBPyConnection) -> None:
         )
         """
     )
+    # A search with its filters and sort, kept under a name. Private to its owner unless
+    # shared, when everyone who can read the dataset sees it in their list.
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS saved_views (
+            id VARCHAR PRIMARY KEY,
+            dataset_id VARCHAR,
+            owner_id VARCHAR,
+            owner_username VARCHAR,
+            name VARCHAR,
+            state_json VARCHAR,
+            shared BOOLEAN,
+            created_at TIMESTAMP,
+            updated_at TIMESTAMP
+        )
+        """
+    )
     _migrate_users(conn)
     _migrate_datasets(conn)
     _migrate_activity_log(conn)
@@ -330,6 +347,7 @@ def delete_dataset(dataset_id: str) -> None:
         conn.execute("DELETE FROM datasets WHERE id = ?", [dataset_id])
         conn.execute("DELETE FROM jobs WHERE dataset_id = ?", [dataset_id])
         conn.execute("DELETE FROM cleaning_operations WHERE dataset_id = ?", [dataset_id])
+        conn.execute("DELETE FROM saved_views WHERE dataset_id = ?", [dataset_id])
 
 
 # ---- jobs ----
@@ -634,6 +652,11 @@ def delete_user(user_id: str) -> None:
     conn = _connection()
     with _lock:
         conn.execute("DELETE FROM users WHERE id = ?", [user_id])
+        # a view only they could see goes with them; one they shared stays, because other
+        # people may be opening it, and it still carries their name
+        conn.execute(
+            "DELETE FROM saved_views WHERE owner_id = ? AND NOT shared", [user_id]
+        )
 
 
 def count_active_admins(exclude_user_id: Optional[str] = None) -> int:

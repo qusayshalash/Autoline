@@ -222,3 +222,15 @@ def _replay_locked(dataset_id: str, key_cols: list[str]) -> int:
             [column],
         ).fetchone()[0]
     return applied
+
+
+def for_row(dataset_id: str, row_key: str) -> list[dict]:
+    """Every correction to one record, newest first."""
+    if not sql_utils.table_exists(dataset_id, TABLE):
+        return []
+    cur = datasets.cursor(dataset_id)
+    rows = cur.execute(
+        f"SELECT * FROM {TABLE} WHERE row_key = ? ORDER BY edited_at DESC", [row_key]
+    ).fetchall()
+    columns = [d[0] for d in cur.description]
+    return [dict(zip(columns, r)) for r in rows]

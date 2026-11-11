@@ -19,12 +19,16 @@ from app.routers import (
     datasets,
     export,
     jobs,
+    records,
+    registry_sync,
     roles,
     rows,
     statistics,
     users,
+    views,
 )
 from app.services import backup as backup_service
+from app.services import registry_sync as registry_sync_service
 from app.services import housekeeping
 from app.services import restore as restore_service
 from app.services import storage
@@ -129,8 +133,11 @@ app.include_router(jobs.router)
 app.include_router(cleaning.router)
 app.include_router(data.router)
 app.include_router(rows.router)
+app.include_router(records.router)
+app.include_router(registry_sync.router)
 app.include_router(statistics.router)
 app.include_router(export.router)
+app.include_router(views.router)
 
 
 @app.get("/api/health")
@@ -178,6 +185,31 @@ def _sweep_job_history() -> None:
         print(f"[housekeeping] sweep failed: {exc}")
 
 
+def _registry_sync_if_due() -> None:
+    """The nightly registry sync, when it is switched on and has not run today.
+
+    Waits its turn rather than competing: a sync somebody started by hand holds the same
+    lock, and a restore must never have a sync writing into the files it is replacing.
+    """
+    if restore_service.is_active():
+        return
+    try:
+        if not registry_sync_service.due_today():
+            return
+    except Exception as exc:  # noqa: BLE001
+        print(f"[registry-sync] schedule check failed: {exc}")
+        return
+    if not registry_sync_service.RUN_LOCK.acquire(blocking=False):
+        return
+    try:
+        outcome = registry_sync_service.run_scheduled()
+        print(f"[registry-sync] nightly run: {outcome}")
+    except Exception as exc:  # noqa: BLE001 - a failed sync must not stop the server
+        print(f"[registry-sync] nightly run failed: {exc}")
+    finally:
+        registry_sync_service.RUN_LOCK.release()
+
+
 def _start_housekeeping() -> None:
     # The test harness sets this. Both of these write to the catalog on their own
     # schedule, which under a test suite means a thread deleting rows while an assertion
@@ -190,6 +222,7 @@ def _start_housekeeping() -> None:
         while True:
             _backup_if_due()
             _sweep_job_history()
+            _registry_sync_if_due()
             time.sleep(_SCHEDULE_CHECK_SECONDS)
 
     # a daemon thread: the schedule must never be the reason the process refuses to exit
