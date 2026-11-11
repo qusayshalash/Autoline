@@ -60,7 +60,10 @@ export const BRANDS: Brand[] = [
   { slug: "geely", ar: "جيلي", en: "Geely", color: "#1f4e79", tokens: ["גילי", "GEELY"] },
   { slug: "chrysler", ar: "كرايسلر", en: "Chrysler", color: "#1a3a5c", tokens: ["קרייזלר", "CHRYSLER"] },
   { slug: "jeep", ar: "جيب", en: "Jeep", color: "#2f4f2f", tokens: ["ג'יפ", "ג׳יפ", "JEEP"] },
-  { slug: "jaguar", ar: "جاكوار", en: "Jaguar", color: "#1c3f33", tokens: ["ג'אקו", "ג׳אקו", "JAGUAR"] },
+  { slug: "jaguar", ar: "جاكوار", en: "Jaguar", color: "#1c3f33", tokens: ["יגואר", "JAGUAR"] },
+  // Chery's off-road brand. Its Hebrew name was once listed as Jaguar's, which put some
+  // forty thousand Chinese SUVs on the Jaguar card.
+  { slug: "jaecoo", ar: "جايكو", en: "Jaecoo", color: "#2f3b36", tokens: ["ג'אקו", "ג׳אקו", "JAECOO"] },
   { slug: "jac", ar: "جاك", en: "JAC", color: "#b02a30", tokens: ["ג'אק", "ג׳אק", "JAC"] },
   { slug: "maruti", ar: "ماروتي", en: "Maruti", color: "#0b4f8a", tokens: ["מרוטי", "MARUTI"] },
   { slug: "xpeng", ar: "إكسبنغ", en: "Xpeng", color: "#0f5c5c", tokens: ["אקספנג", "XPENG"] },

@@ -63,6 +63,20 @@ const PHRASES: Record<string, Term> = {
   'דימלרקריזלר-אס': { ar: "دايملر كرايسلر-النمسا", en: "DaimlerChrysler-Austria" },
   'פיאט/מדייר סוז': { ar: "فيات/ماجيار سوزوكي", en: "Fiat/Magyar Suzuki" },
 
+  // The registry's spellings since its November 2026 clean-up, found by the first sync
+  // against data.gov.il. Multi-word names it now spells differently (BMW-style: each
+  // token alone means nothing), and values whose last part is a two-letter cut-off that
+  // would be unsafe as a word of its own - "אי" is "island", "אנ" is nothing.
+  'אף איי דבליו': { ar: "إف إيه دبليو", en: "FAW" },
+  'אס דבליו אמ': { ar: "إس دبليو إم", en: "SWM" },
+  'דבליו אם איי': { ar: "دبليو إم آي", en: "WMI" },
+  "קיי ג'י מובילי": { ar: "كي جي موبيليتي", en: "KG Mobility" },
+  "ג'יי איי סי": { ar: "جاك", en: "JAC" },
+  'אלפא רומיאו_אי': { ar: "ألفا روميو_إيطاليا", en: "Alfa Romeo_Italy" },
+  'אלפא רומיאו_פו': { ar: "ألفا روميو_بولندا", en: "Alfa Romeo_Poland" },
+  'אסטון מרטין אנ': { ar: "أستون مارتن إنجلترا", en: "Aston Martin England" },
+  'דימלרקריזלר אס': { ar: "دايملر كرايسلر النمسا", en: "DaimlerChrysler Austria" },
+
   // multi-word colour values that don't read well token by token
   'לא ידוע': { ar: "غير معروف", en: "Unknown" },
   'שן פיל': { ar: "عاجي", en: "Ivory" },
@@ -117,6 +131,14 @@ const COUNTRIES: Record<string, Term> = {
   'פורטוגל': { ar: "البرتغال", en: "Portugal" },
   'קנדה': { ar: "كندا", en: "Canada" },
   'ד.אפ': { ar: "جنوب أفريقيا", en: "South Africa" },
+  // more cut-offs, from the registry's November 2026 spellings
+  'קורי': { ar: "كوريا", en: "Korea" },
+  'קוריא': { ar: "كوريا", en: "Korea" },
+  'אפרי': { ar: "أفريقيا", en: "Africa" },
+  'איטל': { ar: "إيطاليا", en: "Italy" },
+  'אנגל': { ar: "إنجلترا", en: "England" },
+  'ארה': { ar: "أمريكا", en: "USA" },
+  'טורק': { ar: "تركيا", en: "Turkey" },
 };
 
 const WORDS: Record<string, Term> = {
@@ -214,8 +236,20 @@ const WORDS: Record<string, Term> = {
   'דאציה': { ar: "داتشيا", en: "Dacia" },
   'גילי': { ar: "جيلي", en: "Geely" },
   'קרייזלר': { ar: "كرايسلر", en: "Chrysler" },
+  'דיימלר': { ar: "دايملر", en: "Daimler" },
+  // the registry's newer spellings of makes it already had
+  "מ.ג'י": { ar: "إم جي", en: "MG" },
+  "ג'ילי": { ar: "جيلي", en: "Geely" },
+  "דאצ'יה": { ar: "داتشيا", en: "Dacia" },
+  "אוונג'ר": { ar: "أفنجر", en: "Avenger" },
+  'גי.איי.סי': { ar: "جي إيه سي", en: "GAC" },
+  "ג'י.אם.סי": { ar: "جي إم سي", en: "GMC" },
+  "ג'י.אמ.": { ar: "جي إم", en: "GM" },
+  'מקלארן': { ar: "ماكلارين", en: "McLaren" },
   "ג'יפ": { ar: "جيب", en: "Jeep" },
-  "ג'אקו": { ar: "جاكوار", en: "Jaguar" },
+  // Jaecoo, Chery's off-road brand - not Jaguar, which the registry writes יגואר. Read
+  // as Jaguar since the first commit; the trade names (JAECOO 7, JAECOO 5) settle it.
+  "ג'אקו": { ar: "جايكو", en: "Jaecoo" },
   "ג'אק": { ar: "جاك", en: "JAC" },
   'מרוטי': { ar: "ماروتي", en: "Maruti" },
   'אקספנג': { ar: "إكسبنغ", en: "Xpeng" },
@@ -342,6 +376,13 @@ const WORDS: Record<string, Term> = {
   'גמס': { ar: "جي إم سي", en: "GMC" },
   'אחר': { ar: "أخرى", en: "Other" },
 };
+
+/**
+ * The registry columns this dictionary is written for: their values come from short
+ * fixed lists, so a value it does not know is a gap worth filling. Model names, trims
+ * and tyre sizes are free text that is never translated, and a new one there is not.
+ */
+export const DICTIONARY_COLUMNS = new Set(["tozeret_nm", "tzeva_rechev", "sug_delek_nm", "baalut"]);
 
 const HEBREW_RE = /[֐-׿]/;
 
