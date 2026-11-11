@@ -54,6 +54,18 @@ def set_window_days(days: int) -> int:
     return days
 
 
+def _cutoff():
+    """The oldest arrival still worth pointing at.
+
+    Every reader below asks with this, rather than trusting that the table holds only
+    recent rows. The sweep keeps the table small, but it runs when a batch lands - so on
+    a dataset nothing has been appended to since, a mark used to stay for ever, and the
+    first sync of a three-month-old file left 2.7 million "recent" rows on screen with no
+    end. Asked at read time, a mark goes when its window does, whatever arrives or not.
+    """
+    return clocks.now() - timedelta(days=window_days())
+
+
 def ensure_table(dataset_id: str) -> None:
     """Created on first append rather than at startup: most datasets never take one."""
     cur = datasets.cursor(dataset_id)
@@ -125,7 +137,8 @@ def summary(dataset_id: str) -> Optional[dict]:
         return None
     cur = datasets.cursor(dataset_id)
     rows = cur.execute(
-        f"SELECT kind, COUNT(*), MAX(added_at) FROM {TABLE} GROUP BY kind"
+        f"SELECT kind, COUNT(*), MAX(added_at) FROM {TABLE} WHERE added_at >= ? GROUP BY kind",
+        [_cutoff()],
     ).fetchall()
     if not rows:
         return None
@@ -160,7 +173,8 @@ def mark_page(dataset_id: str, key_columns: list[str], rows: list, columns: list
     cur = datasets.cursor(dataset_id)
     found = dict(
         cur.execute(
-            f"SELECT row_key, kind FROM {TABLE} WHERE row_key IN ({placeholders})", keys
+            f"SELECT row_key, kind FROM {TABLE} WHERE added_at >= ? AND row_key IN ({placeholders})",
+            [_cutoff(), *keys],
         ).fetchall()
     )
     return [found.get(key) for key in keys]
@@ -176,7 +190,13 @@ def recent_filter_sql(dataset_id: str, key_columns: list[str]) -> Optional[str]:
     if not key_columns or not sql_utils.table_exists(dataset_id, TABLE):
         return None
     key_expr = row_identity.key_expression(key_columns)
-    return f"{key_expr} IN (SELECT row_key FROM {TABLE})"
+    # a literal rather than a parameter: the fragment is spliced into queries whose
+    # parameters are numbered elsewhere. It is a datetime this module computed, never input.
+    cutoff = _cutoff().strftime("%Y-%m-%d %H:%M:%S")
+    return (
+        f"{key_expr} IN (SELECT row_key FROM {TABLE} "
+        f"WHERE added_at >= TIMESTAMP '{cutoff}')"
+    )
 
 
 def for_row(dataset_id: str, row_key: str) -> Optional[dict]:
@@ -185,6 +205,7 @@ def for_row(dataset_id: str, row_key: str) -> Optional[dict]:
         return None
     cur = datasets.cursor(dataset_id)
     found = cur.execute(
-        f"SELECT kind, added_at FROM {TABLE} WHERE row_key = ?", [row_key]
+        f"SELECT kind, added_at FROM {TABLE} WHERE row_key = ? AND added_at >= ?",
+        [row_key, _cutoff()],
     ).fetchone()
     return {"kind": found[0], "added_at": found[1]} if found else None

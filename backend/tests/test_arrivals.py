@@ -166,6 +166,37 @@ def test_the_mark_expires(admin, fleet):
     assert marks["00099777"] == "new"
 
 
+def test_the_mark_expires_with_no_batch_after_it(admin, fleet):
+    """Found on the first registry sync: the sweep ran only when a batch landed, so on a
+    file nothing else was appended to, 2.7 million marks stayed on screen for good. A
+    mark past its window has to stop counting on its own - in the summary, on the page,
+    in the filter - with nothing arriving to clear it."""
+    from datetime import timedelta
+
+    from app.db.connection import datasets
+    from app.services import arrivals
+
+    assert append(admin, fleet, csv_bytes(["00099888,SKODA,2023"])).status_code == 200
+    assert admin.get(f"/api/datasets/{fleet}/arrivals").json() is not None
+
+    assert admin.put("/api/datasets/arrivals/window", json={"days": 1}).status_code == 200
+    with datasets.write_lock(fleet):
+        datasets.cursor(fleet).execute(
+            f"UPDATE {arrivals.TABLE} SET added_at = ?",
+            [arrivals.clocks.now() - timedelta(days=2)],
+        )
+
+    # no append: nothing has swept the table, and the rows are still in it
+    assert admin.get(f"/api/datasets/{fleet}/arrivals").json() is None
+    body = page(admin, fleet, page_size=200)
+    assert not any(body["arrivals"]), "no row is marked once its window has passed"
+    assert page(admin, fleet, only_recent=True)["total_rows"] == 0
+
+    # widening the window brings them back: the marks were hidden, not lost
+    assert admin.put("/api/datasets/arrivals/window", json={"days": 7}).status_code == 200
+    assert admin.get(f"/api/datasets/{fleet}/arrivals").json() is not None
+
+
 def test_the_window_has_a_floor_and_a_ceiling(admin):
     assert admin.put("/api/datasets/arrivals/window", json={"days": 0}).status_code == 422
     assert admin.put("/api/datasets/arrivals/window", json={"days": 400}).status_code == 422
