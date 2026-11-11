@@ -12,10 +12,12 @@ import {
   IconBroom,
   IconHardDrive,
   IconInfo,
+  IconLock,
   IconOverview,
   IconRefresh,
   IconShield,
 } from "../../components/admin/AdminIcons";
+import { EmptyState, SettingsCard } from "../../components/admin/SettingsKit";
 import { Toaster } from "../../components/admin/Toaster";
 import QueryState from "../../components/QueryState";
 import BackupsSection from "./settings/BackupsSection";
@@ -58,7 +60,14 @@ export default function SettingsPage() {
     [params, setParams]
   );
 
-  const items: { id: SectionId; label: string; icon: ReactNode; shown: boolean }[] = [
+  const items: {
+    id: SectionId;
+    label: string;
+    icon: ReactNode;
+    shown: boolean;
+    /** listed, but opens a "coming soon" card instead of the section */
+    locked?: boolean;
+  }[] = [
     { id: "overview", label: t("settings.nav.overview"), icon: <IconOverview />, shown: true },
     {
       id: "storage",
@@ -82,8 +91,9 @@ export default function SettingsPage() {
       id: "registry",
       label: t("settings.nav.registry"),
       icon: <IconRefresh />,
+      shown: can("system.view"),
       // on hold: see features.ts
-      shown: REGISTRY_SYNC_ENABLED && can("system.view"),
+      locked: !REGISTRY_SYNC_ENABLED,
     },
     {
       id: "logs",
@@ -131,12 +141,19 @@ export default function SettingsPage() {
               <button
                 key={item.id}
                 type="button"
-                className={item.id === active ? "active" : ""}
+                className={[item.id === active ? "active" : "", item.locked ? "locked" : ""]
+                  .filter(Boolean)
+                  .join(" ")}
                 aria-current={item.id === active ? "page" : undefined}
                 onClick={() => go(item.id)}
               >
                 {item.icon}
                 {item.label}
+                {item.locked && (
+                  <span className="settings-nav-lock" aria-label={t("catalog.coming_soon") ?? ""}>
+                    <IconLock />
+                  </span>
+                )}
               </button>
             ))}
           </nav>
@@ -163,7 +180,18 @@ export default function SettingsPage() {
             {active === "storage" && <StorageSection />}
             {active === "backups" && <BackupsSection />}
             {active === "maintenance" && <MaintenanceSection />}
-            {active === "registry" && <RegistrySyncSection />}
+            {active === "registry" &&
+              (REGISTRY_SYNC_ENABLED ? (
+                <RegistrySyncSection />
+              ) : (
+                <SettingsCard icon={<IconRefresh />} title={t("registry.title")} description={t("registry.desc")}>
+                  <EmptyState
+                    icon={<IconLock />}
+                    title={t("catalog.coming_soon")}
+                    description={t("catalog.coming_soon_help")}
+                  />
+                </SettingsCard>
+              ))}
             {active === "logs" && <LogsSection />}
             {active === "security" && <SecuritySection />}
             {active === "system" && (

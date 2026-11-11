@@ -1519,3 +1519,8 @@
 .registry-check small { display: block; font-weight: 400; color: var(--text-muted); margin-top: 2px; }
 .registry-buttons { display: flex; gap: 8px; }
 .registry-source { font-size: 0.8rem; color: var(--primary); }
+
+/* a section that is listed but not open yet: dimmed, with a lock at the far end */
+.settings-nav button.locked { opacity: 0.6; }
+.settings-nav button.locked.active { opacity: 0.85; }
+.settings-nav-lock { display: inline-flex; margin-inline-start: auto; }
