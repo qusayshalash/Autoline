@@ -1239,28 +1239,7 @@
     "not_found_chassis": "Chassis number {{chassis}} is not in any of the files.",
     "several_one": "One vehicle found",
     "several_other": "{{count}} vehicles share this number - all of them are shown below",
-    "plate": "Plate number",
-    "unnamed": "Vehicle",
-    "licence_valid": "Licence valid until {{date}}",
-    "licence_expired": "Licence expired on {{date}}",
-    "photo_caption": "A representative photo of the model, not of this vehicle.",
-    "photo_source": "Source: Wikipedia",
-    "photo_loading": "Looking for a photo of the model…",
-    "photo_none": "No photo for this model.",
-    "from_file": "From file: {{name}}",
-    "section": {
-      "vehicle": "Vehicle",
-      "licence": "Licence and inspection",
-      "engine": "Engine, fuel and emissions",
-      "tyres": "Tyres",
-      "registration": "Registration and numbers",
-      "other": "Other information"
-    },
-    "kind": {
-      "P": "Private",
-      "M": "Commercial"
-    },
-    "photo_caption_generation": "A photo of this model's {{years}} generation, not of this vehicle. The colour may differ."
+    "from_file": "From file: {{name}}"
   },
   "views": {
     "button": "Views",

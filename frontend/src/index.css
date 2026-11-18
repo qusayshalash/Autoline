@@ -3512,7 +3512,9 @@ td:hover > .cell-edit-wrap > .cell-revert,
 
 /* Six tiles: one row of six, two of three, or three of two - never five and an orphan.
    Sized by the page's own width, which the sidebar changes, not the window's. */
-.record-page { container-type: inline-size; }
+/* The card is its own container: the record page and the vehicle catalog both hold it,
+   at different widths. */
+.record-card { container-type: inline-size; display: grid; gap: 1.25rem; }
 .rc-glance {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

@@ -121,8 +121,6 @@ SITE_ADDRESS=:80
 PUBLIC_ORIGIN=http://203.0.113.10
 ```
 
-وإن أردت صور الكتالوج لاحقًا، ضع في `CATALOG_PHOTO_CONTACT` عنوان موقعك أو بريدًا تختاره.
-
 احفظ في nano بـ `Ctrl+O` ثم `Enter`، واخرج بـ `Ctrl+X`.
 
 ## 6. التشغيل

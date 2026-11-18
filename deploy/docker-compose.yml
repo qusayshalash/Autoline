@@ -15,7 +15,6 @@ services:
     environment:
       PUBLIC_ORIGIN: ${PUBLIC_ORIGIN:?set PUBLIC_ORIGIN in deploy/.env}
       BACKUP_KEEP: ${BACKUP_KEEP:-3}
-      CATALOG_PHOTO_CONTACT: ${CATALOG_PHOTO_CONTACT:-}
       ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
     volumes:
       # Plain folders on the host rather than Docker volumes, so a backup can be copied

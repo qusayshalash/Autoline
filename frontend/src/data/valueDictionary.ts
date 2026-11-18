@@ -82,12 +82,8 @@ const PHRASES: Record<string, Term> = {
   'שן פיל': { ar: "عاجي", en: "Ivory" },
 };
 
-/**
- * Countries of manufacture, kept apart from the other words for one reason: the registry
- * writes a make together with where it was built - "קיה סלובקיה", Kia Slovakia - and the
- * catalog needs the make alone. Searching for a photo of a "Kia Slovakia Picanto" finds a
- * list of Kia's factories; "Kia Picanto" finds the car. See `makeName`.
- */
+/** Countries of manufacture: the registry writes a make together with where it was
+ *  built - "קיה סלובקיה", Kia Slovakia. */
 const COUNTRIES: Record<string, Term> = {
   'יפן': { ar: "اليابان", en: "Japan" },
   'קוריאה': { ar: "كوريا", en: "Korea" },
@@ -564,16 +560,3 @@ export function hebrewAlternatives(search: string): string[] {
   return out;
 }
 
-
-/**
- * A manufacturer value without its country of manufacture: "קיה סלובקיה" -> "Kia".
- *
- * Words are dropped from the end only, and only while they are countries, so a make whose
- * name happens to contain a country word in the middle keeps it. If nothing is left - a
- * value that was only a country - the whole value is returned rather than nothing.
- */
-export function makeName(value: string, language: string): string {
-  const words = value.trim().split(/\s+/);
-  while (words.length > 1 && COUNTRIES[words[words.length - 1]]) words.pop();
-  return translateValue(words.join(" "), language);
-}

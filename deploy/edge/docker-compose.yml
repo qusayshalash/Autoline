@@ -18,7 +18,6 @@ services:
     environment:
       PUBLIC_ORIGIN: ${PUBLIC_ORIGIN:?set PUBLIC_ORIGIN in deploy/edge/.env}
       BACKUP_KEEP: ${BACKUP_KEEP:-3}
-      CATALOG_PHOTO_CONTACT: ${CATALOG_PHOTO_CONTACT:-}
       ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
     volumes:
       - ${DATA_PATH:-/srv/autoline/data}:/data

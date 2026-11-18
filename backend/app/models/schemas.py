@@ -1008,17 +1008,6 @@ class VehicleLookup(BaseModel):
     matches: list[VehicleMatch] = []
 
 
-class VehiclePhoto(BaseModel):
-    """A photo of the model, not of the vehicle - the screen says so under it."""
-
-    url: Optional[str] = None
-    title: Optional[str] = None
-    page: Optional[str] = None
-    # the generation the photo is of, as "2011–2016"; None when it is the article's lead
-    # photo, whose generation is not known
-    years: Optional[str] = None
-
-
 # ---- saved views --------------------------------------------------------------------
 #
 # Stored as the screen sent them and handed back the same way; the server reads nothing
