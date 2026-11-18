@@ -1,12 +1,14 @@
 /* The vehicle catalog (/catalog). A page of its own, without the workspace sidebar: it is
-   a lookup, used with a document in hand, and the box is the whole interface until there
-   is an answer. Built on the app's tokens, so both themes follow without a second palette.
+   a lookup, used with a document in hand. Before a search the box is the whole interface,
+   set in a quiet hero; after one it becomes a bar above the answer. Built on the app's
+   tokens, so both themes follow without a second palette.
 
-   The one deliberate flourish is the plate: drawn as the plate it is - yellow, with the
-   blue IL band - because that is the object the number came off, and the reader's eye
-   goes to it first. It stays yellow in the dark theme for the same reason. */
+   The one deliberate flourish is the plate: drawn as the plate it is - yellow, with a
+   dark rim - because that is the object the number came off. It stays yellow in the dark
+   theme for the same reason. */
 
 .catalog {
+  --catalog-width: 1100px;
   min-height: 100vh;
   background: var(--bg);
   color: var(--text);
@@ -17,97 +19,286 @@
 /* ---- the bar ------------------------------------------------------------------------- */
 
 .catalog-bar {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 12px max(16px, calc((100% - 1080px) / 2));
-  background: var(--surface);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  backdrop-filter: saturate(1.4) blur(10px);
+  -webkit-backdrop-filter: saturate(1.4) blur(10px);
   border-bottom: 1px solid var(--border);
 }
 
-.catalog-brand {
-  font-weight: 800;
-  font-size: 16px;
-  color: var(--text);
-  text-decoration: none;
-  letter-spacing: 0.01em;
-}
-
-.catalog-bar-title {
-  color: var(--text-muted);
-  font-size: 14px;
-  padding-inline-start: 14px;
-  border-inline-start: 1px solid var(--border);
-}
-
-.catalog-back {
-  margin-inline-start: auto;
-  font-size: 14px;
-  color: var(--primary);
-  text-decoration: none;
-}
-
-.catalog-back:hover {
-  text-decoration: underline;
-}
-
-/* ---- the box ----------------------------------------------------------------------- */
-
-.catalog-main {
+.catalog-bar-inner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
   width: 100%;
-  max-width: 1080px;
+  max-width: var(--catalog-width);
   margin: 0 auto;
-  padding: 0 16px 48px;
+  padding: 10px 20px;
   box-sizing: border-box;
 }
 
-.catalog-search {
+.catalog-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  color: var(--text);
+  text-decoration: none;
+}
+
+/* the app's mark, as on the sign-in page */
+.catalog-brand-mark {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 3px;
+  padding: 6px;
+  box-sizing: border-box;
+  border-radius: 9px;
+  background: linear-gradient(135deg, #2468ed, #299be9);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.22);
+}
+.catalog-brand-mark span { border-radius: 3px; background: #fff; }
+.catalog-brand-mark span:nth-child(2) { opacity: 0.82; }
+.catalog-brand-mark span:nth-child(3) { opacity: 0.68; }
+.catalog-brand-mark span:nth-child(4) { opacity: 0.92; }
+
+.catalog-brand-copy {
+  display: grid;
+  line-height: 1.15;
+  min-width: 0;
+}
+.catalog-brand-copy strong { font-size: 15px; font-weight: 800; letter-spacing: 0.01em; }
+.catalog-brand-copy small {
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.catalog-bar-actions {
+  margin-inline-start: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Light / dark: a track with the sun at one end and the moon at the other, and a thumb
+   that slides to the one in force. Always laid out left-to-right, like any switch. */
+.catalog-theme {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 64px;
+  height: 34px;
+  padding: 0 9px;
+  flex: none;
+  box-sizing: border-box;
+  color: var(--text-muted);
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  box-shadow: inset 0 1px 2px rgba(23, 38, 61, 0.08);
+  cursor: pointer;
+  transition: background 0.25s ease, border-color 0.25s ease;
+}
+.catalog-theme:hover { border-color: var(--border-strong); }
+.catalog-theme:focus-visible { outline: 3px solid color-mix(in srgb, var(--primary) 35%, transparent); outline-offset: 2px; }
+.catalog-theme.is-dark {
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  border-color: #334155;
+}
+
+.catalog-theme-end { display: grid; place-items: center; opacity: 0.55; }
+.catalog-theme-end.sun { color: #d97706; }
+.catalog-theme-end.moon { color: #6366f1; }
+.catalog-theme.is-dark .catalog-theme-end.moon { color: #a5b4fc; }
+
+.catalog-theme-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  color: #d97706;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.22), 0 0 0 1px rgba(15, 23, 42, 0.04);
+  transition: transform 0.28s cubic-bezier(0.34, 1.4, 0.64, 1), background 0.25s ease, color 0.25s ease;
+}
+.catalog-theme.is-dark .catalog-theme-thumb {
+  transform: translateX(30px);
+  color: #e0e7ff;
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.45);
+}
+.catalog-theme-thumb svg { transition: transform 0.4s ease; }
+.catalog-theme.is-dark .catalog-theme-thumb svg { transform: rotate(-30deg); }
+
+@media (prefers-reduced-motion: reduce) {
+  .catalog-theme-thumb,
+  .catalog-theme-thumb svg { transition: none; }
+}
+
+.catalog-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  text-decoration: none;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.catalog-back:hover { background: var(--surface-hover); border-color: var(--border-strong); }
+.catalog-back:focus-visible { outline: 3px solid var(--primary-soft); outline-offset: 2px; }
+[dir="rtl"] .catalog-back-arrow { transform: scaleX(-1); }
+
+/* ---- the page ---------------------------------------------------------------------- */
+
+.catalog-main {
+  flex: 1;
+  width: 100%;
+  max-width: var(--catalog-width);
+  margin: 0 auto;
+  padding: 0 20px 56px;
+  box-sizing: border-box;
+}
+
+/* ---- the hero: before a search ------------------------------------------------------ */
+
+.catalog-hero {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
-  margin-top: 16vh;
-  transition: margin-top 0.2s ease;
+  gap: 22px;
+  margin-top: clamp(32px, 9vh, 96px);
+  padding: clamp(28px, 5vw, 56px) clamp(16px, 4vw, 48px);
+  border-radius: 24px;
+  border: 1px solid var(--border);
+  background:
+    radial-gradient(80% 120% at 50% -10%, color-mix(in srgb, var(--primary) 14%, transparent), transparent 60%),
+    var(--surface);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  isolation: isolate;
 }
 
-.catalog-main.has-query .catalog-search {
-  margin-top: 24px;
-  align-items: stretch;
+/* a faint grid behind the box, fading out toward the edges */
+.catalog-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 28px 28px;
+  opacity: 0.55;
+  mask-image: radial-gradient(70% 70% at 50% 30%, #000, transparent 75%);
+  -webkit-mask-image: radial-gradient(70% 70% at 50% 30%, #000, transparent 75%);
+}
+
+.catalog-intro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.catalog-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--primary-soft-text);
+  background: var(--primary-soft);
+  border: 1px solid color-mix(in srgb, var(--primary) 22%, transparent);
+  border-radius: 999px;
 }
 
 .catalog-heading {
   margin: 0;
-  font-size: clamp(22px, 4vw, 30px);
+  font-size: clamp(28px, 5vw, 44px);
   font-weight: 800;
-  text-align: center;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
   text-wrap: balance;
 }
 
-.catalog-box {
-  display: flex;
-  gap: 10px;
-  width: 100%;
-  max-width: 620px;
+.catalog-sub {
+  margin: 0;
+  max-width: 560px;
+  font-size: clamp(15px, 1.8vw, 17px);
+  line-height: 1.6;
+  color: var(--text-muted);
+  text-wrap: pretty;
 }
 
-.catalog-main.has-query .catalog-box {
-  max-width: none;
+/* ---- the box ------------------------------------------------------------------------- */
+
+.catalog-search { width: 100%; max-width: 680px; }
+
+.catalog-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 64px;
+  padding: 0 8px;
+  padding-inline-start: 18px;
+  box-sizing: border-box;
+  background: var(--surface);
+  border: 1.5px solid var(--border-strong);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px -12px rgba(23, 38, 61, 0.25), var(--shadow-sm);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
+
+.catalog-box:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 18%, transparent), 0 10px 30px -12px rgba(23, 38, 61, 0.25);
+}
+
+.catalog-box-icon {
+  display: grid;
+  place-items: center;
+  color: var(--text-muted);
+  flex: none;
+}
+.catalog-box:focus-within .catalog-box-icon { color: var(--primary); }
 
 .catalog-box input {
   flex: 1;
   min-width: 0;
-  height: 56px;
-  padding: 0 18px;
-  font-size: 20px;
-  font-family: inherit;
+  height: 100%;
+  padding: 0 6px;
+  font: inherit;
+  font-size: 21px;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
   color: var(--text);
-  background: var(--surface);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-sm);
+  background: transparent;
+  border: none;
+  outline: none;
   /* the number is Latin and so is the cursor: typed left to right, on a right-to-left page */
   text-align: left;
 }
@@ -118,98 +309,356 @@
   text-align: right;
   letter-spacing: 0;
   font-size: 16px;
+  font-weight: 400;
   color: var(--text-muted);
 }
+[dir="ltr"] .catalog-box input::placeholder { direction: ltr; text-align: left; }
 
-:root[dir="ltr"] .catalog-box input::placeholder,
-[dir="ltr"] .catalog-box input::placeholder {
-  direction: ltr;
-  text-align: left;
+.catalog-clear {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  padding: 0;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
 }
+.catalog-clear:hover { background: var(--surface-muted); color: var(--text); }
+.catalog-clear:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
 
-.catalog-box input:focus-visible {
-  outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px var(--primary-soft);
-}
-
-.catalog-box button {
-  height: 56px;
-  padding: 0 26px;
+.catalog-go {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 48px;
+  padding: 0 20px;
+  flex: none;
   font: inherit;
   font-size: 16px;
   font-weight: 700;
   color: #fff;
-  background: var(--primary);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--primary) 88%, #fff), var(--primary));
   border: none;
-  border-radius: var(--radius);
+  border-radius: 11px;
+  box-shadow: 0 6px 14px -6px color-mix(in srgb, var(--primary) 70%, transparent);
   cursor: pointer;
+  transition: filter 0.15s ease, transform 0.05s ease;
+}
+.catalog-go:hover:not(:disabled) { filter: brightness(1.06); }
+.catalog-go:active:not(:disabled) { transform: translateY(1px); }
+.catalog-go:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
+.catalog-go:focus-visible { outline: 3px solid color-mix(in srgb, var(--primary) 35%, transparent); outline-offset: 2px; }
+
+.catalog-go kbd {
+  padding: 2px 6px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 5px;
 }
 
-.catalog-box button:hover:not(:disabled) {
-  background: var(--primary-hover);
-}
+/* ---- under the box -------------------------------------------------------------------- */
 
-.catalog-box button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.catalog-box button:focus-visible {
-  outline: 3px solid var(--primary-soft);
-  outline-offset: 2px;
+.catalog-helpers {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  max-width: 680px;
 }
 
 .catalog-hint {
   margin: 0;
-  color: var(--text-muted);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   font-size: 14px;
-  text-align: center;
+  color: var(--text-muted);
+}
+.catalog-hint-sep { opacity: 0.6; }
+
+/* a small copy of the plate: the example to try, and the number a result answers */
+.mini-plate {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  font-variant-numeric: tabular-nums;
+  color: #111;
+  background: #f6c90e;
+  border: 1.5px solid #1a1a1a;
+  border-radius: 5px;
+  box-shadow: inset 0 0 0 1.5px #f6c90e, inset 0 0 0 2.5px rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
+}
+button.mini-plate { cursor: pointer; transition: transform 0.12s ease, box-shadow 0.12s ease; }
+button.mini-plate:hover {
+  transform: translateY(-1px);
+  box-shadow: inset 0 0 0 1.5px #f6c90e, inset 0 0 0 2.5px rgba(0, 0, 0, 0.3), 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+button.mini-plate:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+
+.catalog-recent {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 10px;
+}
+.catalog-recent-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.catalog-recent-list { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.catalog-recent-list button {
+  padding: 5px 11px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.catalog-recent-list button:hover {
+  background: var(--primary-soft);
+  border-color: color-mix(in srgb, var(--primary) 35%, transparent);
+  color: var(--primary-soft-text);
+}
+.catalog-recent-list button:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+.catalog-recent-clear {
+  padding: 0;
+  font: inherit;
+  font-size: 12px;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.catalog-recent-clear:hover { color: var(--danger); }
+
+/* ---- the three notes below the hero --------------------------------------------------- */
+
+.catalog-tips {
+  list-style: none;
+  margin: 20px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
 }
 
-/* ---- states ---------------------------------------------------------------------- */
+.catalog-tip {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas: "icon title" "icon text";
+  column-gap: 12px;
+  row-gap: 3px;
+  padding: 16px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+.catalog-tip-icon {
+  grid-area: icon;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  color: var(--primary);
+  background: var(--primary-soft);
+}
+.catalog-tip strong { grid-area: title; font-size: 14px; font-weight: 700; }
+.catalog-tip span:last-child { grid-area: text; font-size: 13px; line-height: 1.55; color: var(--text-muted); }
+
+/* ---- after a search: the box becomes a bar --------------------------------------------- */
+
+.catalog.has-query .catalog-hero {
+  margin-top: 20px;
+  padding: 0;
+  border: none;
+  background: none;
+  box-shadow: none;
+  overflow: visible;
+}
+.catalog.has-query .catalog-hero::before { display: none; }
+.catalog.has-query .catalog-search { max-width: none; }
+.catalog.has-query .catalog-box { height: 56px; border-radius: 14px; }
+.catalog.has-query .catalog-go { height: 42px; }
+.catalog.has-query .catalog-box input { font-size: 19px; }
 
 .catalog-results {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  margin-top: 22px;
+  gap: 16px;
+  margin-top: 18px;
 }
 
-.catalog-state {
+.catalog-meta {
   margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
   color: var(--text-muted);
-  font-size: 15px;
+}
+.catalog-meta-kind { font-weight: 600; }
+.catalog-meta-vin {
+  padding: 3px 9px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  background: var(--surface-muted);
+  border-radius: 6px;
+}
+.catalog-meta-count {
+  margin-inline-start: auto;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--success);
+  background: var(--success-soft);
+  border-radius: 999px;
 }
 
-.catalog-state.error {
-  color: var(--danger);
-}
+/* ---- notices --------------------------------------------------------------------------- */
 
-.catalog-state.warn {
-  padding: 10px 14px;
-  border-radius: var(--radius-sm);
+.catalog-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  font-size: 14px;
+}
+.catalog-notice p { margin: 0; line-height: 1.55; }
+.catalog-notice strong { display: block; margin-bottom: 2px; font-size: 15px; }
+.catalog-notice-icon { display: grid; place-items: center; flex: none; margin-top: 1px; }
+.catalog-notice.info {
+  background: var(--primary-soft);
+  color: var(--primary-soft-text);
+  border-color: color-mix(in srgb, var(--primary) 20%, transparent);
+}
+.catalog-notice.warn {
   background: var(--warning-soft);
   color: var(--text);
+  border-color: color-mix(in srgb, var(--warning) 30%, transparent);
 }
+.catalog-notice.warn .catalog-notice-icon { color: var(--warning); }
+.catalog-notice.danger {
+  background: var(--danger-soft);
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 25%, transparent);
+}
+
+/* ---- nothing found ------------------------------------------------------------------ */
 
 .catalog-empty {
-  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 40px 24px;
   text-align: center;
   background: var(--surface);
-  border: 1px dashed var(--border-strong);
-  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
 }
-
-.catalog-empty strong {
-  display: block;
-  font-size: 18px;
+.catalog-empty-icon {
+  display: grid;
+  place-items: center;
+  width: 60px;
+  height: 60px;
   margin-bottom: 6px;
+  border-radius: 999px;
+  color: var(--text-muted);
+  background: var(--surface-muted);
+}
+.catalog-empty strong { font-size: 19px; }
+.catalog-empty p { margin: 0; color: var(--text-muted); }
+.catalog-empty-tips {
+  margin: 10px 0 0;
+  padding: 12px 16px;
+  list-style: none;
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: start;
+  background: var(--surface-2);
+  border-radius: 10px;
+}
+.catalog-empty-tips li::before { content: "•"; margin-inline-end: 8px; color: var(--primary); }
+
+/* ---- loading: the card's outline ------------------------------------------------------ */
+
+.catalog-skeleton { display: grid; gap: 1.25rem; }
+.catalog-skeleton .sk-tile,
+.catalog-skeleton .sk-section,
+.catalog-skeleton .sk-bar,
+.catalog-skeleton .sk-plate {
+  background: linear-gradient(90deg, var(--surface-muted) 25%, var(--surface-hover) 50%, var(--surface-muted) 75%);
+  background-size: 200% 100%;
+  animation: catalog-shimmer 1.3s ease-in-out infinite;
+}
+.catalog-skeleton .sk { border-radius: var(--radius); border: 1px solid var(--border); }
+.sk-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 1.5rem 1.6rem;
+  background: var(--surface);
+}
+.sk-lines { display: grid; gap: 10px; flex: 1; }
+.sk-bar { display: block; height: 12px; border-radius: 6px; }
+.sk-bar.tall { height: 28px; }
+.sk-bar.w30 { width: 30%; }
+.sk-bar.w40 { width: 40%; }
+.sk-bar.w60 { width: 60%; }
+.sk-plate { width: 150px; height: 46px; border-radius: 8px; flex: none; }
+.sk-tiles { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.75rem; }
+.sk-tile { height: 78px; }
+.sk-sections { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.sk-section { height: 220px; }
+
+@keyframes catalog-shimmer {
+  from { background-position: 100% 0; }
+  to { background-position: -100% 0; }
 }
 
-.catalog-empty p {
-  margin: 0;
-  color: var(--text-muted);
+@media (prefers-reduced-motion: reduce) {
+  .catalog-skeleton .sk-tile,
+  .catalog-skeleton .sk-section,
+  .catalog-skeleton .sk-bar,
+  .catalog-skeleton .sk-plate { animation: none; }
 }
 
 /* ---- the vehicle ----------------------------------------------------------------- */
@@ -217,27 +666,72 @@
 /* The card itself is RecordCardView, styled with the record page in index.css. */
 .catalog-card {
   display: grid;
-  gap: 8px;
+  gap: 10px;
 }
+
+.catalog-card-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.catalog-print {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 36px;
+  padding: 0 14px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.catalog-print:hover {
+  color: var(--primary-soft-text);
+  background: var(--primary-soft);
+  border-color: color-mix(in srgb, var(--primary) 35%, transparent);
+}
+.catalog-print:focus-visible { outline: 3px solid color-mix(in srgb, var(--primary) 35%, transparent); outline-offset: 2px; }
 
 .catalog-card-source {
   margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
   font-size: 12px;
   color: var(--text-muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
 }
 
-/* ---- phone width --------------------------------------------------------------- */
+/* ---- narrower screens ---------------------------------------------------------------- */
 
-@media (max-width: 720px) {
-  .catalog-bar-title {
-    display: none;
-  }
+@media (max-width: 860px) {
+  .catalog-tips { grid-template-columns: 1fr; }
+  .sk-tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
 
-  .catalog-box button {
-    padding: 0 18px;
-  }
-
-  .catalog-search {
-    margin-top: 10vh;
-  }
+@media (max-width: 640px) {
+  .catalog-bar-inner { padding: 8px 16px; }
+  .catalog-back span { display: none; }
+  .catalog-back { width: 36px; padding: 0; justify-content: center; }
+  .catalog-main { padding: 0 16px 40px; }
+  .catalog-hero { margin-top: 18px; border-radius: 18px; }
+  .catalog-box { height: 58px; padding-inline-start: 14px; }
+  .catalog-box input { font-size: 18px; }
+  .catalog-go { padding: 0 16px; }
+  .catalog-go kbd { display: none; }
+  .sk-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .sk-sections { grid-template-columns: 1fr; }
+  .sk-plate { width: 110px; }
 }

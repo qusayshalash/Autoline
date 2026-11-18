@@ -57,6 +57,11 @@ export function formatDateTime(value: string | null | undefined, language: strin
   return formatter(language, { dateStyle: "medium", timeStyle: "short" }).format(when);
 }
 
+/** This moment, as formatDateTime shows one - the time a sheet was printed. */
+export function formatNow(language: string): string {
+  return formatter(language, { dateStyle: "medium", timeStyle: "short" }).format(new Date());
+}
+
 /**
  * The same moment to the second.
  *

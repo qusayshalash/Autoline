@@ -3696,3 +3696,153 @@ td:hover > .cell-edit-wrap > .cell-revert,
   --arrival-bg: var(--danger-soft);
   --arrival-fg: var(--danger);
 }
+
+/* ---------------------------------------------------------------------------
+   The vehicle card on paper (or saved as PDF from the print dialog)
+   ---------------------------------------------------------------------------
+   One A4 page, in the light palette whatever theme is on screen: the app's chrome, the
+   catalog's search and every button are left behind, a small heading says what the
+   sheet is and when it was printed, and nothing is split across a page break. Colour
+   is kept - the yellow plate and the licence status read by it. */
+.rc-print-head { display: none; }
+
+@media print {
+  @page { size: A4; margin: 10mm; }
+
+  :root,
+  :root[data-theme="dark"] {
+    color-scheme: light;
+    --bg: #ffffff;
+    --surface: #ffffff;
+    --surface-2: #f7f9fc;
+    --surface-hover: #f2f5f9;
+    --surface-muted: #edf1f7;
+    --border: #d5dce7;
+    --border-strong: #c9d2df;
+    --text: #111827;
+    --text-muted: #556275;
+    --primary: #2563eb;
+    --primary-soft: #eff6ff;
+    --primary-soft-text: #1d4ed8;
+    --danger: #dc2626;
+    --danger-soft: #fef2f2;
+    --success: #15803d;
+    --success-soft: #f0fdf4;
+    --warning: #b45309;
+    --warning-soft: #fffbeb;
+    --shadow-sm: none;
+    --shadow-md: none;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* what is not the card */
+  .sidebar,
+  .record-topbar,
+  .catalog-bar,
+  .catalog-hero,
+  .catalog-meta,
+  .catalog-notice,
+  .catalog-tips,
+  .catalog-card-foot,
+  body.printing-one .catalog-card:not(.print-target) {
+    display: none !important;
+  }
+
+  /* the workspace scrolls inside a full-height frame; on paper it simply flows */
+  .app-shell,
+  .app-main,
+  .catalog {
+    display: block !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+  .app-main,
+  .record-page,
+  .catalog-main,
+  .catalog-results {
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Everything on the card is sized in rem, so the root size is what makes it fit: at
+     10px a full registry card - six tiles and four sections - takes about half an A4
+     page, leaving room for a file with more columns or a history of corrections. */
+  html { font-size: 10px !important; }
+
+  .rc-print-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 10px;
+    padding-bottom: 5px;
+    border-bottom: 1.5px solid #111827;
+  }
+  .rc-print-brand { font-weight: 800; font-size: 12pt; }
+  .rc-print-title { font-weight: 700; font-size: 10pt; }
+  .rc-print-meta {
+    margin-inline-start: auto;
+    display: flex;
+    gap: 10px;
+    font-size: 7.5pt;
+    color: #556275;
+  }
+
+  .record-card { gap: 6px; }
+  .rc-hero {
+    gap: 12px;
+    padding: 8px 12px;
+    background: #fff !important;
+    border: 1px solid #d5dce7;
+    border-radius: 8px;
+  }
+  .rc-hero-text { gap: 1px; }
+  .rc-make { font-size: 8pt; }
+  .rc-title { font-size: 17pt; }
+  .rc-subtitle { font-size: 9pt; }
+  .rc-chips { margin-top: 3px; }
+  .rc-id { gap: 2px; }
+  .rc-plate { font-size: 13pt; padding: 3px 10px; }
+
+  .rc-glance { grid-template-columns: repeat(6, minmax(0, 1fr)) !important; gap: 5px; }
+  .rc-fact {
+    grid-template-columns: 1fr !important;
+    grid-template-areas: "label" "value" "note" !important;
+    padding: 5px 7px;
+    border-radius: 7px;
+  }
+  .rc-fact-icon { display: none !important; }
+  .rc-fact-value { font-size: 9pt; }
+  .rc-fact-label,
+  .rc-fact-note { font-size: 7pt; }
+
+  .rc-sections { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 6px; }
+  .rc-section { padding: 0 9px 3px; border-radius: 8px; }
+  .rc-section-title { padding: 5px 0 4px; font-size: 7.5pt; }
+  .rc-row { padding: 3px 0; gap: 8px; }
+  .rc-row dt { font-size: 8pt; gap: 4px; }
+  .rc-row-icon { display: none; }
+  .rc-row dd,
+  .rc-code { font-size: 8.5pt; }
+  .rc-history li { padding: 3px 0; }
+  .rc-note { padding: 4px 0; }
+
+  .rc-hero,
+  .rc-fact,
+  .rc-section,
+  .rc-row {
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+  .catalog-card + .catalog-card { break-before: page; }
+}

@@ -1231,7 +1231,6 @@
     "label": "Plate or chassis number",
     "placeholder": "Plate or chassis number",
     "search": "Search",
-    "hint": "For example 49-107-66 or 4910766, or the full chassis number. Press Enter to search.",
     "searching": "Searching…",
     "unreadable": "That looks like neither a plate nor a chassis number. A plate is digits only; a chassis number is Latin letters and digits.",
     "not_found_title": "No vehicle with this number",
@@ -1239,7 +1238,27 @@
     "not_found_chassis": "Chassis number {{chassis}} is not in any of the files.",
     "several_one": "One vehicle found",
     "several_other": "{{count}} vehicles share this number - all of them are shown below",
-    "from_file": "From file: {{name}}"
+    "from_file": "From file: {{name}}",
+    "eyebrow": "Vehicle catalog · every file",
+    "sub": "Type the plate as it is printed, or the full chassis number (VIN), to open the vehicle's card with all its details.",
+    "clear": "Clear",
+    "try": "Try:",
+    "chassis_hint": "or a 17-character chassis number",
+    "recent": "Recent searches",
+    "recent_clear": "Clear list",
+    "tip_any_title": "Type it as you see it",
+    "tip_any_text": "With dashes, spaces or neither, with or without the leading zero.",
+    "tip_files_title": "Across every file",
+    "tip_files_text": "One search covers every dataset you have access to.",
+    "tip_card_title": "The whole card",
+    "tip_card_text": "Licence, last test, specification and numbers on one page.",
+    "kind_plate": "Results for plate",
+    "kind_chassis": "Results for chassis number",
+    "found_one": "1 result",
+    "found_other": "{{count}} results",
+    "unreadable_title": "That number can't be read",
+    "not_found_tip_digits": "Check the digits: a plate has 7 or 8 digits, a chassis number 17 characters.",
+    "not_found_tip_files": "The vehicle may be in a file not uploaded yet, or one you have no access to."
   },
   "views": {
     "button": "Views",
@@ -1285,7 +1304,10 @@
     "licence_due": "Expires soon",
     "licence_expired": "Expired",
     "last_test": "Last test",
-    "corrected": "Corrected by hand"
+    "corrected": "Corrected by hand",
+    "print": "Print / PDF",
+    "print_title": "Vehicle card",
+    "printed_at": "Printed {{when}}"
   },
   "registry": {
     "title": "Government registry sync",

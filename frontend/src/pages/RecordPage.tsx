@@ -52,6 +52,11 @@ export default function RecordPage() {
             {copied ? t("record.link_copied") : t("record.copy_link")}
           </button>
         )}
+        {record && (
+          <button type="button" className="btn secondary" onClick={() => window.print()}>
+            {t("record.print")}
+          </button>
+        )}
       </div>
 
       {key.length === 0 ? (
@@ -61,7 +66,7 @@ export default function RecordPage() {
       ) : error || !record ? (
         <ErrorBanner message={apiErrorMessage(error, t("common.error_generic"))} />
       ) : (
-        <RecordCardView record={record} />
+        <RecordCardView record={record} source={dataset?.original_filename} />
       )}
     </div>
   );

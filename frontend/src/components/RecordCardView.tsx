@@ -10,6 +10,7 @@ import {
   formatCalendarDate,
   formatDate,
   formatDateTime,
+  formatNow,
   relativeDays,
 } from "../data/datetime";
 import {
@@ -34,7 +35,14 @@ const LICENCE_DUE_DAYS = 30;
  * internal codes last and quietest. Then, for whoever may see it, what was changed by
  * hand and by whom.
  */
-export default function RecordCardView({ record }: { record: RecordCard }) {
+export default function RecordCardView({
+  record,
+  source,
+}: {
+  record: RecordCard;
+  /** the file the record came from, named on the printed copy */
+  source?: string;
+}) {
   const { t, i18n } = useTranslation();
   const lang = i18n.language;
   const raw = usesRawHeaders(lang);
@@ -117,6 +125,18 @@ export default function RecordCardView({ record }: { record: RecordCard }) {
 
   return (
     <div className="record-card">
+      {/* only on paper: whose card this is, and when and from what it was printed */}
+      <div className="rc-print-head" aria-hidden="true">
+        <span className="rc-print-brand" lang="en">
+          AutoLine
+        </span>
+        <span className="rc-print-title">{t("record.print_title")}</span>
+        <span className="rc-print-meta">
+          {source && <bdi>{t("catalog.from_file", { name: source })}</bdi>}
+          <span>{t("record.printed_at", { when: formatNow(lang) })}</span>
+        </span>
+      </div>
+
       <header className="rc-hero">
         <div className="rc-hero-text">
           {make && <p className="rc-make">{make}</p>}
