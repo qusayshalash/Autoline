@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { type Correction, type RecordCard } from "../api/client";
 import ArrivalMark from "./ArrivalMark";
+import CopyButton from "./CopyButton";
 import SemanticIcon from "./SemanticIcons";
 import VinPanel from "./VinPanel";
 import { columnLabel, columnMeta, usesRawHeaders } from "../data/columnDictionary";
@@ -22,7 +23,12 @@ import {
   RECORD_SECTIONS,
   type SectionId,
 } from "../data/recordSections";
+import { formatPlate } from "../data/plate";
 import { hasHebrew, translateValue } from "../data/valueDictionary";
+
+/** The values people read out or type elsewhere - a plate, a chassis number, an engine
+ *  code - each get a copy button beside them. */
+const COPYABLE = new Set(["mispar_rechev", "misgeret", "degem_manoa"]);
 
 /** Within this many days of expiry a licence is flagged as due rather than valid. */
 const LICENCE_DUE_DAYS = 30;
@@ -185,8 +191,11 @@ export default function RecordCardView({
               {record.key_columns.map((c) => columnLabel(c, lang)).join(" + ")}
             </span>
             {isPlate ? (
-              <span className="rc-plate" dir="ltr">
-                {formatPlate(record.key[0])}
+              <span className="rc-plate-row">
+                <span className="rc-plate" dir="ltr">
+                  {formatPlate(record.key[0])}
+                </span>
+                <CopyButton value={formatPlate(record.key[0])} label={columnLabel(record.key_columns[0], lang)} />
               </span>
             ) : (
               <bdi className="rc-key">{record.key.join(" · ")}</bdi>
@@ -265,6 +274,13 @@ export default function RecordCardView({
                           </span>
                         )}
                         {valueCell(c)}
+                        {COPYABLE.has(c) && get(c) && (
+                          <CopyButton
+                            // the plate as it is printed, not the zero-padded form it is stored in
+                            value={c === "mispar_rechev" ? formatPlate(get(c)) : get(c).trim()}
+                            label={columnLabel(c, lang)}
+                          />
+                        )}
                       </span>
                       {fix && (
                         <span className="rc-was">
@@ -359,15 +375,6 @@ function PrintQr({ url, caption }: { url: string; caption: string }) {
       <small>{caption}</small>
     </span>
   );
-}
-
-/** An Israeli plate as it is printed: 12-345-67 for seven digits, 123-45-678 for eight.
- *  The stored number keeps its leading zeros, which are not on the plate. */
-function formatPlate(value: string): string {
-  const digits = value.replace(/\D/g, "").replace(/^0+(?=\d{7})/, "");
-  if (digits.length === 7) return `${digits.slice(0, 2)}-${digits.slice(2, 5)}-${digits.slice(5)}`;
-  if (digits.length === 8) return `${digits.slice(0, 3)}-${digits.slice(3, 5)}-${digits.slice(5)}`;
-  return value;
 }
 
 function PenGlyph() {

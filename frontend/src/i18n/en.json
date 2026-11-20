@@ -1393,5 +1393,20 @@
     "issue_year": "Character 10 means model year {{decoded}}; the record says {{registry}}.",
     "issue_model": "The chassis number's model code is {{code}}; the record says {{registry}}.",
     "issue_check": "The check digit does not agree with the rest of the number - possibly a typo."
+  },
+  "copy": {
+    "copy_what": "Copy {{what}}",
+    "copied": "Copied"
+  },
+  "share": {
+    "whatsapp": "Share on WhatsApp",
+    "make": "Vehicle: {{value}}",
+    "model": "Model: {{value}}",
+    "year": "Year: {{value}}",
+    "plate": "Plate: {{value}}",
+    "chassis": "Chassis: {{value}}",
+    "engine": "Engine: {{value}}",
+    "licence_valid": "Licence: valid until {{date}}",
+    "licence_expired": "Licence: expired {{date}}"
   }
 }

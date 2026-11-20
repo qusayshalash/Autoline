@@ -3840,6 +3840,51 @@ td:hover > .cell-edit-wrap > .cell-revert,
 .rc-vin-alert ul { margin: 0.25rem 0 0; padding-inline-start: 1.1rem; }
 
 /* ---------------------------------------------------------------------------
+   Copy a value, send a vehicle on WhatsApp
+   --------------------------------------------------------------------------- */
+.copy-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  flex: none;
+  padding: 0;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.copy-btn:hover { color: var(--primary); background: var(--primary-soft); border-color: color-mix(in srgb, var(--primary) 25%, transparent); }
+.copy-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+.copy-btn.is-copied { color: var(--success); background: var(--success-soft); }
+.rc-plate-row { display: inline-flex; align-items: center; gap: 0.4rem; }
+
+.share-wa {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  text-decoration: none;
+}
+/* in the catalog it stands beside the print button, in WhatsApp's own green */
+.catalog-card-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.catalog-card-actions .share-wa {
+  height: 36px;
+  padding: 0 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  background: #1fa855;
+  border: 1px solid #1a9149;
+  border-radius: 10px;
+  box-shadow: var(--shadow-sm);
+  transition: filter 0.15s ease;
+}
+.catalog-card-actions .share-wa:hover { filter: brightness(1.07); }
+.catalog-card-actions .share-wa:focus-visible { outline: 3px solid color-mix(in srgb, #1fa855 40%, transparent); outline-offset: 2px; }
+
+/* ---------------------------------------------------------------------------
    The vehicle card on paper (or saved as PDF from the print dialog)
    ---------------------------------------------------------------------------
    One A4 page, in the light palette whatever theme is on screen: the app's chrome, the
@@ -3895,6 +3940,7 @@ td:hover > .cell-edit-wrap > .cell-revert,
   .catalog-notice,
   .catalog-tips,
   .catalog-card-foot,
+  .copy-btn,
   .similar,
   .rc-vin,
   body.printing-one .catalog-card:not(.print-target) {

@@ -6,6 +6,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { lookupVehicle, type VehicleMatch } from "../api/catalog";
 import { apiErrorMessage, type RecordCard } from "../api/client";
 import RecordCardView from "../components/RecordCardView";
+import ShareWhatsApp from "../components/ShareWhatsApp";
 import SimilarVehicles from "../components/SimilarVehicles";
 import { useTheme } from "../theme/ThemeContext";
 import "../catalog.css";
@@ -364,10 +365,13 @@ function VehicleCard({ match, query }: { match: VehicleMatch; query: string }) {
           <IconFile />
           <span>{t("catalog.from_file", { name: match.dataset_name })}</span>
         </p>
-        <button type="button" className="catalog-print" onClick={print}>
-          <IconPrinter />
-          <span>{t("record.print")}</span>
-        </button>
+        <div className="catalog-card-actions">
+          <ShareWhatsApp record={record} />
+          <button type="button" className="catalog-print" onClick={print}>
+            <IconPrinter />
+            <span>{t("record.print")}</span>
+          </button>
+        </div>
       </div>
     </article>
   );

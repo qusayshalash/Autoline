@@ -7,6 +7,7 @@ import { apiErrorMessage, fetchRecord, getDataset, type RecordCard } from "../ap
 import ErrorBanner from "../components/ErrorBanner";
 import LoadingState from "../components/LoadingState";
 import RecordCardView from "../components/RecordCardView";
+import ShareWhatsApp from "../components/ShareWhatsApp";
 import SimilarVehicles from "../components/SimilarVehicles";
 
 /** One record, whole, reached from its row number in the grid. The card itself is
@@ -53,6 +54,7 @@ export default function RecordPage() {
             {copied ? t("record.link_copied") : t("record.copy_link")}
           </button>
         )}
+        {record && <ShareWhatsApp record={record} className="btn secondary" />}
         {record && (
           <button type="button" className="btn secondary" onClick={() => window.print()}>
             {t("record.print")}

@@ -1472,5 +1472,20 @@
     "issue_year": "الخانة 10 تعني موديل {{decoded}}، والسجل يقول {{registry}}.",
     "issue_model": "رمز الطراز في الشاصي {{code}}، والسجل يقول {{registry}}.",
     "issue_check": "خانة التحقّق لا توافق باقي الرقم، فقد يكون فيه خطأ كتابة."
+  },
+  "copy": {
+    "copy_what": "نسخ {{what}}",
+    "copied": "تم النسخ"
+  },
+  "share": {
+    "whatsapp": "مشاركة واتساب",
+    "make": "المركبة: {{value}}",
+    "model": "الطراز: {{value}}",
+    "year": "سنة الصنع: {{value}}",
+    "plate": "اللوحة: {{value}}",
+    "chassis": "الشاصي: {{value}}",
+    "engine": "المحرّك: {{value}}",
+    "licence_valid": "الترخيص: ساري حتى {{date}}",
+    "licence_expired": "الترخيص: منتهٍ منذ {{date}}"
   }
 }

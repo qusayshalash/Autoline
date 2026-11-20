@@ -1413,5 +1413,20 @@
     "issue_year": "תו 10 פירושו שנת דגם {{decoded}}, והרישום אומר {{registry}}.",
     "issue_model": "קוד הדגם בשלדה הוא {{code}}, והרישום אומר {{registry}}.",
     "issue_check": "ספרת הביקורת לא מתאימה לשאר המספר - ייתכן שיש טעות הקלדה."
+  },
+  "copy": {
+    "copy_what": "העתקת {{what}}",
+    "copied": "הועתק"
+  },
+  "share": {
+    "whatsapp": "שיתוף בוואטסאפ",
+    "make": "רכב: {{value}}",
+    "model": "דגם: {{value}}",
+    "year": "שנת ייצור: {{value}}",
+    "plate": "לוחית: {{value}}",
+    "chassis": "שלדה: {{value}}",
+    "engine": "מנוע: {{value}}",
+    "licence_valid": "רישיון: בתוקף עד {{date}}",
+    "licence_expired": "רישיון: פג ב-{{date}}"
   }
 }
