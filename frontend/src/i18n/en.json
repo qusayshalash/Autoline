@@ -1258,7 +1258,13 @@
     "found_other": "{{count}} results",
     "unreadable_title": "That number can't be read",
     "not_found_tip_digits": "Check the digits: a plate has 7 or 8 digits, a chassis number 17 characters.",
-    "not_found_tip_files": "The vehicle may be in a file not uploaded yet, or one you have no access to."
+    "not_found_tip_files": "The vehicle may be in a file not uploaded yet, or one you have no access to.",
+    "similar_title": "Vehicles like this one in this file",
+    "similar_counting": "Counting…",
+    "similar_engine_one": "vehicle with this model and engine",
+    "similar_engine_other": "vehicles with this model and engine",
+    "similar_model_one": "vehicle of this model, any engine",
+    "similar_model_other": "vehicles of this model, any engine"
   },
   "views": {
     "button": "Views",
@@ -1307,7 +1313,8 @@
     "corrected": "Corrected by hand",
     "print": "Print / PDF",
     "print_title": "Vehicle card",
-    "printed_at": "Printed {{when}}"
+    "printed_at": "Printed {{when}}",
+    "print_scan": "Scan to open the card"
   },
   "registry": {
     "title": "Government registry sync",
@@ -1358,5 +1365,33 @@
     "removed_mark": "No longer in the government registry",
     "removed_tool": "Left the registry",
     "removed_tool_hint": "Vehicles the government registry no longer lists: scrapped, exported or off the road. Kept in your data with a mark."
+  },
+  "vin": {
+    "title": "Chassis number, read",
+    "nonstandard": "An older chassis number (not 17 characters), which the standard does not cover.",
+    "verdict_ok": "✓ Matches the record",
+    "verdict_warn": "⚠ Worth a look",
+    "verdict_bad": "⚠ Does not match the record",
+    "verdict_unknown": "Maker not known yet",
+    "verdict_nonstandard": "Older format",
+    "part_maker": "Characters 1–3 · maker",
+    "part_model": "Characters 4–8 · model code",
+    "part_year": "Character 10 · model year",
+    "part_check": "Character 9 · check digit",
+    "part_serial": "Characters 12–17 · serial",
+    "ok_maker": "Matches the make on record",
+    "ok_model": "Same model code as the record",
+    "ok_year": "Matches the year built",
+    "near_year": "One year apart, which is normal",
+    "ok_check": "Check digit is sound",
+    "year_not_encoded": "This maker does not write the year in character 10",
+    "unknown_prefix": "A rare prefix not known yet",
+    "differs": "Differs from the record",
+    "alert_bad": "The chassis number does not match the record - check the vehicle",
+    "alert_warn": "A difference worth a look",
+    "issue_maker": "Prefix {{wmi}} belongs to {{expected}}; the record says {{registry}}.",
+    "issue_year": "Character 10 means model year {{decoded}}; the record says {{registry}}.",
+    "issue_model": "The chassis number's model code is {{code}}; the record says {{registry}}.",
+    "issue_check": "The check digit does not agree with the rest of the number - possibly a typo."
   }
 }

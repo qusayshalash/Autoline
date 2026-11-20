@@ -3697,6 +3697,148 @@ td:hover > .cell-edit-wrap > .cell-revert,
   --arrival-fg: var(--danger);
 }
 
+/* ---- cars like this one ---------------------------------------------------------------- */
+
+.similar {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 18px;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--primary) 7%, transparent), transparent 60%),
+    var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+.similar-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  flex: none;
+  border-radius: 11px;
+  color: var(--primary);
+  background: var(--primary-soft);
+}
+.similar-body { display: grid; gap: 8px; min-width: 0; flex: 1; }
+.similar-body > strong { font-size: 14px; font-weight: 700; }
+.similar-loading { font-size: 13px; color: var(--text-muted); }
+.similar-links { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.similar-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 6px 12px;
+  font-size: 14px;
+  color: var(--text);
+  text-decoration: none;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+.similar-link b {
+  font-size: 18px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--primary-soft-text);
+}
+.similar-link.primary {
+  background: var(--primary-soft);
+  border-color: color-mix(in srgb, var(--primary) 35%, transparent);
+}
+.similar-link:hover {
+  border-color: var(--primary);
+  transform: translateY(-1px);
+}
+.similar-link:focus-visible { outline: 3px solid color-mix(in srgb, var(--primary) 35%, transparent); outline-offset: 2px; }
+.similar-code {
+  padding: 1px 6px;
+  font-family: ui-monospace, "SFMono-Regular", "Cascadia Mono", Consolas, monospace;
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--surface-muted);
+  border-radius: 5px;
+}
+.similar-chevron { color: var(--text-muted); flex: none; }
+[dir="rtl"] .similar-chevron { transform: scaleX(-1); }
+
+@media (max-width: 640px) {
+  .similar { padding: 12px 14px; }
+  .similar-link { width: 100%; box-sizing: border-box; }
+  .similar-chevron { margin-inline-start: auto; }
+}
+
+/* ---------------------------------------------------------------------------
+   The chassis number, read (VinPanel)
+   --------------------------------------------------------------------------- */
+.rc-vin { padding-bottom: 1rem; }
+.rc-vin-head { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; border-bottom: 1px solid var(--border); }
+.rc-vin-head .rc-section-title { border-bottom: none; }
+.rc-vin-verdict { padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.78rem; font-weight: 800; white-space: nowrap; }
+.rc-vin-verdict.ok { background: var(--success-soft); color: var(--success); }
+.rc-vin-verdict.warn { background: var(--warning-soft); color: var(--warning); }
+.rc-vin-verdict.bad { background: var(--danger-soft); color: var(--danger); }
+.rc-vin-verdict.unknown { background: var(--surface-muted); color: var(--text-muted); }
+.rc-vin.verdict-bad { border-color: color-mix(in srgb, var(--danger) 45%, var(--border)); }
+.rc-vin.verdict-warn { border-color: color-mix(in srgb, var(--warning) 45%, var(--border)); }
+
+/* one hue per part, the same in the boxes and in the key below them */
+.rc-vin .p-maker { --part: #3b82f6; --part-bg: color-mix(in srgb, #3b82f6 16%, var(--surface)); }
+.rc-vin .p-model { --part: #8b5cf6; --part-bg: color-mix(in srgb, #8b5cf6 16%, var(--surface)); }
+.rc-vin .p-check { --part: #94a3b8; --part-bg: var(--surface-muted); }
+.rc-vin .p-year { --part: #22c55e; --part-bg: color-mix(in srgb, #22c55e 16%, var(--surface)); }
+.rc-vin .p-plant { --part: #f59e0b; --part-bg: color-mix(in srgb, #f59e0b 16%, var(--surface)); }
+.rc-vin .p-serial { --part: #64748b; --part-bg: var(--surface-muted); }
+
+.rc-vin-chars { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem 0.6rem; padding: 1.25rem 0 0.5rem; }
+.rc-vin-part { display: grid; justify-items: center; gap: 0.35rem; }
+.rc-vin-boxes { display: flex; gap: 3px; }
+.rc-vin-ch {
+  display: grid;
+  place-items: center;
+  width: 1.85rem;
+  height: 2.5rem;
+  border-radius: 7px;
+  font-family: ui-monospace, "SFMono-Regular", "Cascadia Mono", Consolas, monospace;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text);
+  background: var(--part-bg);
+  box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--part) 55%, transparent);
+}
+.rc-vin-ch.is-wrong { outline: 2.5px solid var(--danger); outline-offset: 1px; }
+.rc-vin-pos { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); }
+
+.rc-vin-legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 0.6rem; margin-top: 0.75rem; }
+.rc-vin-fact {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas: "sw label" "sw value" "sw note";
+  column-gap: 0.6rem;
+  row-gap: 0.1rem;
+  align-content: start;
+  padding: 0.7rem 0.8rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.rc-vin-swatch { grid-area: sw; width: 0.7rem; height: 0.7rem; margin-top: 0.3rem; border-radius: 3px; background: var(--part); }
+.rc-vin-label { grid-area: label; font-size: 0.74rem; font-weight: 700; color: var(--text-muted); }
+.rc-vin-value { grid-area: value; font-size: 1rem; font-weight: 800; overflow-wrap: anywhere; }
+.rc-vin-note { grid-area: note; font-size: 0.74rem; font-weight: 700; }
+.rc-vin-note.ok { color: var(--success); }
+.rc-vin-note.bad { color: var(--danger); }
+.rc-vin-note.muted { color: var(--text-muted); font-weight: 500; }
+
+.rc-vin-alert { margin-top: 0.85rem; padding: 0.8rem 1rem; border-radius: 10px; font-size: 0.88rem; line-height: 1.7; }
+.rc-vin-alert.bad { background: var(--danger-soft); color: var(--danger); border: 1px solid color-mix(in srgb, var(--danger) 30%, transparent); }
+.rc-vin-alert.warn { background: var(--warning-soft); color: var(--text); border: 1px solid color-mix(in srgb, var(--warning) 35%, transparent); }
+.rc-vin-alert ul { margin: 0.25rem 0 0; padding-inline-start: 1.1rem; }
+
 /* ---------------------------------------------------------------------------
    The vehicle card on paper (or saved as PDF from the print dialog)
    ---------------------------------------------------------------------------
@@ -3753,6 +3895,8 @@ td:hover > .cell-edit-wrap > .cell-revert,
   .catalog-notice,
   .catalog-tips,
   .catalog-card-foot,
+  .similar,
+  .rc-vin,
   body.printing-one .catalog-card:not(.print-target) {
     display: none !important;
   }
@@ -3783,12 +3927,20 @@ td:hover > .cell-edit-wrap > .cell-revert,
   .rc-print-head {
     display: flex;
     flex-wrap: wrap;
-    align-items: baseline;
+    align-items: center;
     gap: 2px 10px;
     padding-bottom: 5px;
     border-bottom: 1.5px solid #111827;
   }
   .rc-print-brand { font-weight: 800; font-size: 12pt; }
+  /* the live card's address, at a size a phone reads from arm's length */
+  .rc-print-qr {
+    display: grid;
+    justify-items: center;
+    gap: 1px;
+  }
+  .rc-print-qr svg { width: 20mm; height: 20mm; display: block; }
+  .rc-print-qr small { font-size: 6pt; color: #556275; white-space: nowrap; }
   .rc-print-title { font-weight: 700; font-size: 10pt; }
   .rc-print-meta {
     margin-inline-start: auto;

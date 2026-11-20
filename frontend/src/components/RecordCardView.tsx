@@ -1,9 +1,11 @@
-import { type ReactNode } from "react";
+import qrcode from "qrcode-generator";
+import { useMemo, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
 import { type Correction, type RecordCard } from "../api/client";
 import ArrivalMark from "./ArrivalMark";
 import SemanticIcon from "./SemanticIcons";
+import VinPanel from "./VinPanel";
 import { columnLabel, columnMeta, usesRawHeaders } from "../data/columnDictionary";
 import {
   daysUntil,
@@ -38,10 +40,13 @@ const LICENCE_DUE_DAYS = 30;
 export default function RecordCardView({
   record,
   source,
+  children,
 }: {
   record: RecordCard;
   /** the file the record came from, named on the printed copy */
   source?: string;
+  /** shown after the details and before the history - "vehicles like this one" */
+  children?: ReactNode;
 }) {
   const { t, i18n } = useTranslation();
   const lang = i18n.language;
@@ -135,6 +140,7 @@ export default function RecordCardView({
           {source && <bdi>{t("catalog.from_file", { name: source })}</bdi>}
           <span>{t("record.printed_at", { when: formatNow(lang) })}</span>
         </span>
+        <PrintQr url={window.location.href} caption={t("record.print_scan")} />
       </div>
 
       <header className="rc-hero">
@@ -274,6 +280,10 @@ export default function RecordCardView({
         ))}
       </div>
 
+      {record.vin && <VinPanel reading={record.vin} />}
+
+      {children}
+
       {record.corrections !== null && (
         <section className="rc-section rc-history-card" aria-labelledby="rc-history">
           <h2 id="rc-history" className="rc-section-title">
@@ -314,6 +324,40 @@ export default function RecordCardView({
         </section>
       )}
     </div>
+  );
+}
+
+/**
+ * The page's own address as a QR code, for the printed copy: whoever holds the sheet can
+ * open the live card from a phone - the current licence, not the one on the day it was
+ * printed. It opens only for someone signed in, like the address itself.
+ *
+ * Drawn as one SVG path of dark modules, at error-correction level M (a sheet that has
+ * been folded or stamped still scans), with the two-module quiet zone scanners need.
+ */
+function PrintQr({ url, caption }: { url: string; caption: string }) {
+  const path = useMemo(() => {
+    const qr = qrcode(0, "M");
+    qr.addData(url, "Byte");
+    qr.make();
+    const size = qr.getModuleCount();
+    let d = "";
+    for (let row = 0; row < size; row++) {
+      for (let col = 0; col < size; col++) {
+        if (qr.isDark(row, col)) d += `M${col + 2} ${row + 2}h1v1h-1z`;
+      }
+    }
+    return { d, box: size + 4 };
+  }, [url]);
+
+  return (
+    <span className="rc-print-qr">
+      <svg viewBox={`0 0 ${path.box} ${path.box}`} shapeRendering="crispEdges" aria-hidden="true">
+        <rect width={path.box} height={path.box} fill="#fff" />
+        <path d={path.d} fill="#000" />
+      </svg>
+      <small>{caption}</small>
+    </span>
   );
 }
 

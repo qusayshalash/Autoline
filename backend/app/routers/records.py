@@ -16,7 +16,7 @@ from app.db import catalog
 from app.db.connection import datasets as dataset_connections
 from app.errors import ApiError
 from app.models.schemas import CorrectionOut, RecordArrival, RecordOut
-from app.services import arrivals, clocks, corrections, row_identity
+from app.services import arrivals, clocks, corrections, row_identity, vin
 from app.services.rate_limit import QUERY
 
 router = APIRouter(prefix="/api/datasets", tags=["records"])
@@ -90,4 +90,5 @@ def get_record(
             if found is not None
             else None
         ),
+        vin=vin.read({c: ("" if v is None else str(v)) for c, v in record.items()}),
     )

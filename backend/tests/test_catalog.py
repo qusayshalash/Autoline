@@ -156,4 +156,71 @@ def test_the_lookup_is_rate_limited():
     source = (Path(__file__).resolve().parent.parent / "app" / "routers" / "catalog.py").read_text(
         encoding="utf-8"
     )
-    assert source.count("rate_limited(QUERY)") == 1
+    assert source.count("rate_limited(QUERY)") == 2
+
+
+# ---- how many like it -------------------------------------------------------------------
+
+
+@pytest.fixture(scope="module")
+def fleet(admin) -> str:
+    """Five vehicles: three Corollas, two with one engine and one with another, a Corolla
+    from another make (the same trade name is not the same car), and a Kia with no
+    engine code at all."""
+    from conftest import wait_for_job
+
+    body = (
+        "mispar_rechev,tozeret_nm,kinuy_mishari,degem_manoa,shnat_yitzur\n"
+        "11111111,טויוטה יפן,COROLLA,1ZR,2016\n"
+        "22222222,טויוטה יפן,COROLLA,1ZR,2018\n"
+        "33333333,טויוטה יפן,COROLLA,2ZR,2019\n"
+        "44444444,טויוטה טורקיה,COROLLA,1ZR,2020\n"
+        "55555555,קיה קוריאה,PICANTO,,2015\n"
+    ).encode("utf-8")
+    r = admin.post("/api/datasets/upload", files={"file": ("fleet.csv", body, "text/csv")})
+    dataset_id = r.json()["dataset_id"]
+    r = admin.post(
+        f"/api/datasets/{dataset_id}/import",
+        json={"encoding": "utf-8", "delimiter": ",", "has_header": True},
+    )
+    assert wait_for_job(admin, r.json()["id"])["status"] == "done"
+    yield dataset_id
+    admin.delete(f"/api/datasets/{dataset_id}")
+
+
+def similar(client, dataset_id, q):
+    r = client.get("/api/catalog/similar", params={"dataset_id": dataset_id, "q": q})
+    assert r.status_code == 200, r.text
+    return r.json()
+
+
+def test_cars_like_it_are_counted_by_model_then_engine(admin, fleet):
+    out = similar(admin, fleet, "11111111")
+    assert out["model"]["count"] == 3  # the Turkish-built Corolla is another make
+    assert out["engine"]["count"] == 2
+    assert [f["column"] for f in out["engine"]["filters"]] == ["tozeret_nm", "kinuy_mishari", "degem_manoa"]
+
+
+def test_the_count_is_what_the_grid_then_shows(admin, fleet):
+    """The card's number and the grid behind its link must agree, or the link lies."""
+    out = similar(admin, fleet, "11111111")
+    for part in ("model", "engine"):
+        filters = [{"op": "eq", **f} for f in out[part]["filters"]]
+        r = admin.post(f"/api/datasets/{fleet}/data", json={"filters": filters, "page_size": 10})
+        assert r.status_code == 200, r.text
+        assert r.json()["total_rows"] == out[part]["count"], part
+
+
+def test_no_engine_code_means_no_engine_count(admin, fleet):
+    out = similar(admin, fleet, "55555555")
+    assert out["model"]["count"] == 1
+    assert out["engine"] is None
+
+
+def test_an_unknown_vehicle_or_dataset(admin, viewer, anon, fleet):
+    assert similar(admin, fleet, "99999999") == {"model": None, "engine": None}
+    assert similar(viewer, fleet, "11111111")["model"]["count"] == 3
+    r = admin.get("/api/catalog/similar", params={"dataset_id": "nope", "q": "11111111"})
+    assert r.status_code == 404 and r.json()["code"] == "dataset_not_found"
+    r = anon.get("/api/catalog/similar", params={"dataset_id": fleet, "q": "11111111"})
+    assert r.status_code == 401

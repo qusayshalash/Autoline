@@ -27,7 +27,7 @@ from typing import Optional
 
 from app.db import catalog
 from app.db.connection import datasets
-from app.services import sql_utils
+from app.services import sql_utils, vin
 
 PLATE_COLUMN = "mispar_rechev"
 CHASSIS_COLUMN = "misgeret"
@@ -83,12 +83,14 @@ def lookup(query: str) -> dict:
                 [value, MAX_MATCHES - len(matches)],
             ).fetchall()
         for row in rows:
+            values = ["" if v is None else str(v) for v in row]
             matches.append(
                 {
                     "dataset_id": dataset_id,
                     "dataset_name": ds.get("original_filename") or "",
                     "columns": columns,
-                    "values": ["" if v is None else str(v) for v in row],
+                    "values": values,
+                    "vin": vin.read(dict(zip(columns, values))),
                 }
             )
         if len(matches) >= MAX_MATCHES:
@@ -100,3 +102,79 @@ def lookup(query: str) -> dict:
         "normalized": value,
         "matches": matches,
     }
+
+
+# ---- how many like it -------------------------------------------------------------------
+#
+# "How many cars like this one are on the road?" is the question a parts trader asks next:
+# it is the size of the market for whatever fits this car. Two answers, from wide to
+# narrow: the same make and model, and of those the ones with this engine - the engine is
+# what decides most filters.
+#
+# Counted in the table the grid shows (the cleaned copy when there is one), with the
+# grid's own filter builder, so the number on the card is the number of rows the link
+# opens - never a figure the grid then contradicts.
+
+MAKE_COLUMN = "tozeret_nm"
+TRADE_NAME_COLUMN = "kinuy_mishari"
+MODEL_CODE_COLUMN = "degem_nm"
+ENGINE_COLUMN = "degem_manoa"
+
+
+def similar(dataset_id: str, query: str) -> dict:
+    """{"model": {filters, count} | None, "engine": {filters, count} | None} for the
+    vehicle `query` finds in this dataset. None where the vehicle lacks the field."""
+    from app.models.schemas import FilterRule
+    from app.services import view
+
+    empty = {"model": None, "engine": None}
+    ds = catalog.get_dataset(dataset_id)
+    if ds is None or ds.get("status") != "ready":
+        raise LookupError(dataset_id)
+
+    plate, chassis = interpret(query)
+    if plate is None and chassis is None:
+        return empty
+    column, value = (PLATE_COLUMN, plate) if plate else (CHASSIS_COLUMN, chassis)
+
+    with datasets.reading(dataset_id) as cur:
+        if not sql_utils.table_exists(dataset_id, "raw_data"):
+            return empty
+        raw_columns = sql_utils.table_columns(dataset_id, "raw_data")
+        if column not in raw_columns:
+            return empty
+        row = cur.execute(
+            f"SELECT * FROM raw_data WHERE {sql_utils.quote_ident(column)} = ? LIMIT 1", [value]
+        ).fetchone()
+        if row is None:
+            return empty
+        car = {c: ("" if v is None else str(v).strip()) for c, v in zip(raw_columns, row)}
+
+        table = sql_utils.resolve_source_table(dataset_id, "cleaned")
+        columns = sql_utils.table_columns(dataset_id, table)
+
+        # the trade name ("COROLLA") is what people mean by the model; the registry's
+        # model code stands in only when a row has no trade name
+        model_column = next(
+            (c for c in (TRADE_NAME_COLUMN, MODEL_CODE_COLUMN) if car.get(c) and c in columns), None
+        )
+        if not car.get(MAKE_COLUMN) or MAKE_COLUMN not in columns or model_column is None:
+            return empty
+
+        def count(rules: list[dict]) -> int:
+            where, params = view.where(
+                dataset_id, columns, filters=[FilterRule(op="eq", **r) for r in rules]
+            )
+            return cur.execute(
+                f"SELECT COUNT(*) FROM {sql_utils.quote_ident(table)} WHERE {where}", params
+            ).fetchone()[0]
+
+        model_rules = [
+            {"column": MAKE_COLUMN, "value": car[MAKE_COLUMN]},
+            {"column": model_column, "value": car[model_column]},
+        ]
+        out = {"model": {"filters": model_rules, "count": count(model_rules)}, "engine": None}
+        if car.get(ENGINE_COLUMN) and ENGINE_COLUMN in columns:
+            engine_rules = model_rules + [{"column": ENGINE_COLUMN, "value": car[ENGINE_COLUMN]}]
+            out["engine"] = {"filters": engine_rules, "count": count(engine_rules)}
+        return out

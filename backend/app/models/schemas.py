@@ -990,6 +990,37 @@ class ExportRequest(Incoming):
     sort_dir: Literal["asc", "desc"] = "asc"
 
 
+class VinCheck(BaseModel):
+    """One thing a chassis number was checked for, and how it came out. `state` is
+    "match", "mismatch", "near" (the year, one off - normal), "valid", "invalid" or
+    "unchecked" (the rule does not hold for this maker, or the record lacks the field)."""
+
+    state: str
+    registry: Optional[Any] = None
+    decoded: Optional[int] = None
+    makes: list[str] = []
+    code: Optional[str] = None
+
+
+class VinReading(BaseModel):
+    """What a vehicle's chassis number says, against the registry's record of it - see
+    app/services/vin.py. `verdict`: "ok", "warn", "bad", "unknown" (a prefix too rare to
+    judge) or "nonstandard" (an older number, not 17 characters)."""
+
+    vin: str
+    standard: bool
+    verdict: str
+    wmi: Optional[str] = None
+    known: bool = False
+    model_code: Optional[str] = None
+    year_code: Optional[str] = None
+    serial: Optional[str] = None
+    maker: Optional[VinCheck] = None
+    model: Optional[VinCheck] = None
+    year: Optional[VinCheck] = None
+    check_digit: Optional[VinCheck] = None
+
+
 class VehicleMatch(BaseModel):
     """One vehicle the catalog found, as a row of the dataset it was found in."""
 
@@ -997,6 +1028,26 @@ class VehicleMatch(BaseModel):
     dataset_name: str
     columns: list[str]
     values: list[str]
+    vin: Optional[VinReading] = None
+
+
+class SimilarFilter(BaseModel):
+    column: str
+    value: str
+
+
+class SimilarCount(BaseModel):
+    """How many rows share these values - and the filters that open exactly those rows."""
+
+    filters: list[SimilarFilter]
+    count: int
+
+
+class SimilarVehicles(BaseModel):
+    # the same make and model; None when the vehicle has no make or model
+    model: Optional[SimilarCount] = None
+    # of those, the ones with this engine; None when the vehicle has no engine code
+    engine: Optional[SimilarCount] = None
 
 
 class VehicleLookup(BaseModel):
@@ -1078,6 +1129,8 @@ class RecordOut(BaseModel):
     arrival: Optional[RecordArrival] = None
     # the hand corrections, newest first; None when the reader may not see them
     corrections: Optional[list[CorrectionOut]] = None
+    # the chassis number read against the record; None when it has none
+    vin: Optional[VinReading] = None
 
 
 class RegistrySyncConfig(Incoming):

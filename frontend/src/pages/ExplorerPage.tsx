@@ -140,7 +140,27 @@ export default function ExplorerPage() {
       // a browser refusing storage is not a reason to stop working
     }
   }, [datasetId, searchColumns]);
-  const [filters, setFilters] = useState<FilterRule[]>([]);
+  // A link may open the grid already filtered: ?eq=column=value, once per rule - the
+  // catalog's "cars like this one" does. Read once, then taken off the address so it does
+  // not come back after the filters have been changed by hand.
+  const [filters, setFilters] = useState<FilterRule[]>(() =>
+    searchParams.getAll("eq").flatMap((pair) => {
+      const at = pair.indexOf("=");
+      return at > 0 ? [{ column: pair.slice(0, at), op: "eq" as const, value: pair.slice(at + 1) }] : [];
+    })
+  );
+  useEffect(() => {
+    if (!searchParams.has("eq")) return;
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete("eq");
+        return next;
+      },
+      { replace: true }
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [sortBy, setSortBy] = useState<string | null>(null);
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [page, setPage] = useState(1);

@@ -1,0 +1,2078 @@
+{
+ "measured_on": "2026-11-20",
+ "vehicles": 3780174,
+ "rules_hold_at": 0.99,
+ "prefixes": {
+  "1A8": {
+   "cars": 405,
+   "makes": [
+    "קרייזלר מכסיקו",
+    "קרייזלר ארהב\""
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "1B3": {
+   "cars": 287,
+   "makes": [
+    "קרייזלר ארהב\""
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "1C3": {
+   "cars": 343,
+   "makes": [
+    "קרייזלר ארהב\"",
+    "קרייזלר קנדה",
+    "קרייזלר-אוסטרי",
+    "דימלרקריזלר-גר"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "1C4": {
+   "cars": 15019,
+   "makes": [
+    "קרייזלר ארהב\"",
+    "ג'יפ ארהב\"",
+    "פיאט קרייזלר",
+    "ג'יפ איטליה"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": false
+  },
+  "1C6": {
+   "cars": 251,
+   "makes": [
+    "ג'יפ ארהב\"",
+    "קרייזלר ארהב\""
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "1D8": {
+   "cars": 296,
+   "makes": [
+    "קרייזלר ארהב\""
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "1FA": {
+   "cars": 557,
+   "makes": [
+    "פורד ארהב\""
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "1FM": {
+   "cars": 5614,
+   "makes": [
+    "פורד ארהב\""
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": true
+  },
+  "1G1": {
+   "cars": 6999,
+   "makes": [
+    "שברולט ארהב\""
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "1G4": {
+   "cars": 2474,
+   "makes": [
+    "ביואיק ארהב"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "1G6": {
+   "cars": 961,
+   "makes": [
+    "קאדילאק ארהב\""
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "1GC": {
+   "cars": 175,
+   "makes": [
+    "שברולט ארהב\""
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "1GK": {
+   "cars": 265,
+   "makes": [
+    "ג'י.אמ.סי ארהב"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "1GN": {
+   "cars": 7774,
+   "makes": [
+    "שברולט ארהב\""
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "1GY": {
+   "cars": 3843,
+   "makes": [
+    "קאדילאק ארהב\""
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "1HG": {
+   "cars": 426,
+   "makes": [
+    "הונדה-ארהב\""
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": false
+  },
+  "1J4": {
+   "cars": 1354,
+   "makes": [
+    "קרייזלר ארהב\"",
+    "קרייזלר-אוסטרי"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "1J8": {
+   "cars": 881,
+   "makes": [
+    "קרייזלר ארהב\"",
+    "קרייזלר-אוסטרי"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "1N4": {
+   "cars": 708,
+   "makes": [
+    "ניסאן ארהב\""
+   ],
+   "year_code": true,
+   "model_code": true,
+   "check_digit": true
+  },
+  "1V2": {
+   "cars": 267,
+   "makes": [
+    "פולקסווגן ארהב"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "2A4": {
+   "cars": 489,
+   "makes": [
+    "קרייזלר קנדה"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "2A8": {
+   "cars": 135,
+   "makes": [
+    "קרייזלר קנדה"
+   ],
+   "year_code": true,
+   "model_code": true,
+   "check_digit": true
+  },
+  "2C3": {
+   "cars": 200,
+   "makes": [
+    "קרייזלר קנדה",
+    "דודג' קנדה"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": true
+  },
+  "2C4": {
+   "cars": 1222,
+   "makes": [
+    "קרייזלר קנדה",
+    "דודג' קנדה"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "2FM": {
+   "cars": 3662,
+   "makes": [
+    "פורד קנדה"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "2G1": {
+   "cars": 1649,
+   "makes": [
+    "שברולט קנדה"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "2G4": {
+   "cars": 601,
+   "makes": [
+    "ביואיק קנדה"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "2GN": {
+   "cars": 441,
+   "makes": [
+    "שברולט קנדה"
+   ],
+   "year_code": true,
+   "model_code": true,
+   "check_digit": true
+  },
+  "2T3": {
+   "cars": 115,
+   "makes": [
+    "טויוטה קנדה"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "3C4": {
+   "cars": 788,
+   "makes": [
+    "ג'יפ מכסיקו",
+    "קרייזלר מכסיקו"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "3D4": {
+   "cars": 233,
+   "makes": [
+    "קרייזלר מכסיקו"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "3FM": {
+   "cars": 110,
+   "makes": [
+    "פורד מקסיקו"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": true
+  },
+  "3G1": {
+   "cars": 1521,
+   "makes": [
+    "שברולט מקסיקו"
+   ],
+   "year_code": true,
+   "model_code": true,
+   "check_digit": true
+  },
+  "3GN": {
+   "cars": 7849,
+   "makes": [
+    "שברולט מקסיקו"
+   ],
+   "year_code": true,
+   "model_code": true,
+   "check_digit": true
+  },
+  "3GY": {
+   "cars": 1016,
+   "makes": [
+    "קאדילאק מכסיקו"
+   ],
+   "year_code": true,
+   "model_code": true,
+   "check_digit": true
+  },
+  "3HG": {
+   "cars": 2400,
+   "makes": [
+    "הונדה מקסיקו"
+   ],
+   "year_code": true,
+   "model_code": true,
+   "check_digit": false
+  },
+  "3KP": {
+   "cars": 1446,
+   "makes": [
+    "קיה מכסיקו"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": false
+  },
+  "3N1": {
+   "cars": 8784,
+   "makes": [
+    "ניסאן מקסיקו"
+   ],
+   "year_code": false,
+   "model_code": true,
+   "check_digit": true
+  },
+  "3PC": {
+   "cars": 368,
+   "makes": [
+    "ניסאן מקסיקו"
+   ],
+   "year_code": true,
+   "model_code": true,
+   "check_digit": true
+  },
+  "4JG": {
+   "cars": 1461,
+   "makes": [
+    "מרצדס בנץ ארהב"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "4S2": {
+   "cars": 439,
+   "makes": [
+    "איסוזו ארהב\""
+   ],
+   "year_code": true,
+   "model_code": true,
+   "check_digit": true
+  },
+  "4S4": {
+   "cars": 622,
+   "makes": [
+    "סובארו ארהב\"",
+    "סובארו יפן"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": false
+  },
+  "4T1": {
+   "cars": 4411,
+   "makes": [
+    "טויוטה ארהב\""
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "5N1": {
+   "cars": 216,
+   "makes": [
+    "ניסאן ארהב\""
+   ],
+   "year_code": true,
+   "model_code": true,
+   "check_digit": true
+  },
+  "5TD": {
+   "cars": 4166,
+   "makes": [
+    "טויוטה ארהב\"",
+    "לקסוס ארהב"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": true
+  },
+  "5UX": {
+   "cars": 1145,
+   "makes": [
+    "ב מ וו ארהב\""
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "5YJ": {
+   "cars": 1609,
+   "makes": [
+    "טסלה ארה''ב"
+   ],
+   "year_code": true,
+   "model_code": true,
+   "check_digit": true
+  },
+  "5YM": {
+   "cars": 167,
+   "makes": [
+    "ב מ וו ארהב\""
+   ],
+   "year_code": true,
+   "model_code": true,
+   "check_digit": true
+  },
+  "6FP": {
+   "cars": 368,
+   "makes": [
+    "פורד ד אפריקה",
+    "פורד תאילנד"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": false
+  },
+  "7JR": {
+   "cars": 594,
+   "makes": [
+    "וולבו ארהב\""
+   ],
+   "year_code": true,
+   "model_code": true,
+   "check_digit": false
+  },
+  "7SA": {
+   "cars": 221,
+   "makes": [
+    "טסלה ארה''ב"
+   ],
+   "year_code": true,
+   "model_code": true,
+   "check_digit": true
+  },
+  "ADM": {
+   "cars": 134,
+   "makes": [
+    "האמר ג.מ. דרום"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "AHT": {
+   "cars": 1192,
+   "makes": [
+    "טויוטה דרום אפ"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "HAC": {
+   "cars": 269,
+   "makes": [
+    "איון סין",
+    "גי.אי.סי סין"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "HES": {
+   "cars": 2254,
+   "makes": [
+    "סמארט סין"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "HJN": {
+   "cars": 151,
+   "makes": [
+    "ניאו רכב סין"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "JA4": {
+   "cars": 38788,
+   "makes": [
+    "מיצובישי יפן"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "JAA": {
+   "cars": 1147,
+   "makes": [
+    "איסוזו יפן"
+   ],
+   "year_code": true,
+   "model_code": true,
+   "check_digit": false
+  },
+  "JAC": {
+   "cars": 1280,
+   "makes": [
+    "איסוזו יפן"
+   ],
+   "year_code": true,
+   "model_code": true,
+   "check_digit": false
+  },
+  "JDA": {
+   "cars": 22776,
+   "makes": [
+    "דייהטסו-יפן"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": false
+  },
+  "JF1": {
+   "cars": 52794,
+   "makes": [
+    "סובארו יפן",
+    "טויוטה יפן"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": false
+  },
+  "JF2": {
+   "cars": 28095,
+   "makes": [
+    "סובארו יפן"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "JHL": {
+   "cars": 205,
+   "makes": [
+    "הונדה-יפן"
+   ],
+   "year_code": false,
+   "model_code": true,
+   "check_digit": false
+  },
+  "JHM": {
+   "cars": 46327,
+   "makes": [
+    "הונדה-יפן"
+   ],
+   "year_code": true,
+   "model_code": true,
+   "check_digit": false
+  },
+  "JM1": {
+   "cars": 303,
+   "makes": [
+    "מזדה יפן"
+   ],
+   "year_code": false,
+   "model_code": true,
+   "check_digit": false
+  },
+  "JM3": {
+   "cars": 770,
+   "makes": [
+    "מזדה יפן"
+   ],
+   "year_code": true,
+   "model_code": true,
+   "check_digit": true
+  },
+  "JMB": {
+   "cars": 91048,
+   "makes": [
+    "מיצובישי יפן"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": false
+  },
+  "JMZ": {
+   "cars": 72297,
+   "makes": [
+    "מזדה יפן",
+    "מזדה צרפת"
+   ],
+   "year_code": false,
+   "model_code": true,
+   "check_digit": false
+  },
+  "JN1": {
+   "cars": 11702,
+   "makes": [
+    "ניסאן יפן"
+   ],
+   "year_code": false,
+   "model_code": true,
+   "check_digit": false
+  },
+  "JSA": {
+   "cars": 60919,
+   "makes": [
+    "סוזוקי-יפן"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": false
+  },
+  "JT1": {
+   "cars": 330,
+   "makes": [
+    "טויוטה יפן"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": false
+  },
+  "JTB": {
+   "cars": 7171,
+   "makes": [
+    "טויוטה יפן"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": false
+  },
+  "JTD": {
+   "cars": 86094,
+   "makes": [
+    "טויוטה יפן",
+    "טויוטה צרפת",
+    "טויוטה צ'כיה"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": true
+  },
+  "JTE": {
+   "cars": 30501,
+   "makes": [
+    "טויוטה יפן"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": true
+  },
+  "JTF": {
+   "cars": 2775,
+   "makes": [
+    "טויוטה יפן"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "JTH": {
+   "cars": 10979,
+   "makes": [
+    "לקסוס יפן",
+    "טויוטה יפן"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": true
+  },
+  "JTJ": {
+   "cars": 11759,
+   "makes": [
+    "לקסוס יפן",
+    "טויוטה יפן"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": true
+  },
+  "JTM": {
+   "cars": 60048,
+   "makes": [
+    "טויוטה יפן"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": true
+  },
+  "JTN": {
+   "cars": 78758,
+   "makes": [
+    "טויוטה יפן"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": true
+  },
+  "JTP": {
+   "cars": 3750,
+   "makes": [
+    "טויוטה טורקיה"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": true
+  },
+  "KL1": {
+   "cars": 40076,
+   "makes": [
+    "שברולט ד.קוריא"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "KL7": {
+   "cars": 8557,
+   "makes": [
+    "שברולט ד.קוריא"
+   ],
+   "year_code": true,
+   "model_code": true,
+   "check_digit": true
+  },
+  "KL8": {
+   "cars": 13274,
+   "makes": [
+    "שברולט ד.קוריא"
+   ],
+   "year_code": true,
+   "model_code": true,
+   "check_digit": true
+  },
+  "KM8": {
+   "cars": 3799,
+   "makes": [
+    "יונדאי קוריאה"
+   ],
+   "year_code": true,
+   "model_code": true,
+   "check_digit": true
+  },
+  "KMF": {
+   "cars": 1454,
+   "makes": [
+    "יונדאי קוריאה"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": false
+  },
+  "KMH": {
+   "cars": 292102,
+   "makes": [
+    "יונדאי קוריאה"
+   ],
+   "year_code": true,
+   "model_code": true,
+   "check_digit": false
+  },
+  "KMT": {
+   "cars": 2724,
+   "makes": [
+    "יונדאי קוריאה"
+   ],
+   "year_code": false,
+   "model_code": true,
+   "check_digit": false
+  },
+  "KMU": {
+   "cars": 302,
+   "makes": [
+    "יונדאי קוריאה"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "KMX": {
+   "cars": 179,
+   "makes": [
+    "יונדאי קוריאה"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": false
+  },
+  "KNA": {
+   "cars": 287220,
+   "makes": [
+    "קיה קוריאה"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": false
+  },
+  "KNC": {
+   "cars": 421,
+   "makes": [
+    "קיה קוריאה"
+   ],
+   "year_code": true,
+   "model_code": true,
+   "check_digit": false
+  },
+  "KND": {
+   "cars": 25455,
+   "makes": [
+    "קיה קוריאה"
+   ],
+   "year_code": true,
+   "model_code": true,
+   "check_digit": true
+  },
+  "KNE": {
+   "cars": 2927,
+   "makes": [
+    "קיה קוריאה"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": false
+  },
+  "KPA": {
+   "cars": 470,
+   "makes": [
+    "קיי גי מוביליט",
+    "סאנגיונג ד.קור"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": false
+  },
+  "KPT": {
+   "cars": 8291,
+   "makes": [
+    "סאנגיונג ד.קור",
+    "קיי גי מוביליט"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": false
+  },
+  "L1N": {
+   "cars": 12728,
+   "makes": [
+    "אקספנג סין"
+   ],
+   "year_code": true,
+   "model_code": true,
+   "check_digit": true
+  },
+  "L6T": {
+   "cars": 13765,
+   "makes": [
+    "זיקר",
+    "לינק אנד קו",
+    "גילי סין"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "LB3": {
+   "cars": 20094,
+   "makes": [
+    "גילי סין"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "LC0": {
+   "cars": 10335,
+   "makes": [
+    "בי ווי די"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "LDP": {
+   "cars": 3835,
+   "makes": [
+    "דונגפנג סין",
+    "וויה סין"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": true
+  },
+  "LFB": {
+   "cars": 235,
+   "makes": [
+    "אף אי דאבל יו"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "LFP": {
+   "cars": 1083,
+   "makes": [
+    "אף אי דאבל יו"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "LFZ": {
+   "cars": 2699,
+   "makes": [
+    "ליפמוטור סין"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "LGW": {
+   "cars": 4009,
+   "makes": [
+    "אורה סין",
+    "וואי סין",
+    "גרייט וול סין"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": true
+  },
+  "LGX": {
+   "cars": 44630,
+   "makes": [
+    "בי ווי די"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "LJ1": {
+   "cars": 1549,
+   "makes": [
+    "ג'אק סין",
+    "גיי.איי.סי סין",
+    "ניאו רכב סין"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": true
+  },
+  "LLX": {
+   "cars": 159,
+   "makes": [
+    "יודו סין"
+   ],
+   "year_code": false,
+   "model_code": true,
+   "check_digit": true
+  },
+  "LM8": {
+   "cars": 3262,
+   "makes": [
+    "סרס סין"
+   ],
+   "year_code": true,
+   "model_code": true,
+   "check_digit": true
+  },
+  "LME": {
+   "cars": 2501,
+   "makes": [
+    "סקיוול סין"
+   ],
+   "year_code": false,
+   "model_code": true,
+   "check_digit": true
+  },
+  "LMW": {
+   "cars": 272,
+   "makes": [
+    "גי.אי.סי סין"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": true
+  },
+  "LMX": {
+   "cars": 1182,
+   "makes": [
+    "פורתינג סין"
+   ],
+   "year_code": true,
+   "model_code": true,
+   "check_digit": true
+  },
+  "LNA": {
+   "cars": 443,
+   "makes": [
+    "גי.אי.סי סין"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "LND": {
+   "cars": 1672,
+   "makes": [
+    "איויאיסי סין"
+   ],
+   "year_code": false,
+   "model_code": true,
+   "check_digit": true
+  },
+  "LNN": {
+   "cars": 59202,
+   "makes": [
+    "צ'רי סין",
+    "ג'אקו סין",
+    "אומודה סין"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "LRW": {
+   "cars": 22343,
+   "makes": [
+    "טסלה סין"
+   ],
+   "year_code": true,
+   "model_code": true,
+   "check_digit": true
+  },
+  "LS6": {
+   "cars": 4117,
+   "makes": [
+    "דיפאל סין",
+    "אוואטר סין"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "LSF": {
+   "cars": 108,
+   "makes": [
+    "מקסוס סין"
+   ],
+   "year_code": true,
+   "model_code": true,
+   "check_digit": true
+  },
+  "LSH": {
+   "cars": 498,
+   "makes": [
+    "מקסוס סין"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "LSJ": {
+   "cars": 35619,
+   "makes": [
+    "מ.ג סין",
+    "איי אם סין"
+   ],
+   "year_code": false,
+   "model_code": true,
+   "check_digit": true
+  },
+  "LSK": {
+   "cars": 2649,
+   "makes": [
+    "מקסוס סין",
+    "מ.ג סין"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": true
+  },
+  "LVA": {
+   "cars": 653,
+   "makes": [
+    "פוטון סין"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "LVP": {
+   "cars": 1691,
+   "makes": [
+    "סרס סין"
+   ],
+   "year_code": true,
+   "model_code": true,
+   "check_digit": true
+  },
+  "LVT": {
+   "cars": 12664,
+   "makes": [
+    "צ'רי סין"
+   ],
+   "year_code": true,
+   "model_code": true,
+   "check_digit": true
+  },
+  "LVU": {
+   "cars": 7936,
+   "makes": [
+    "ג'אקו סין",
+    "צ'רי סין",
+    "אומודה סין"
+   ],
+   "year_code": true,
+   "model_code": true,
+   "check_digit": true
+  },
+  "LVV": {
+   "cars": 16504,
+   "makes": [
+    "צ'רי סין",
+    "ג'אקו סין"
+   ],
+   "year_code": true,
+   "model_code": true,
+   "check_digit": true
+  },
+  "LVX": {
+   "cars": 2067,
+   "makes": [
+    "איווייס סין"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "LVY": {
+   "cars": 607,
+   "makes": [
+    "וולבו סין"
+   ],
+   "year_code": true,
+   "model_code": true,
+   "check_digit": false
+  },
+  "LYV": {
+   "cars": 114,
+   "makes": [
+    "וולבו סין"
+   ],
+   "year_code": true,
+   "model_code": true,
+   "check_digit": false
+  },
+  "MA3": {
+   "cars": 24402,
+   "makes": [
+    "מרוטי-סוזוקי"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": false
+  },
+  "MAK": {
+   "cars": 513,
+   "makes": [
+    "הונדה הודו"
+   ],
+   "year_code": true,
+   "model_code": true,
+   "check_digit": false
+  },
+  "MAL": {
+   "cars": 25711,
+   "makes": [
+    "יונדאי הודו"
+   ],
+   "year_code": true,
+   "model_code": true,
+   "check_digit": false
+  },
+  "MDH": {
+   "cars": 5168,
+   "makes": [
+    "ניסאן הודו"
+   ],
+   "year_code": false,
+   "model_code": true,
+   "check_digit": false
+  },
+  "MMB": {
+   "cars": 2890,
+   "makes": [
+    "מיצובישי תאילנ"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": false
+  },
+  "MMC": {
+   "cars": 44979,
+   "makes": [
+    "מיצובישי תאילנ"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": false
+  },
+  "MMS": {
+   "cars": 3803,
+   "makes": [
+    "סוזוקי תאילנד"
+   ],
+   "year_code": false,
+   "model_code": true,
+   "check_digit": false
+  },
+  "MMZ": {
+   "cars": 33386,
+   "makes": [
+    "מזדה תאילנד"
+   ],
+   "year_code": false,
+   "model_code": true,
+   "check_digit": false
+  },
+  "MPA": {
+   "cars": 25528,
+   "makes": [
+    "איסוזו תאילנד"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": false
+  },
+  "MR0": {
+   "cars": 21042,
+   "makes": [
+    "טויוטה תאילנד"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": true
+  },
+  "NLA": {
+   "cars": 18617,
+   "makes": [
+    "הונדה טורקיה"
+   ],
+   "year_code": false,
+   "model_code": true,
+   "check_digit": false
+  },
+  "NLH": {
+   "cars": 133159,
+   "makes": [
+    "יונדאי טורקיה"
+   ],
+   "year_code": true,
+   "model_code": true,
+   "check_digit": false
+  },
+  "NLJ": {
+   "cars": 427,
+   "makes": [
+    "יונדאי טורקיה"
+   ],
+   "year_code": true,
+   "model_code": true,
+   "check_digit": false
+  },
+  "NMT": {
+   "cars": 162355,
+   "makes": [
+    "טויוטה טורקיה"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": true
+  },
+  "SAD": {
+   "cars": 551,
+   "makes": [
+    "יגואר",
+    "יגואר אוסטריה"
+   ],
+   "year_code": true,
+   "model_code": true,
+   "check_digit": true
+  },
+  "SAJ": {
+   "cars": 791,
+   "makes": [
+    "יגואר"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": false
+  },
+  "SAL": {
+   "cars": 8928,
+   "makes": [
+    "רובר אנגליה",
+    "לנדרובר אנגליה",
+    "לנדרובר סלובקי"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": false
+  },
+  "SB1": {
+   "cars": 42203,
+   "makes": [
+    "טויוטה אנגליה",
+    "טויוטה בלגיה"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": true
+  },
+  "SCB": {
+   "cars": 109,
+   "makes": [
+    "בנטלי בריטניה"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "SHH": {
+   "cars": 19547,
+   "makes": [
+    "הונדה בריטניה"
+   ],
+   "year_code": false,
+   "model_code": true,
+   "check_digit": false
+  },
+  "SHS": {
+   "cars": 5641,
+   "makes": [
+    "הונדה בריטניה"
+   ],
+   "year_code": false,
+   "model_code": true,
+   "check_digit": false
+  },
+  "SJK": {
+   "cars": 304,
+   "makes": [
+    "ניסאן אנגליה"
+   ],
+   "year_code": false,
+   "model_code": true,
+   "check_digit": false
+  },
+  "SJN": {
+   "cars": 26809,
+   "makes": [
+    "ניסאן אנגליה"
+   ],
+   "year_code": false,
+   "model_code": true,
+   "check_digit": false
+  },
+  "TMA": {
+   "cars": 102359,
+   "makes": [
+    "יונדאי צ'כיה"
+   ],
+   "year_code": true,
+   "model_code": true,
+   "check_digit": false
+  },
+  "TMB": {
+   "cars": 241660,
+   "makes": [
+    "סקודה צ'כיה",
+    "סקודה סלובקיה"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": false
+  },
+  "TRU": {
+   "cars": 812,
+   "makes": [
+    "אאודי הונגריה"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": false
+  },
+  "TSM": {
+   "cars": 93169,
+   "makes": [
+    "סוזוקי הונגריה",
+    "פיאט/מדייר סוז",
+    "סוזוקי אנגליה"
+   ],
+   "year_code": false,
+   "model_code": true,
+   "check_digit": false
+  },
+  "U5Y": {
+   "cars": 108740,
+   "makes": [
+    "קיה סלובקיה",
+    "קיה קוריאה"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": false
+  },
+  "UU1": {
+   "cars": 8768,
+   "makes": [
+    "דאציה רומניה",
+    "דאציה מרוקו",
+    "דאציה סין"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": false
+  },
+  "VF1": {
+   "cars": 53788,
+   "makes": [
+    "רנו טורקיה",
+    "דאציה רומניה",
+    "רנו ספרד",
+    "רנו צרפת",
+    "רנו ד.קוריאה",
+    "רנו סלובניה"
+   ],
+   "year_code": false,
+   "model_code": true,
+   "check_digit": false
+  },
+  "VF3": {
+   "cars": 57422,
+   "makes": [
+    "פיג'ו צרפת",
+    "פיג'ו סלובקיה",
+    "פיג'ו צ'כיה",
+    "פיג'ו ספרד",
+    "פיג'ו תורכיה",
+    "פיגו איטליה",
+    "פיג'ו אוסטריה",
+    "פיג'ו פורטוגל",
+    "פיג'ו פולין",
+    "פיג'ו אנגליה"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": false
+  },
+  "VF7": {
+   "cars": 52518,
+   "makes": [
+    "סיטרואן ספרד",
+    "סיטרואן צרפת",
+    "סיטרואן סלובק",
+    "סיטרואן צ'כיה",
+    "סיטרואן תורכיה",
+    "סיטרואן פורטוג",
+    "די.אס צרפת",
+    "סיטרואן אנגליה",
+    "סיטרואן יפן"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": false
+  },
+  "VNK": {
+   "cars": 57353,
+   "makes": [
+    "טויוטה צרפת",
+    "טויוטה בלגיה"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": true
+  },
+  "VNV": {
+   "cars": 773,
+   "makes": [
+    "ניסאן צרפת"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": true
+  },
+  "VR1": {
+   "cars": 937,
+   "makes": [
+    "די.אס צרפת",
+    "די אס גרמניה"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": false
+  },
+  "VR3": {
+   "cars": 16251,
+   "makes": [
+    "פיג'ו ספרד",
+    "פיג'ו סלובקיה",
+    "פיג'ו צרפת",
+    "פיגו מרוקו"
+   ],
+   "year_code": true,
+   "model_code": true,
+   "check_digit": false
+  },
+  "VR7": {
+   "cars": 29235,
+   "makes": [
+    "סיטרואן ספרד",
+    "סיטרואן פורטוג",
+    "סיטרואן צרפת",
+    "סיטרואן סלובק"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": false
+  },
+  "VSK": {
+   "cars": 703,
+   "makes": [
+    "ניסאן ספרד"
+   ],
+   "year_code": false,
+   "model_code": true,
+   "check_digit": false
+  },
+  "VSS": {
+   "cars": 115096,
+   "makes": [
+    "סיאט ספרד",
+    "סיאט צ'כיה",
+    "קופרה ספרד",
+    "סיאט סלובקיה",
+    "סיאט פורטוגל",
+    "קופרה סין",
+    "סיאט גרמניה",
+    "קופרה צ'כיה",
+    "סיאט בלגיה"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": false
+  },
+  "VXF": {
+   "cars": 307,
+   "makes": [
+    "פיאט צרפת"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": false
+  },
+  "VXK": {
+   "cars": 7018,
+   "makes": [
+    "אופל-ספרד",
+    "אופל צרפת",
+    "אופל סלובקיה",
+    "אופל-גרמניה"
+   ],
+   "year_code": false,
+   "model_code": true,
+   "check_digit": false
+  },
+  "VYF": {
+   "cars": 1402,
+   "makes": [
+    "פיאט פורטוגל",
+    "פיאט ספרד",
+    "פיאט צרפת"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": false
+  },
+  "W0L": {
+   "cars": 20468,
+   "makes": [
+    "אופל-ספרד",
+    "אופל פולין",
+    "אופל-גרמניה",
+    "אופל אנגליה",
+    "אופל ד.קוריאה",
+    "אופל-בלגיה"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": false
+  },
+  "W0V": {
+   "cars": 6636,
+   "makes": [
+    "אופל-ספרד",
+    "אופל-גרמניה",
+    "אופל צרפת",
+    "אופל ד.קוריאה",
+    "אופל פולין",
+    "אופל אנגליה",
+    "אופל פורטוגל"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": false
+  },
+  "W1A": {
+   "cars": 137,
+   "makes": [
+    "סמארט צרפת"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": false
+  },
+  "W1K": {
+   "cars": 12769,
+   "makes": [
+    "מרצדס בנץ גרמנ",
+    "מרצדס בנץ הונג",
+    "מרצדס בנץ ד.אפ",
+    "מרצדס בנץ פינל"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": false
+  },
+  "W1N": {
+   "cars": 10738,
+   "makes": [
+    "מרצדס בנץ גרמנ",
+    "מרצדס בנץ ארהב",
+    "מרצדס-בנץ אוסט",
+    "מרצדס בנץ הונג",
+    "מרצדס בנץ מקסי",
+    "מרצדס בנץ פינל"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": false
+  },
+  "W1V": {
+   "cars": 2731,
+   "makes": [
+    "מרצדס בנץ ספרד",
+    "מרצדס בנץ גרמנ"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": false
+  },
+  "WA1": {
+   "cars": 107,
+   "makes": [
+    "אודי מכסיקו",
+    "אאודי סלובקיה"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "WAU": {
+   "cars": 44519,
+   "makes": [
+    "אאודי",
+    "אאודי הונגריה",
+    "אאודי ספרד",
+    "אאודי בלגיה",
+    "אודי מכסיקו",
+    "אאודי סלובקיה",
+    "פולקסווגן סלוב"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "WBA": {
+   "cars": 33434,
+   "makes": [
+    "ב מ וו גרמניה",
+    "ב מ וו ארהב\"",
+    "ב מ וו הולנד",
+    "ב מ וו אוסטריה",
+    "ב מ וו מקסיקו",
+    "ב מ וו ד. אפר"
+   ],
+   "year_code": false,
+   "model_code": true,
+   "check_digit": true
+  },
+  "WBS": {
+   "cars": 841,
+   "makes": [
+    "ב מ וו גרמניה",
+    "ב מ וו מקסיקו",
+    "ב מ וו ארהב\""
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": true
+  },
+  "WBY": {
+   "cars": 2418,
+   "makes": [
+    "ב מ וו גרמניה",
+    "ב מ וו סין"
+   ],
+   "year_code": false,
+   "model_code": true,
+   "check_digit": true
+  },
+  "WDB": {
+   "cars": 4050,
+   "makes": [
+    "דימלרקריזלר-גר",
+    "מרצדס בנץ גרמנ",
+    "מרצדס-בנץ אוסט"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": false
+  },
+  "WDC": {
+   "cars": 6834,
+   "makes": [
+    "מרצדס בנץ גרמנ",
+    "מרצדס בנץ ארהב",
+    "דימלרקריזלר-אר"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": false
+  },
+  "WDD": {
+   "cars": 20795,
+   "makes": [
+    "מרצדס בנץ גרמנ",
+    "מרצדס בנץ הונג",
+    "דימלרקריזלר-גר",
+    "מרצדס בנץ ד.אפ",
+    "מרצדס בנץ מקסי"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": false
+  },
+  "WDF": {
+   "cars": 2647,
+   "makes": [
+    "מרצדס בנץ ספרד",
+    "דימלרקריזלר-ספ",
+    "מרצדס-בנץ צרפת"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": false
+  },
+  "WF0": {
+   "cars": 63431,
+   "makes": [
+    "פורד גרמניה",
+    "פורד ספרד",
+    "פורד תורכיה",
+    "פורד-בלגיה",
+    "פורד רומניה",
+    "פורד מקסיקו",
+    "פורד בריטניה"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": false
+  },
+  "WME": {
+   "cars": 733,
+   "makes": [
+    "סמארט צרפת",
+    "סמארט סלובניה",
+    "סמארט ג'.מ.ב.ה",
+    "אמ.סי.סי."
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": false
+  },
+  "WMW": {
+   "cars": 6759,
+   "makes": [
+    "ב מ וו בריטניה",
+    "ב מ וו הולנד",
+    "ב מ וו אוסטריה",
+    "ב מ וו סין",
+    "ב מ וו גרמניה"
+   ],
+   "year_code": false,
+   "model_code": true,
+   "check_digit": true
+  },
+  "WP0": {
+   "cars": 1360,
+   "makes": [
+    "פורשה גרמניה"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": false
+  },
+  "WP1": {
+   "cars": 1284,
+   "makes": [
+    "פורשה גרמניה",
+    "פורשה סלובקיה"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": false
+  },
+  "WUA": {
+   "cars": 712,
+   "makes": [
+    "אאודי",
+    "אאודי הונגריה",
+    "אאודי ספרד",
+    "אאודי סלובקיה"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "WV1": {
+   "cars": 6798,
+   "makes": [
+    "פולקסווגן גרמנ",
+    "פולקסווגן פולי"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": false
+  },
+  "WV2": {
+   "cars": 14969,
+   "makes": [
+    "פולקסווגן פולי",
+    "פולקסווגן גרמנ"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": false
+  },
+  "WV4": {
+   "cars": 292,
+   "makes": [
+    "פולקסווגן ד.אפ"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "WVG": {
+   "cars": 18409,
+   "makes": [
+    "פולקסווגן גרמנ",
+    "פולקסווגן-ספרד",
+    "פולקסווגן מכסי",
+    "פולקסווגן פורט",
+    "פולקסווגן סלוב"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": false
+  },
+  "WVW": {
+   "cars": 67728,
+   "makes": [
+    "פולקסווגן גרמנ",
+    "פולקסווגן-ספרד",
+    "פולקסווגן מכסי",
+    "פולקסווגן פורט",
+    "פולקסווגן סלוב",
+    "פולקסווגן ד.אפ",
+    "פולקסווגן בלגי"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": false
+  },
+  "XMC": {
+   "cars": 172,
+   "makes": [
+    "מיצובישי הולנד"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": false
+  },
+  "XP7": {
+   "cars": 9822,
+   "makes": [
+    "טסלה גרמניה"
+   ],
+   "year_code": true,
+   "model_code": true,
+   "check_digit": true
+  },
+  "YAR": {
+   "cars": 6964,
+   "makes": [
+    "טויוטה ספרד",
+    "טויוטה צ'כיה",
+    "טויוטה צרפת"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": false
+  },
+  "YS3": {
+   "cars": 103,
+   "makes": [
+    "סאאב שודיה"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "YSM": {
+   "cars": 558,
+   "makes": [
+    "פולסטאר סין"
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": true
+  },
+  "YV1": {
+   "cars": 21926,
+   "makes": [
+    "וולבו בלגיה",
+    "וולבו שוודיה",
+    "וולבו סין",
+    "וולבו הולנד",
+    "וולבו ארהב\""
+   ],
+   "year_code": true,
+   "model_code": false,
+   "check_digit": false
+  },
+  "ZAA": {
+   "cars": 357,
+   "makes": [
+    "אלפא רומיאו"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": true
+  },
+  "ZAC": {
+   "cars": 2771,
+   "makes": [
+    "ג'יפ איטליה",
+    "ג'יפ פולין",
+    "פיאט איטליה"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": true
+  },
+  "ZAM": {
+   "cars": 183,
+   "makes": [
+    "מזארטי איטליה"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": false
+  },
+  "ZAR": {
+   "cars": 6056,
+   "makes": [
+    "אלפא רומיאו"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": false
+  },
+  "ZFA": {
+   "cars": 21054,
+   "makes": [
+    "פיאט פולין",
+    "פיאט תורכיה",
+    "פיאט איטליה",
+    "פיאט תאילנד",
+    "פיאט סרביה",
+    "פיאט יפן"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": false
+  },
+  "ZFF": {
+   "cars": 137,
+   "makes": [
+    "פרארי"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": false
+  },
+  "ZLA": {
+   "cars": 172,
+   "makes": [
+    "לנצ'יה",
+    "לנציה פולין"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": false
+  },
+  "ZN6": {
+   "cars": 324,
+   "makes": [
+    "מזארטי איטליה"
+   ],
+   "year_code": false,
+   "model_code": false,
+   "check_digit": false
+  }
+ }
+}

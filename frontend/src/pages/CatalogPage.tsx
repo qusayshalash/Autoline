@@ -6,6 +6,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { lookupVehicle, type VehicleMatch } from "../api/catalog";
 import { apiErrorMessage, type RecordCard } from "../api/client";
 import RecordCardView from "../components/RecordCardView";
+import SimilarVehicles from "../components/SimilarVehicles";
 import { useTheme } from "../theme/ThemeContext";
 import "../catalog.css";
 
@@ -305,7 +306,7 @@ export default function CatalogPage() {
             )}
 
             {data?.matches.map((m, i) => (
-              <VehicleCard key={`${m.dataset_id}-${i}`} match={m} />
+              <VehicleCard key={`${m.dataset_id}-${i}`} match={m} query={q} />
             ))}
           </section>
         )}
@@ -314,7 +315,7 @@ export default function CatalogPage() {
   );
 }
 
-function VehicleCard({ match }: { match: VehicleMatch }) {
+function VehicleCard({ match, query }: { match: VehicleMatch; query: string }) {
   const { t } = useTranslation();
   const get = (col: string) => {
     const i = match.columns.indexOf(col);
@@ -332,6 +333,7 @@ function VehicleCard({ match }: { match: VehicleMatch }) {
     key: plate ? [plate] : [],
     arrival: null,
     corrections: null,
+    vin: match.vin,
   };
 
   // With several matches on the page, only the card whose button was pressed goes to
@@ -354,7 +356,9 @@ function VehicleCard({ match }: { match: VehicleMatch }) {
 
   return (
     <article className="catalog-card" ref={ref}>
-      <RecordCardView record={record} source={match.dataset_name} />
+      <RecordCardView record={record} source={match.dataset_name}>
+        <SimilarVehicles datasetId={match.dataset_id} query={query} />
+      </RecordCardView>
       <div className="catalog-card-foot">
         <p className="catalog-card-source" dir="auto">
           <IconFile />

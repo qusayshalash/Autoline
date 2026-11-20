@@ -884,6 +884,31 @@ export async function deleteSavedView(datasetId: string, viewId: string): Promis
 
 /* ---- one record (the vehicle card) ---------------------------------------------- */
 
+/** One thing a chassis number was checked for - see backend app/services/vin.py. */
+export interface VinCheck {
+  state: "match" | "mismatch" | "near" | "valid" | "invalid" | "unchecked";
+  registry?: string | number | null;
+  decoded?: number | null;
+  makes?: string[];
+  code?: string | null;
+}
+
+/** A vehicle's chassis number read against the registry's record of it. */
+export interface VinReading {
+  vin: string;
+  standard: boolean;
+  verdict: "ok" | "warn" | "bad" | "unknown" | "nonstandard";
+  wmi?: string | null;
+  known?: boolean;
+  model_code?: string | null;
+  year_code?: string | null;
+  serial?: string | null;
+  maker?: VinCheck | null;
+  model?: VinCheck | null;
+  year?: VinCheck | null;
+  check_digit?: VinCheck | null;
+}
+
 export interface RecordCard {
   /** every column of the record, in the file's order, corrections applied */
   columns: string[];
@@ -893,6 +918,8 @@ export interface RecordCard {
   arrival: { kind: Arrival; added_at: string | null } | null;
   /** newest first; null when the reader may not see who corrected what */
   corrections: Correction[] | null;
+  /** the chassis number read against the record; absent or null when it has none */
+  vin?: VinReading | null;
 }
 
 /** The address of a record's card. The key goes in the query, one `key` per column. */
