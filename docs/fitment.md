@@ -33,6 +33,27 @@ The reference database is **`<DATA_DIR>/reference/fitment.duckdb`**, about **22 
   `/srv/autoline/data` (mounted as `/data` in the container), so the file goes to
   **`/srv/autoline/data/reference/fitment.duckdb`**.
 
+## Where the data came from
+
+It was gathered in August 2026, outside this repository, in two places on Qusay's
+machine:
+
+- **Dataprime** (`Desktop\Dataprime`) - the first project: JS Filter was crawled part page
+  by part page (its site permits it: no robots exclusion, a 5-second crawl delay),
+  Denckermann was queried by OE number, and the registry's free-text fields were
+  normalised (`normalize.py`: engine codes like `1-AZ`/`1 AZ` -> `1AZ`, `RAV 4` -> `RAV4`,
+  the make parsed out of `tozeret_nm`). `agreement.py` there is the agreement method
+  ported here.
+- **A Codex session** (`Documents\Codex\2026-08-21\new-chat\outputs`) - where MANN-FILTER
+  and UFI were added and all four catalogues merged per vehicle configuration. MANN was
+  matched to its catalogue by chassis number for 2.3 million vehicles. **Qusay has
+  confirmed the MANN data may be used** (24 November 2026).
+
+> ⚠️ **The `outputs` folder is the only copy of the merged data.** Its name is a
+> temporary session's, so it is easy to delete while tidying up. Rebuilding the database
+> needs it; losing it means gathering the catalogues again. Keep a copy somewhere
+> permanent - the files `build_fitment.py` reads total about 250 MB.
+
 ## Building it (about 10 minutes, once)
 
 ```bash
@@ -154,3 +175,19 @@ equivalents of the MANN part" - useful as stock alternatives, never as a second 
   the obvious next piece of work.
 - The rule that governs all of it: **a wrong filter can damage an engine, so a missing
   part is reported as missing and never inferred from a similar car.**
+
+## What comes next
+
+The data already answers more than the card asks of it. Proposed, not built:
+
+1. **Bulk lookup** - paste a list of plates, get each vehicle's filters as a table and an
+   Excel file: a customer's fleet turned into a quotation.
+2. **Reverse lookup** - a part number -> how many vehicles on the road take it, and which
+   models: what to keep in stock.
+3. **The 211,857 "ambiguous" vehicles** - MANN found several candidate types and chose
+   none; the candidates were not kept in the merged file.
+4. **Refreshing the catalogues** - nothing does this yet; it would mean re-running the
+   gathering, then `build_fitment.py`.
+
+The project's wider plan, and every decision taken along the way, is in
+[docs/PROJECT.md](PROJECT.md).

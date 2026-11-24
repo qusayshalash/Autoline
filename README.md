@@ -8,6 +8,9 @@ vehicle registry — **4,114,487 rows, 867 MB, Windows-1255 Hebrew, pipe-delimit
 
 Every figure in this README came from that file.
 
+Where the project stands, what is built but locked, the owner's decisions and the plan
+ahead: [docs/PROJECT.md](docs/PROJECT.md).
+
 ---
 
 ## What it does
