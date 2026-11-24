@@ -151,6 +151,16 @@ finds nothing. Both paths print identically in every error message. This project
 spent a day inside an application cache before a file-id comparison revealed that two
 supposedly different paths were the same file.
 
+### Filter fitment data lives outside the repository
+
+The vehicle card's "filters that fit" section reads a 22 MB reference database,
+`<DATA_DIR>/reference/fitment.duckdb`, built from four filter makers' catalogues. That
+data is theirs, so it is never committed: it is built once (about 10 minutes, with
+`backend/scripts/build_fitment.py`) and copied to the server by hand on deployment.
+Without the file the section is simply absent - no error. How it is built, deployed and
+verified, and why agreement between catalogues is decided the way it is:
+[docs/fitment.md](docs/fitment.md).
+
 ### Rate limiting that gives nothing away
 
 Failed logins are counted against the username **as typed**, whether or not that account
