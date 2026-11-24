@@ -1,4 +1,4 @@
-import { api, type VinReading } from "./client";
+import { api, type Fitment, type VinReading } from "./client";
 
 export interface VehicleMatch {
   dataset_id: string;
@@ -6,6 +6,8 @@ export interface VehicleMatch {
   columns: string[];
   values: string[];
   vin?: VinReading | null;
+  removed_at?: string | null;
+  fitment?: Fitment | null;
 }
 
 export interface VehicleLookup {

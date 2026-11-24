@@ -1408,5 +1408,33 @@
     "engine": "Engine: {{value}}",
     "licence_valid": "Licence: valid until {{date}}",
     "licence_expired": "Licence: expired {{date}}"
+  },
+  "removed": {
+    "title": "No longer in the government registry",
+    "since": "Missing from the registry since {{date}}",
+    "explain": "The registry gives no reason - scrapped, exported or taken off the road. What follows is the last it knew.",
+    "all": "Every vehicle no longer listed ›"
+  },
+  "fitment": {
+    "title": "Filters that fit",
+    "same_config_one": "1 vehicle with this configuration",
+    "same_config_other": "{{n}} vehicles with this configuration",
+    "type_oil": "Oil filter",
+    "type_air": "Air filter",
+    "type_fuel": "Fuel filter",
+    "type_cabin": "Cabin filter",
+    "verdict_agree": "✓ Agreed",
+    "verdict_disagree": "⚠ Catalogues differ",
+    "verdict_single": "One source",
+    "verdict_unlinked": "Cannot compare",
+    "by_vin": "by chassis",
+    "by_model": "by model",
+    "lifetime": "Lifetime: sealed in the tank, not replaced.",
+    "lifetime_short": "Lifetime",
+    "none": "Not in the catalogues",
+    "ufi_equivalents": "UFI equivalents of the MANN part:",
+    "electric": "Fully electric, so no engine filters.",
+    "not_covered": "The catalogues on hand do not cover this vehicle. No part number is guessed.",
+    "foot": "\"Agreed\": two catalogues from different companies point to the same original-equipment number. \"Catalogues differ\": check before ordering - a wrong filter can harm an engine."
   }
 }

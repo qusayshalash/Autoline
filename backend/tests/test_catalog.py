@@ -224,3 +224,30 @@ def test_an_unknown_vehicle_or_dataset(admin, viewer, anon, fleet):
     assert r.status_code == 404 and r.json()["code"] == "dataset_not_found"
     r = anon.get("/api/catalog/similar", params={"dataset_id": fleet, "q": "11111111"})
     assert r.status_code == 401
+
+
+# ---- a vehicle the registry has dropped -------------------------------------------------
+
+
+def test_a_vehicle_the_registry_dropped_is_found_and_said_to_be_gone(admin, registry):
+    """It is kept and marked, never deleted (removals.py): a lookup still finds it, and both
+    the catalog and the record card carry the day it was first missed."""
+    from app.db.connection import datasets
+    from app.services import removals
+
+    assert admin.put(f"/api/datasets/{registry}/key", json={"columns": ["mispar_rechev"]}).status_code == 200
+    removals.ensure_table(registry)
+    datasets.cursor(registry).execute(
+        f"INSERT OR REPLACE INTO {removals.TABLE} VALUES ('04910766', TIMESTAMP '2026-11-03 02:00:00')"
+    )
+    try:
+        gone = next(m for m in find(admin, "4910766")["matches"] if m["dataset_id"] == registry)
+        assert gone["removed_at"].startswith("2026-11-03")
+        still = next(m for m in find(admin, "491-07-665")["matches"] if m["dataset_id"] == registry)
+        assert still["removed_at"] is None
+
+        card = admin.get(f"/api/datasets/{registry}/record", params={"key": "04910766"})
+        assert card.status_code == 200, card.text
+        assert card.json()["removed_at"].startswith("2026-11-03")
+    finally:
+        datasets.cursor(registry).execute(f"DELETE FROM {removals.TABLE}")

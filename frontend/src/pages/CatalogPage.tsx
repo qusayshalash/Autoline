@@ -335,6 +335,8 @@ function VehicleCard({ match, query }: { match: VehicleMatch; query: string }) {
     arrival: null,
     corrections: null,
     vin: match.vin,
+    removed_at: match.removed_at,
+    fitment: match.fitment,
   };
 
   // With several matches on the page, only the card whose button was pressed goes to
@@ -357,7 +359,7 @@ function VehicleCard({ match, query }: { match: VehicleMatch; query: string }) {
 
   return (
     <article className="catalog-card" ref={ref}>
-      <RecordCardView record={record} source={match.dataset_name}>
+      <RecordCardView record={record} source={match.dataset_name} datasetId={match.dataset_id}>
         <SimilarVehicles datasetId={match.dataset_id} query={query} />
       </RecordCardView>
       <div className="catalog-card-foot">

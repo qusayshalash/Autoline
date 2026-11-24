@@ -884,6 +884,26 @@ export async function deleteSavedView(datasetId: string, viewId: string): Promis
 
 /* ---- one record (the vehicle card) ---------------------------------------------- */
 
+/** The filters the catalogues fit to a vehicle - see backend app/services/fitment.py. */
+export type FitmentType = "oil" | "air" | "fuel" | "cabin";
+export type FitmentSource = "mann" | "ufi" | "ufi_xref" | "jsfilter" | "denckermann";
+export interface FitmentPart {
+  part: string;
+  brand?: string | null;
+}
+export interface Fitment {
+  configuration: string;
+  found: boolean;
+  covered: boolean;
+  electric?: boolean;
+  vehicles?: number | null;
+  sources?: string[];
+  filters: Partial<Record<FitmentType, Partial<Record<FitmentSource, FitmentPart[]>>>>;
+  matches: Partial<Record<string, { status?: string | null; detail?: string | null }>>;
+  /** agree | disagree | unlinked | single, decided when the reference was built */
+  verdicts: Partial<Record<FitmentType, { verdict: string; clashes: string[] }>>;
+}
+
 /** One thing a chassis number was checked for - see backend app/services/vin.py. */
 export interface VinCheck {
   state: "match" | "mismatch" | "near" | "valid" | "invalid" | "unchecked";
@@ -920,6 +940,10 @@ export interface RecordCard {
   corrections: Correction[] | null;
   /** the chassis number read against the record; absent or null when it has none */
   vin?: VinReading | null;
+  /** when the government registry stopped listing this vehicle; null while it lists it */
+  removed_at?: string | null;
+  /** the filters that fit it; absent or null when the fitment reference is not installed */
+  fitment?: Fitment | null;
 }
 
 /** The address of a record's card. The key goes in the query, one `key` per column. */

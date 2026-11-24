@@ -27,7 +27,7 @@ from typing import Optional
 
 from app.db import catalog
 from app.db.connection import datasets
-from app.services import sql_utils, vin
+from app.services import clocks, fitment, removals, row_identity, sql_utils, vin
 
 PLATE_COLUMN = "mispar_rechev"
 CHASSIS_COLUMN = "misgeret"
@@ -82,15 +82,24 @@ def lookup(query: str) -> dict:
                 f"SELECT * FROM raw_data WHERE {sql_utils.quote_ident(column)} = ? LIMIT ?",
                 [value, MAX_MATCHES - len(matches)],
             ).fetchall()
-        for row in rows:
-            values = ["" if v is None else str(v) for v in row]
+            found = []
+            for row in rows:
+                values = ["" if v is None else str(v) for v in row]
+                record = dict(zip(columns, values))
+                # a vehicle the registry has dropped is still found - and said to be gone
+                key = row_identity.row_key_values(ds, record)
+                gone = removals.for_row(dataset_id, key) if key else None
+                found.append((values, record, gone))
+        for values, record, gone in found:
             matches.append(
                 {
                     "dataset_id": dataset_id,
                     "dataset_name": ds.get("original_filename") or "",
                     "columns": columns,
                     "values": values,
-                    "vin": vin.read(dict(zip(columns, values))),
+                    "vin": vin.read(record),
+                    "removed_at": clocks.iso(gone) if gone else None,
+                    "fitment": fitment.lookup(record),
                 }
             )
         if len(matches) >= MAX_MATCHES:

@@ -990,6 +990,39 @@ class ExportRequest(Incoming):
     sort_dir: Literal["asc", "desc"] = "asc"
 
 
+class FitmentPart(BaseModel):
+    part: str
+    brand: Optional[str] = None
+
+
+class FitmentVerdict(BaseModel):
+    # "agree", "disagree", "unlinked" (no shared reference to compare by) or "single"
+    verdict: str
+    # the source pairs that contradict each other, as "mann|jsfilter"
+    clashes: list[str] = []
+
+
+class FitmentMatch(BaseModel):
+    status: Optional[str] = None
+    detail: Optional[str] = None
+
+
+class Fitment(BaseModel):
+    """The filters four catalogues fit to a vehicle, each source kept apart - see
+    app/services/fitment.py. `filters`: type ("oil", "air", "fuel", "cabin") -> source
+    ("mann", "ufi", "ufi_xref", "jsfilter", "denckermann") -> parts."""
+
+    configuration: str
+    found: bool
+    covered: bool
+    electric: bool = False
+    vehicles: Optional[int] = None
+    sources: list[str] = []
+    filters: dict[str, dict[str, list[FitmentPart]]] = {}
+    matches: dict[str, FitmentMatch] = {}
+    verdicts: dict[str, FitmentVerdict] = {}
+
+
 class VinCheck(BaseModel):
     """One thing a chassis number was checked for, and how it came out. `state` is
     "match", "mismatch", "near" (the year, one off - normal), "valid", "invalid" or
@@ -1029,6 +1062,10 @@ class VehicleMatch(BaseModel):
     columns: list[str]
     values: list[str]
     vin: Optional[VinReading] = None
+    # when the government registry stopped listing this vehicle; None while it lists it
+    removed_at: Optional[str] = None
+    # the filters that fit it; None when the fitment reference is not installed
+    fitment: Optional[Fitment] = None
 
 
 class SimilarFilter(BaseModel):
@@ -1131,6 +1168,10 @@ class RecordOut(BaseModel):
     corrections: Optional[list[CorrectionOut]] = None
     # the chassis number read against the record; None when it has none
     vin: Optional[VinReading] = None
+    # when the government registry stopped listing this vehicle; None while it lists it
+    removed_at: Optional[str] = None
+    # the filters that fit it; None when the fitment reference is not installed
+    fitment: Optional[Fitment] = None
 
 
 class RegistrySyncConfig(Incoming):

@@ -69,7 +69,7 @@ export default function RecordPage() {
       ) : error || !record ? (
         <ErrorBanner message={apiErrorMessage(error, t("common.error_generic"))} />
       ) : (
-        <RecordCardView record={record} source={dataset?.original_filename}>
+        <RecordCardView record={record} source={dataset?.original_filename} datasetId={datasetId}>
           {identifier(record) && <SimilarVehicles datasetId={datasetId} query={identifier(record)!} />}
         </RecordCardView>
       )}

@@ -1,10 +1,12 @@
 import qrcode from "qrcode-generator";
 import { useMemo, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 
 import { type Correction, type RecordCard } from "../api/client";
 import ArrivalMark from "./ArrivalMark";
 import CopyButton from "./CopyButton";
+import FitmentPanel from "./FitmentPanel";
 import SemanticIcon from "./SemanticIcons";
 import VinPanel from "./VinPanel";
 import { columnLabel, columnMeta, usesRawHeaders } from "../data/columnDictionary";
@@ -46,11 +48,14 @@ const LICENCE_DUE_DAYS = 30;
 export default function RecordCardView({
   record,
   source,
+  datasetId,
   children,
 }: {
   record: RecordCard;
   /** the file the record came from, named on the printed copy */
   source?: string;
+  /** the dataset it is in, for links into its grid */
+  datasetId?: string;
   /** shown after the details and before the history - "vehicles like this one" */
   children?: ReactNode;
 }) {
@@ -135,7 +140,7 @@ export default function RecordCardView({
   };
 
   return (
-    <div className="record-card">
+    <div className={`record-card${record.removed_at ? " is-removed" : ""}`}>
       {/* only on paper: whose card this is, and when and from what it was printed */}
       <div className="rc-print-head" aria-hidden="true">
         <span className="rc-print-brand" lang="en">
@@ -148,6 +153,8 @@ export default function RecordCardView({
         </span>
         <PrintQr url={window.location.href} caption={t("record.print_scan")} />
       </div>
+
+      {record.removed_at && <RemovedBanner since={record.removed_at} datasetId={datasetId} />}
 
       <header className="rc-hero">
         <div className="rc-hero-text">
@@ -241,6 +248,8 @@ export default function RecordCardView({
           )}
         </div>
       )}
+
+      {record.fitment && <FitmentPanel fitment={record.fitment} />}
 
       <div className="rc-sections">
         {sections.map((s) => (
@@ -374,6 +383,47 @@ function PrintQr({ url, caption }: { url: string; caption: string }) {
       </svg>
       <small>{caption}</small>
     </span>
+  );
+}
+
+/**
+ * The vehicle is no longer in the government registry. It is kept and marked, never deleted
+ * (backend removals.py), so the card still shows everything - and says first, before any of
+ * it, that this is the last the registry knew. The registry gives no reason, so none is
+ * guessed: scrapped, exported and taken off the road all look the same from here.
+ */
+function RemovedBanner({ since, datasetId }: { since: string; datasetId?: string }) {
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language;
+  const days = daysUntil(since.slice(0, 10));
+  return (
+    <div className="rc-removed" role="status">
+      <span className="rc-removed-icon" aria-hidden="true">
+        <svg viewBox="0 0 20 20" width={22} height={22} fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="10" cy="10" r="7.3" />
+          <path d="M5 5l10 10" />
+        </svg>
+      </span>
+      <div className="rc-removed-text">
+        <strong>{t("removed.title")}</strong>
+        <span>
+          {t("removed.since", { date: formatCalendarDate(since.slice(0, 10), lang) })}
+          {days !== null && (
+            <>
+              {" · "}
+              {relativeDays(days, lang)}
+            </>
+          )}
+          {". "}
+          {t("removed.explain")}
+        </span>
+      </div>
+      {datasetId && (
+        <Link className="rc-removed-link" to={`/datasets/${datasetId}/explore?removed=1`}>
+          {t("removed.all")}
+        </Link>
+      )}
+    </div>
   );
 }
 

@@ -16,7 +16,7 @@ from app.db import catalog
 from app.db.connection import datasets as dataset_connections
 from app.errors import ApiError
 from app.models.schemas import CorrectionOut, RecordArrival, RecordOut
-from app.services import arrivals, clocks, corrections, row_identity, vin
+from app.services import arrivals, clocks, corrections, fitment, removals, row_identity, vin
 from app.services.rate_limit import QUERY
 
 router = APIRouter(prefix="/api/datasets", tags=["records"])
@@ -62,6 +62,7 @@ def get_record(
         if record is None:
             raise ApiError(404, "row_not_found", "No record with this key")
         arrival = arrivals.for_row(dataset_id, row_key)
+        gone = removals.for_row(dataset_id, row_key)
         can_see_corrections = "datasets.edit" in set(user.get("permissions") or [])
         found = corrections.for_row(dataset_id, row_key) if can_see_corrections else None
 
@@ -91,4 +92,6 @@ def get_record(
             else None
         ),
         vin=vin.read({c: ("" if v is None else str(v)) for c, v in record.items()}),
+        removed_at=clocks.iso(gone) if gone else None,
+        fitment=fitment.lookup({c: ("" if v is None else str(v)) for c, v in record.items()}),
     )

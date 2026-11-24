@@ -150,11 +150,12 @@ export default function ExplorerPage() {
     })
   );
   useEffect(() => {
-    if (!searchParams.has("eq")) return;
+    if (!searchParams.has("eq") && !searchParams.has("removed")) return;
     setSearchParams(
       (prev) => {
         const next = new URLSearchParams(prev);
         next.delete("eq");
+        next.delete("removed");
         return next;
       },
       { replace: true }
@@ -226,7 +227,8 @@ export default function ExplorerPage() {
     }
   }, [datasetId, translateChoice]);
   const [onlyRecent, setOnlyRecent] = useState(false);
-  const [onlyRemoved, setOnlyRemoved] = useState(false);
+  // ?removed=1 - the record card's "every vehicle no longer listed" - opens on just those
+  const [onlyRemoved, setOnlyRemoved] = useState(() => searchParams.get("removed") === "1");
   const [panel, setPanel] = useState<Panel>(null);
   const [filterOpen, setFilterOpen] = useState(false);
   const [groupBy, setGroupBy] = useState<string[]>([]);
